@@ -1,1 +1,0 @@
-# Questions for interview in week 5

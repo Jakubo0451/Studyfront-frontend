@@ -1,2 +1,2 @@
 # WebProjectTeam5
-a platform for text-related AI research
+Our documentation goes here
