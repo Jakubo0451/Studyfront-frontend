@@ -1,3 +1,10 @@
+import TestComponent from '@/components/testcomponent/TestComponent.jsx'
+
 export default function Test() {
-    return <h1>Hello, Next.js!</h1>
+    return (
+        <div>
+            <h1>Test Page</h1>
+            <TestComponent />
+        </div>
+    )
   }
