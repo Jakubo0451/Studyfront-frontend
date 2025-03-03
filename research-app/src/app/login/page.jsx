@@ -11,6 +11,9 @@ export default function Login() {
       <input name="password" required />
 
       <button onClick={()=>{console.log('clicked')}} id="button" type="submit">Submit</button>
+      
+      <p>Need an account?</p>
+      <a href="./signup">Sign up</a>
     </Form>
   );
 }
