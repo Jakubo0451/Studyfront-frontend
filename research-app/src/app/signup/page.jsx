@@ -1,26 +1,39 @@
 "use client";
 import Form from "next/form";
+import Image from "next/image";
+import styles from "./signup.module.css";
+import logo from "./../../../public/logo/logo.png";
 
 export default function page() {
   return (
     <div>
-      <Form action="/dashboard">
-        <label htmlFor="username">Username</label>
-        <input name="username" required />
+      
+      <Form className={styles.form} action="/dashboard">
+        <Image
+          className={styles.logo}
+          src={logo}
+          alt="Logo"
+          height={40}
+          layout="intrinsic"
+        />
+        <label className={styles.inputFields} htmlFor="username">Username</label>
+        <input className={styles.input} name="username" placeholder="Username" required />
 
-        <label htmlFor="email">Email</label>
-        <input name="email" required />
+        <label className={styles.inputFields} htmlFor="email">Email</label>
+        <input className={styles.input} name="email" placeholder="Email" required />
 
-        <label htmlFor="password">Password</label>
-        <input type="password"  name="password" required />
+        <label className={styles.inputFields} htmlFor="password">Password</label>
+        <input className={styles.input} type="password" name="password" placeholder="Password" required />
 
-        <label htmlFor="password-repeat">Repeat Password</label>
-        <input type="password" name="password-repeat" required />
+        <label className={styles.inputFields} htmlFor="password-repeat">Repeat Password</label>
+        <input className={styles.input} type="password" name="password-repeat" placeholder="Password" required />
 
-        <button onClick={()=>{console.log('clicked')}} id="button" type="submit">Submit</button>
-        
-        <p>Already have an account?</p>
-        <a href="./login">Log in!</a>
+        <div className={styles.accountLink}>
+          <p>Already have an account?</p>
+          <a href="./login">Log in!</a>
+        </div>
+
+        <button onClick={() => { console.log('clicked') }} id="button" type="submit" className={styles.button}>Sigh up</button>
       </Form>
     </div>
   );
