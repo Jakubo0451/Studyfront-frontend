@@ -12,10 +12,10 @@ export default function page() {
         <input name="email" required />
 
         <label htmlFor="password">Password</label>
-        <input name="password" required />
+        <input type="password"  name="password" required />
 
         <label htmlFor="password-repeat">Repeat Password</label>
-        <input name="password-repeat" />
+        <input type="password" name="password-repeat" required />
 
         <button onClick={()=>{console.log('clicked')}} id="button" type="submit">Submit</button>
         

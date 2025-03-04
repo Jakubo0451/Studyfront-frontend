@@ -8,7 +8,7 @@ export default function Login() {
       <input name="username" required />
 
       <label htmlFor="password">Password</label>
-      <input name="password" required />
+      <input type="password" name="password" required />
 
       <button onClick={()=>{console.log('clicked')}} id="button" type="submit">Submit</button>
       
