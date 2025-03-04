@@ -1,0 +1,34 @@
+.form {
+    width: 50%;
+    margin: 10% auto;
+}
+
+.inputFields {
+    display: block;
+    margin-bottom: 10px; 
+}
+
+.input {
+    width: 100%;
+    padding: 8px;
+    background-color: var(--rainy-blue);
+    color: var(--white);
+}
+
+.button {
+    display: block;
+    width: 40%;
+    padding: 10px;
+    margin: 0 auto;
+    color: var(--white);
+    background-color: var(--Petrol-blue);
+}
+.logo {
+    display: block;
+    margin: 0 auto;
+}
+.accountLink {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
