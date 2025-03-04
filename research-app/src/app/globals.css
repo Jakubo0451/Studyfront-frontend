@@ -1,3 +1,9 @@
+@import './colours.css';
+
 *{
   font-family: var(--font-Inter);
+}
+
+body {
+  background-color: var(--ice-blue);
 }
