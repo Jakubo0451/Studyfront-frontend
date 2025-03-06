@@ -5,7 +5,7 @@ let isConnected = false;
 export default async function dbConnect() {
     if (isConnected) return;
     try {
-        await mongoose.connect(process.env.MONGODB_URI, {
+        await mongoose.connect(process.env.MONGO_URL, {
             dbName: "studyfront",
             useNewUrlParser: true,
             useUnifiedTopology: true,

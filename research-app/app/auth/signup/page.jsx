@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/compat/router";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");

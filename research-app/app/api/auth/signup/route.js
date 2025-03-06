@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import { dbConnect } from '@/lib/dbConnect';
-import User from '@/models/user.js';
+import dbConnect from '../../../lib/dbconnect';
+import User from '../../../../models/user.js';
 
 export async function POST(request) {
   try {
@@ -21,8 +21,9 @@ export async function POST(request) {
     const newUser = await User.create({ username, email, password: hashedPassword });
 
     return NextResponse.json({ message: 'User registered', user: newUser }, { status: 201 });
+  
   } catch (error) {
-    console.error('Registration error:', error);
+    console.log('Registration error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
