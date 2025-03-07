@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Kaisei+Opti&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -7,4 +8,6 @@
   --color-sky-blue: oklch(81.37% 0.0394 233.68);
   --color-ice-blue: oklch(93.43% 0.0197 245.64);
   --color-light-grey: oklch(97.02% 0 0);
+
+  --font-kaisei: "Kaisei Opti", serif;
 }
