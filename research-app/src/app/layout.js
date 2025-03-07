@@ -1,5 +1,5 @@
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "./output.css";
 
 const inter = Inter({
   variable: "--font-Inter",
@@ -14,7 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.variable}`}>
+      <body className="bg-ice-blue">
         {children}
       </body>
     </html>

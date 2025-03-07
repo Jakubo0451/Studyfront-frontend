@@ -1,35 +1,44 @@
 import Link from "next/link";
 import Image from "next/image";
-import styles from './Header.module.css';
 import { FaPlus, FaBars } from "react-icons/fa";
 import logo from "../../../public/logo/logo.png";
 
 export default function Header() {
     return (
-        <header className={styles.header}>
-            <ul className={styles.header_nav}>
-                <li className={`${styles.header_nav_item} ${styles.header_nav_logo}`}>
-                    <Link href="/dashboard" className={styles.header_nav_link}> 
-                        <Image
-                            src={logo}
-                            alt="Logo"
-                            height={40}
-                            layout="intrinsic"
-                        />
+        <header className="bg-sky-blue shadow-md p-4">
+            <ul className="flex justify-between items-center">
+                <li className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4">
+                        <Link href="/dashboard" passHref>
+                            <Image
+                                src={logo}
+                                alt="Logo"
+                                height={40}
+                                layout="intrinsic"
+                            />
+                        </Link>
+                    </div>                
+                    <div className="flex items-center space-x-4">
+                        <Link href="/dashboard" passHref>
+                            <div className="flex items-center space-x-2">
+                                <FaPlus />
+                                <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-24">Your studies</span>
+                            </div>
+                        </Link>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <Link href="/create" passHref>
+                            <div className="flex items-center space-x-2">
+                                <FaBars />
+                                <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-32">Create a study</span>
+                            </div>
+                        </Link>
+                    </div>
+                </li>
+                <li>
+                    <Link href="/login" passHref>
+                        <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-16">Logout</span>
                     </Link>
-                </li>
-                <li className={`${styles.header_nav_item} ${styles.header_nav_center}`}>
-                    <div className={styles.header_nav_center_item}> 
-                        <FaPlus />
-                        <Link href="/dashboard" className={styles.header_nav_link}>Your studies</Link>
-                    </div>
-                    <div className={styles.header_nav_center_item}>
-                        <FaBars />
-                        <Link href="/create" className={styles.header_nav_link}>Create a study</Link>
-                    </div>
-                </li>
-                <li className={styles.header_nav_item}>
-                    <Link href="/login" className={styles.header_nav_link}>Logout</Link>
                 </li>
             </ul>
         </header>
