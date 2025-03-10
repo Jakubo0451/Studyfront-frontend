@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { IoPersonOutline } from "react-icons/io5";
+import Link from "next/link";
 
 const StudiesList = () => {
     const [data, setData] = useState([]);
@@ -35,11 +36,11 @@ const StudiesList = () => {
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
-                            <button className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow">Edit</button>
-                            <button className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow">Share</button>
+                            <Link href={`/edit/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Edit</Link>
+                            <Link href={`/share/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
                         </div>
                         <div className="flex">
-                            <button className="bg-petrol-blue text-white rounded px-4 py-2 w-full">View results</button>
+                            <Link href={`/view-results/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 w-full text-center">View results</Link>
                         </div>
                     </div>
                 ))}
