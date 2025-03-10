@@ -28,7 +28,7 @@ export default function Login() {
         </div>
         <div className="flex items-center justify-between mt-4 mb-0">
           <p className="text-sm text-zinc-700">Don't have an account?</p>
-          <a href="./login" className="text-sm font-medium text-petrol-blue">Sign up!</a>
+          <a href="./signup" className="text-sm font-medium text-petrol-blue">Sign up!</a>
         </div>
         <button onClick={() => { console.log('clicked') }} id="button" type="submit" className="w-full px-4 py-3 mt-4 text-white bg-petrol-blue rounded cursor-pointer">Login</button>
       </Form>
