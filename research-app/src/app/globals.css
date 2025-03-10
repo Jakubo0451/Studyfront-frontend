@@ -1,23 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Kaisei+Opti&display=swap');
+@import "tailwindcss";
 
-*{
-  font-family: "Kaisei Opti", serif;
-  font-style: normal;
-}
+@theme {
+  --color-oxford-blue: oklch(32.1% 0.0204 233.84);
+  --color-petrol-blue: oklch(44.99% 0.0432 252.44);
+  --color-rainy-blue: oklch(62.17% 0.0294 234.29);
+  --color-sky-blue: oklch(81.37% 0.0394 233.68);
+  --color-ice-blue: oklch(93.43% 0.0197 245.64);
+  --color-light-grey: oklch(97.02% 0 0);
 
-:root {
-  --oxford-blue: #29353C;
-  --Petrol-blue: #44576D;
-  --rainy-blue: #768A96;
-  --sky-blue: #AAc7D8;
-  --ice-blue: #DFEBF6; 
-  --light-grey: #F5F5F5;
-  --black: #000000;
-  --white: #FFFFFF;
-}
-
-body {
-  background-color: var(--ice-blue);
-  margin: 0;
-  padding: 0;
+  --font-kaisei: "Kaisei Opti", serif;
 }
