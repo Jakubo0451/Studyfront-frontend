@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dbConnect from "../../../lib/dbconnect";
-import User from "../../../../models/user";
+import User from "../../../models/user";
 
 export async function POST(request) {
   try {
@@ -26,7 +26,7 @@ export async function POST(request) {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return NextResponse.unauthorized(
+      return NextResponse.json(
         { message: "Invalid credentials" },
         { status: 401 }
       );
@@ -35,7 +35,7 @@ export async function POST(request) {
       expiresIn: "1d",
     });
 
-    return NextResponse.ok({ message: "User logged in", token }, { status: 200 });
+    return NextResponse.json({ message: "User logged in", token }, { status: 200 });
   } catch (error) {
     console.error("Error logging in user", error);
     return NextResponse.error({ message: "Error logging in user" }, { status: 500 });

@@ -7,11 +7,9 @@ export default async function dbConnect() {
     try {
         await mongoose.connect(process.env.MONGO_URL, {
             dbName: "studyfront",
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
         });
         isConnected = true;
-        console.log("Database connected");         
+        console.log("Database connected");
     } catch (error) {
         console.error("Error connecting to database", error);
         throw new Error("Error connecting to database");

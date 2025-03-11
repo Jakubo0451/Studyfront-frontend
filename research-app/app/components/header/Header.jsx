@@ -10,5 +10,5 @@ export default function Header() {
                 <li><Link href="/login">Logout</Link></li>
             </ul>
         </header>
-    )
+    )   
 }

@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import dbConnect from '../../../lib/dbconnect';
-import User from '../../../../models/user.js';
+import User from '../../../models/user.js';
 
 export async function POST(request) {
   try {
     await dbConnect();
-    const { username, email, password } = await request.json();
+    const { name, email, password } = await request.json();
 
-    if (!username || !email || !password) {
+    if (!name || !email || !password) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 });
     }
 
@@ -18,7 +18,7 @@ export async function POST(request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ username, email, password: hashedPassword });
+    const newUser = await User.create({ name, email, password: hashedPassword });
 
     return NextResponse.json({ message: 'User registered', user: newUser }, { status: 201 });
   
