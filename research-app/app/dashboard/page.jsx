@@ -1,6 +1,6 @@
 "use client";
-import Header from '@/components/header/Header.jsx'
-import StudiesList from '@/components/studiesList/StudiesList.jsx'
+import Header from '../components/header/Header.jsx'
+import StudiesList from '../components/studiesList/studiesList.jsx'
 import { FaPlus, FaBars } from "react-icons/fa";
 import Link from "next/link";
 

@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import logo from "./../../../public/logo/logo.png";
+import logo from "../../public/logo/logo.png";
+import form from 'next/form';
+import Image from 'next/image';
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -26,7 +29,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <Form className="w-full max-w-lg p-12 space-y-8" action={handleLogin}>
+      <form className="w-full max-w-lg p-12 space-y-8" onSubmit={handleLogin}>
         <div className="flex justify-center mb-8">
           <Image
             className="h-10"
@@ -51,7 +54,7 @@ export default function LoginPage() {
           <a href="./signup" className="text-sm font-medium text-petrol-blue">Sign up!</a>
         </div>
         <button id="button" type="submit" className="w-full px-4 py-3 mt-4 text-white bg-petrol-blue rounded cursor-pointer">Login</button>
-      </Form>
+      </form>
     </div>
   );
 }
