@@ -15,8 +15,8 @@ export default function Home() {
           />
         <h1 className="flex flex-col items-center justify-center text-center text-2xl">Simple and powerful research tool for your studies</h1>
         <div className="w-full flex flex-grow space-x-4 mb-2">
-          <Link href={`/edit/`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Edit</Link>
-          <Link href={`/share`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
+          <Link href={`/signup`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Sign Up</Link>
+          <Link href={`/login`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Login</Link>
         </div>
       </div>
     </div>
