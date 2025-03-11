@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Header from "@/components/header/Header";
-import SideBar from "@/components/studyCreator/sideBar.jsx";
+import SideBar from "../components/studyCreator/sideBar.jsx";
 
 export default function page() {
   return (
