@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:css": "npx @tailwindcss/cli -i ./src/app/globals.css -o ./src/app/output.css --watch"
+    "build:css": "npx @tailwindcss/cli -i ./app/globals.css -o ./app/output.css"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
