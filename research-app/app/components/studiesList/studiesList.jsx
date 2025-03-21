@@ -24,7 +24,7 @@ const StudiesList = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.map((item, index) => (
                     <div key={index} className="bg-sky-blue p-4 rounded shadow">
-                        <h2 className="text-2xl mb-2">{item.header}</h2>
+                        <h2 className="text-2xl mb-2 text-center">{item.header}</h2>
                         <div className="flex justify-between text-lg mb-4">
                             <div className="flex items-center">
                                 <CiCalendar className="mr-1" />

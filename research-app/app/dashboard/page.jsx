@@ -1,7 +1,7 @@
 "use client";
 import Header from '../components/header/Header.jsx'
 import StudiesList from '../components/studiesList/studiesList.jsx'
-import { FaPlus, FaBars } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import Link from "next/link";
 
 export default function Dashboard() {
