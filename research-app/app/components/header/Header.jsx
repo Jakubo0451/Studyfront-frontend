@@ -24,7 +24,7 @@ export default function Header() {
                     <div className="flex items-center space-x-4">
                         <Link href="/dashboard" passHref>
                             <div className="flex items-center space-x-2">
-                                <FaPlus />
+                                <FaBars />
                                 <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-24">Your studies</span>
                             </div>
                         </Link>
@@ -32,7 +32,7 @@ export default function Header() {
                     <div className="flex items-center space-x-4">
                         <Link href="/create" passHref>
                             <div className="flex items-center space-x-2">
-                                <FaBars />
+                                <FaPlus />
                                 <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-32">Create a study</span>
                             </div>
                         </Link>

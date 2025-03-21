@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Kaisei+Opti&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Kaisei+Opti&family=Readex+Pro:wght@160..700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -10,4 +11,10 @@
   --color-light-grey: oklch(97.02% 0 0);
 
   --font-kaisei: "Kaisei Opti", serif;
+}
+
+@layer base {
+  a {
+    font-family:"Readex Pro", sans-serif;
+  }
 }
