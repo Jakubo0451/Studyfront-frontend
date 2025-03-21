@@ -2,6 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { FaPlus, FaBars } from "react-icons/fa";
 import logo from "../../../public/logo/logo.png";
+import { useRouter } from "next/navigation";
+import LogoutButton from '../logout/Logout.jsx';
+
 
 export default function Header() {
     return (
@@ -35,11 +38,7 @@ export default function Header() {
                         </Link>
                     </div>
                 </li>
-                <li>
-                    <Link href="/login" passHref>
-                        <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-16">Logout</span>
-                    </Link>
-                </li>
+                <LogoutButton></LogoutButton>
             </ul>
         </header>
     )   
