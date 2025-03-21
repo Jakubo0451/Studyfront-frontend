@@ -36,11 +36,11 @@ const StudiesList = () => {
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
-                            <Link href={`/edit/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Edit</Link>
-                            <Link href={`/share/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
+                            <Link href={`/edit/`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Edit</Link>
+                            <Link href={`/share/`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
                         </div>
                         <div className="flex">
-                            <Link href={`/view-results/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 w-full text-center">View results</Link>
+                            <Link href={`/view-results/`} className="bg-petrol-blue text-white rounded px-4 py-2 w-full text-center">View results</Link>
                         </div>
                     </div>
                 ))}
