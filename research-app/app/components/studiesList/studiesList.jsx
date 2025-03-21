@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { IoPersonOutline } from "react-icons/io5";
+import { PiDownloadSimpleFill } from "react-icons/pi";
 import Link from "next/link";
 
 const StudiesList = () => {
@@ -36,11 +37,16 @@ const StudiesList = () => {
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
-                            <Link href={`/edit/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Edit</Link>
-                            <Link href={`/share/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
+                            <Link href={`/edit/`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Edit</Link>
+                            <Link href={`/share/`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
                         </div>
-                        <div className="flex">
-                            <Link href={`/view-results/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 w-full text-center">View results</Link>
+                        <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
+                            <div className="flex text-petrol-blue grow items-center justify-center">
+                                <PiDownloadSimpleFill className="!w-full !h-full"/>
+                            </div>
+                            <Link href={`/edit/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center">.csv</Link>
+                            <Link href={`/edit/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center">.xml</Link>
+                            <Link href={`/edit/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center">.json</Link>
                         </div>
                     </div>
                 ))}
