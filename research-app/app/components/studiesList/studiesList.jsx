@@ -36,7 +36,7 @@ const StudiesList = () => {
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
-                            <Link href={`/edit/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Edit</Link>
+                            <Link href={`/edit/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Detalis</Link>
                             <Link href={`/share/${index}`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
                         </div>
                         <div className="flex">

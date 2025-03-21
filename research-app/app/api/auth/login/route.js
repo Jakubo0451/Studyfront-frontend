@@ -29,7 +29,7 @@ export async function POST(request) {
 
     const response = NextResponse.json({ message: "User logged in" }, { status: 200 });
 
-    // ✅ Set HTTP-only cookie for authentication
+    // Set HTTP-only cookie for authentication
     response.cookies.set("token", token, {
       httpOnly: true,  // Prevents XSS attacks
       secure: process.env.NODE_ENV === "production",

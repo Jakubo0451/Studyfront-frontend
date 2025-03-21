@@ -9,10 +9,9 @@ export default async function dbConnect() {
             dbName: "studyfront",
         });
         isConnected = true;
-        console.log("Database connected");
+        console.log("Databas    e connected");
     } catch (error) {
         console.error("Error connecting to database", error);
         throw new Error("Error connecting to database");
-    }
-    
+    }   
 }
