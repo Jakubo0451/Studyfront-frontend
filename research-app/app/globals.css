@@ -14,7 +14,7 @@
 }
 
 @layer base {
-  a {
+  a, button {
     font-family:"Readex Pro", sans-serif;
   }
 }
