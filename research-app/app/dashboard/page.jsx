@@ -3,10 +3,12 @@ import Header from '../components/header/Header.jsx'
 import StudiesList from '../components/studiesList/studiesList.jsx'
 import { FaPlus } from "react-icons/fa";
 import Link from "next/link";
+import SharePopup from '../components/sharePopup/sharePopup.jsx'
 
 export default function Dashboard() {
     return (
         <div>
+            <SharePopup></SharePopup>
             <Header></Header>
             <div className="flex flex-col items-center h-full">
                 <h1 className="text-6xl mb-10 mt-10">Your studies</h1>

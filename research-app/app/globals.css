@@ -18,3 +18,92 @@
     font-family:"Readex Pro", sans-serif;
   }
 }
+
+.sharePopup {
+  position: fixed;
+  backdrop-filter: brightness(0.5);
+  width: 100%;
+  height: 100vh;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.sharePopup>div {
+  display: flex;
+}
+
+.shareStudy {
+  background-color: var(--color-sky-blue);
+  padding: 1.5rem;
+  border-radius:.25rem;
+  border-top-right-radius: 0;
+}
+
+.shareStudy h1 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 0 .5rem 1rem .5rem;
+}
+
+.shareStudy select {
+  background-color: var(--color-petrol-blue);
+  color: white;
+  padding: .8rem;
+  border-radius: .25rem;
+  width: 100%;
+  font-family: "Readex Pro", sans-serif;
+}
+
+.shareStudy label {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  display: block;
+}
+
+.shareStudy input, .shareStudy textarea {
+  border: solid 3px var(--color-petrol-blue);
+  border-right: none;
+  background-color: white;
+  color: black;
+  padding: .3rem;
+  font-size: 1.2rem;
+  border-radius: .25rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  width: 100%;
+}
+
+.share-link, .share-email {
+  display: flex;
+
+}
+
+.copyBtn, .sendBtn {
+  background-color: var(--color-petrol-blue);
+  color: white;
+  padding: .5rem;
+  border-radius: .25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  cursor: pointer;
+  width: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.3rem;
+}
+
+.closeBtn {
+  background-color: var(--color-petrol-blue);
+  color: var(--color-sky-blue);
+  padding: .1rem;
+  border-radius: .25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.2rem;
+}

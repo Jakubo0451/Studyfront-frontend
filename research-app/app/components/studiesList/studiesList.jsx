@@ -20,6 +20,10 @@ const StudiesList = () => {
         setData(testData);
     }, []);
 
+    const openShare = () => {
+        document.querySelector('.sharePopup').style.display = 'flex';
+    }
+
     return (
         <div className="w-1/2 p-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -37,7 +41,7 @@ const StudiesList = () => {
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
-                            <Link href={`/share/`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Share</Link>
+                            <button onClick={openShare} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer">Share</button>
                             <Link href={`/details/`} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center">Details</Link>
                         </div>
                         <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
