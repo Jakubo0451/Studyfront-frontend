@@ -55,10 +55,14 @@
   font-weight: 300;
   appearance: none;
   padding-left: 3rem;
+  cursor: pointer;
 }
 
 .shareStudy select:focus {
   outline: none;
+}
+
+.shareStudy select:hover {
   outline: solid 3px white;
 }
 
