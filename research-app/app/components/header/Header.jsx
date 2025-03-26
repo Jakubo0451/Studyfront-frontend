@@ -25,7 +25,7 @@ export default function Header() {
                         <Link href="/dashboard" passHref>
                             <div className="flex items-center space-x-2">
                                 <FaBars />
-                                <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-24">Your studies</span>
+                                <span className="text-gray-700 hover:text-gray-900 hover:font-bold w-26">Your studies</span>
                             </div>
                         </Link>
                     </div>
