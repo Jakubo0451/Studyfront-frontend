@@ -1,4 +1,3 @@
-// research-app/app/api/auth/studyCreation/route.js
 import { MongoClient } from "mongodb";
 import { NextResponse } from 'next/server';
 
