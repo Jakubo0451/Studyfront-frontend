@@ -26,7 +26,7 @@ export default function StudyCreationForm() {
       if (response.ok) {
         setLoading(false);
         const studyData = await response.json();
-        router.push(`/studies/${studyData.id}`);
+        router.push(`/createStudy/${studyData.id}`);
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to create study.');
