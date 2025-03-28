@@ -18,7 +18,7 @@
   }
 }
 
-.sharePopup {
+.sharePopup, .detailsPopup {
   position: fixed;
   backdrop-filter: brightness(0.5);
   width: 100%;
@@ -28,24 +28,24 @@
   align-items: center;
 }
 
-.sharePopup>div {
+.sharePopup>div, .detailsPopup>div {
   display: flex;
 }
 
-.shareStudy {
+.shareStudy, .studyDetails {
   background-color: var(--color-sky-blue);
   padding: 1.5rem;
   border-radius:.25rem;
   border-top-right-radius: 0;
 }
 
-.shareStudy h1 {
+.shareStudy h1, .studyDetails h1 {
   font-size: 1.8rem;
   text-align: center;
   padding: 0 .5rem 1rem .5rem;
 }
 
-.shareStudy select {
+.shareStudy select, .studyDetails select {
   background-color: var(--color-petrol-blue);
   color: white;
   padding: .8rem;
@@ -58,15 +58,15 @@
   cursor: pointer;
 }
 
-.shareStudy select:focus {
+.shareStudy select:focus, .studyDetails select:focus {
   outline: none;
 }
 
-.shareStudy select:hover {
+.shareStudy select:hover, .studyDetails select:hover {
   outline: solid 3px white;
 }
 
-.shareStudy label {
+.shareStudy label, .studyDetails h2 {
   font-size: 1.1rem;
   margin-top: 1rem;
   margin-bottom: .3rem;
@@ -172,4 +172,103 @@
   width: 100%;
   height: 100vh;
   z-index: -1;
+}
+
+.studyDetails table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-weight: 300;
+  background-color: var(--color-rainy-blue);
+  border-radius: .25rem;
+}
+
+.studyDetails tr {
+  border-bottom: solid 1px white;
+  padding: .5rem;
+  font-weight: 500;
+}
+
+.studyDetails tr:last-child {
+  border: none;
+}
+
+.studyDetails td {
+  padding: .5rem;
+  color: white;
+  font-weight: 300;
+  border-right: solid 1px white;
+}
+
+.studyDetails td:last-child {
+  border: none;
+}
+
+.study-info>p {
+  display: flex;
+  background-color: var(--color-rainy-blue);
+  padding: .3rem;
+  border-radius: .25rem;
+  color: white;
+  margin-bottom: .5rem;
+}
+
+.study-info>p>svg {
+  font-size: 1.5rem;
+  margin-right: .3rem;
+}
+
+.details-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  gap: .5rem;
+}
+
+.details-options button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: .5rem;
+  border-radius: .25rem;
+  cursor: pointer;
+}
+
+.details-options button>svg {
+  font-size: 1.2rem;
+  margin-right: .3rem;
+}
+
+.defaultBtn {
+  background-color: var(--color-petrol-blue);
+}
+
+.defaultBtn:hover {
+  background-color: var(--color-oxford-blue);
+}
+
+.yellowBtn {
+  background-color: #BE833F;
+}
+
+.yellowBtn:hover {
+  background-color: #a56e2e;
+}
+
+.redBtn {
+  background-color: #BE3F3F;
+}
+
+.redBtn:hover {
+  background-color: #a42c2c;
+}
+
+.greenBtn {
+  background-color: #3FBE47;
+}
+
+.greenBtn:hover {
+  background-color: #2ca42c;
 }
