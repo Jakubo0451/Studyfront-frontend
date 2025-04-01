@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Kaisei+Opti&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Kaisei+Opti&family=Readex+Pro:wght@160..700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -11,10 +9,279 @@
   --color-light-grey: oklch(97.02% 0 0);
 
   --font-kaisei: "Kaisei Opti", serif;
+  --font-readex: "Readex Pro", sans-serif;
 }
 
 @layer base {
   a, button {
-    font-family:"Readex Pro", sans-serif;
+    font-family: var(--font-readex);
   }
+}
+
+.sharePopup, .detailsPopup {
+  position: fixed;
+  backdrop-filter: brightness(0.5);
+  width: 100%;
+  height: 100vh;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+.sharePopup>div, .detailsPopup>div {
+  display: flex;
+}
+
+.shareStudy, .studyDetails {
+  background-color: var(--color-sky-blue);
+  padding: 1.5rem;
+  border-radius:.25rem;
+  border-top-right-radius: 0;
+}
+
+.shareStudy h1, .studyDetails h1 {
+  font-size: 1.8rem;
+  text-align: center;
+  padding: 0 .5rem 1rem .5rem;
+}
+
+.shareStudy select, .studyDetails select {
+  background-color: var(--color-petrol-blue);
+  color: white;
+  padding: .8rem;
+  border-radius: .25rem;
+  width: 100%;
+  font-family: var(--font-readex);
+  font-weight: 300;
+  appearance: none;
+  padding-left: 3rem;
+  cursor: pointer;
+}
+
+.shareStudy select:focus, .studyDetails select:focus {
+  outline: none;
+}
+
+.shareStudy select:hover, .studyDetails select:hover {
+  outline: solid 3px white;
+}
+
+.shareStudy label, .studyDetails h2 {
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  margin-bottom: .3rem;
+  display: block;
+}
+
+.shareStudy input, .shareStudy textarea {
+  border: solid 3px var(--color-petrol-blue);
+  border-right: none;
+  background-color: white;
+  color: black;
+  padding: .3rem;
+  font-size: 1.1rem;
+  border-radius: .25rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  width: 100%;
+  min-width: 25ch;
+}
+
+.shareStudy input:focus, .shareStudy textarea:focus {
+  outline: none;
+  border: solid 3px var(--color-oxford-blue);
+}
+
+.share-link, .share-email {
+  display: flex;
+}
+
+.copyBtn, .sendBtn {
+  background-color: var(--color-petrol-blue);
+  color: white;
+  padding: .5rem;
+  border-radius: .25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  cursor: pointer;
+  width: 3rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.3rem;
+  transition: background-color .3s, color .3s;
+}
+
+.copyBtn:hover, .sendBtn:hover {
+  background-color: var(--color-oxford-blue);
+}
+
+.closeBtn {
+  background-color: var(--color-petrol-blue);
+  color: var(--color-sky-blue);
+  padding: .1rem;
+  border-radius: .25rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.2rem;
+  transition: background-color .3s, color .3s;
+}
+
+.closeBtn:hover {
+  background-color: var(--color-oxford-blue);
+  color: white;
+}
+
+.copiedLink::before {
+  content: "Copied!";
+  color: white;
+  font-size: .8rem;
+  margin-bottom: 4.5rem;
+  position: absolute;
+  background-color: var(--color-petrol-blue);
+  padding: .2rem .5rem;
+  border-radius: .25rem;
+}
+
+.sentEmails::before {
+  content: "Sent!";
+  color: white;
+  font-size: .8rem;
+  margin-bottom: 4.5rem;
+  position: absolute;
+  background-color: var(--color-petrol-blue);
+  padding: .2rem .5rem;
+  border-radius: .25rem;
+}
+
+.dropDownIcon {
+  position: absolute;
+  color: var(--color-sky-blue);
+  font-size: 1.5rem;
+  margin-left: 1rem;
+  margin-top: .8rem;
+  pointer-events: none;
+}
+
+.closePopupBackground {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+}
+
+.studyDetails table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-weight: 300;
+  background-color: var(--color-ice-blue);
+  border-radius: .25rem;
+}
+
+.studyDetails tr {
+  border-bottom: solid 2px var(--color-sky-blue);
+  padding: .5rem;
+  font-weight: 500;
+}
+
+.studyDetails tr:last-child {
+  border: none;
+}
+
+.studyDetails td {
+  padding: .5rem;
+  color: black;
+  font-weight: 300;
+  border-right: solid 2px var(--color-sky-blue);
+}
+
+.studyDetails td>div {
+  display: flex;
+  align-items: center;
+}
+
+.studyDetails td:last-child {
+  border: none;
+  text-align: center;
+}
+
+.studyDetails td>div>svg {
+  font-size: 1.4rem;
+  margin-right: .3rem;
+  display: inline-block;
+}
+
+.study-info>p {
+  display: flex;
+  background-color: var(--color-ice-blue);
+  padding: .5rem .6rem;
+  border-radius: .25rem;
+  color: black;
+  margin-bottom: .5rem;
+  align-items: center;
+}
+
+.study-info>p>svg {
+  font-size: 1.2rem;
+  margin-right: .3rem;
+}
+
+.details-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  gap: .5rem;
+}
+
+.details-options button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  padding: .5rem;
+  border-radius: .25rem;
+  cursor: pointer;
+}
+
+.details-options button>svg {
+  font-size: 1.2rem;
+  margin-right: .3rem;
+}
+
+.defaultBtn {
+  background-color: var(--color-petrol-blue);
+}
+
+.defaultBtn:hover {
+  background-color: var(--color-oxford-blue);
+}
+
+.yellowBtn {
+  background-color: #BE833F;
+}
+
+.yellowBtn:hover {
+  background-color: #a56e2e;
+}
+
+.redBtn {
+  background-color: #BE3F3F;
+}
+
+.redBtn:hover {
+  background-color: #a42c2c;
+}
+
+.greenBtn {
+  background-color: #3FBE47;
+}
+
+.greenBtn:hover {
+  background-color: #2ca42c;
 }
