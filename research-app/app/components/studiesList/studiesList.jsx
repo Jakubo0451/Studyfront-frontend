@@ -45,16 +45,16 @@ const StudiesList = () => {
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
-                            <button onClick={openShare} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer">Share</button>
-                            <button onClick={openDetails} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer">Details</button>
+                            <button onClick={openShare} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Share</button>
+                            <button onClick={openDetails} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Details</button>
                         </div>
                         <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
                             <div className="flex text-petrol-blue grow items-center justify-center">
                                 <PiDownloadSimpleFill className="!w-full !h-full"/>
                             </div>
-                            <Link href={`/csvDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center">.csv</Link>
-                            <Link href={`/xmlDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center">.xml</Link>
-                            <Link href={`/jsonDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center">.json</Link>
+                            <Link href={`/csvDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300">.csv</Link>
+                            <Link href={`/xmlDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300">.xml</Link>
+                            <Link href={`/jsonDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300">.json</Link>
                         </div>
                     </div>
                 ))}

@@ -179,12 +179,12 @@
   border-collapse: collapse;
   margin-bottom: 1rem;
   font-weight: 300;
-  background-color: var(--color-rainy-blue);
+  background-color: var(--color-ice-blue);
   border-radius: .25rem;
 }
 
 .studyDetails tr {
-  border-bottom: solid 1px white;
+  border-bottom: solid 2px var(--color-sky-blue);
   padding: .5rem;
   font-weight: 500;
 }
@@ -195,26 +195,39 @@
 
 .studyDetails td {
   padding: .5rem;
-  color: white;
+  color: black;
   font-weight: 300;
-  border-right: solid 1px white;
+  border-right: solid 2px var(--color-sky-blue);
+}
+
+.studyDetails td>div {
+  display: flex;
+  align-items: center;
 }
 
 .studyDetails td:last-child {
   border: none;
+  text-align: center;
+}
+
+.studyDetails td>div>svg {
+  font-size: 1.4rem;
+  margin-right: .3rem;
+  display: inline-block;
 }
 
 .study-info>p {
   display: flex;
-  background-color: var(--color-rainy-blue);
-  padding: .3rem;
+  background-color: var(--color-ice-blue);
+  padding: .5rem .6rem;
   border-radius: .25rem;
-  color: white;
+  color: black;
   margin-bottom: .5rem;
+  align-items: center;
 }
 
 .study-info>p>svg {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   margin-right: .3rem;
 }
 

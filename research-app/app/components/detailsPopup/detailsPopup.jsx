@@ -2,10 +2,13 @@
 import React from 'react'
 import { IoIosClose } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
-import { CiCalendar } from "react-icons/ci";
+import { BsCalendar4 } from "react-icons/bs";
 import { MdEdit } from "react-icons/md";
 import { FaPowerOff } from "react-icons/fa6";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { BsPersonCheck } from "react-icons/bs";
+import { BsPersonX } from "react-icons/bs";
+import { BsPeople } from "react-icons/bs";
 
 function closePopup() {
   document.querySelector('.detailsPopup').style.display = 'none';
@@ -26,19 +29,34 @@ export default function detailsPopup() {
           </select>
           <h2>Information</h2>
           <div className="study-info">
-            <p><CiCalendar />Study created: 04.03.2025</p>
+            <p><BsCalendar4 />Study created: 04.03.2025</p>
             <table>
               <tbody>
                 <tr>
-                  <td>Finished participants</td>
+                  <td>
+                    <div>
+                      <BsPersonCheck />
+                      Finished participants
+                    </div>
+                  </td>
                   <td>26</td>
                 </tr>
                 <tr>
-                  <td>Unfinished participants</td>
+                  <td>
+                    <div>
+                      <BsPersonX />
+                      Unfinished participants
+                    </div>
+                  </td>
                   <td>2</td>
                 </tr>
                 <tr>
-                  <td>Total participants</td>
+                  <td>
+                    <div>
+                      <BsPeople />
+                      Total participants
+                    </div>
+                  </td>
                   <td>28</td>
                 </tr>
               </tbody>
