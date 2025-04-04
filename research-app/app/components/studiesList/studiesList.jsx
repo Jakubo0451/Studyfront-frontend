@@ -1,31 +1,52 @@
+'use client';
 import React, { useState, useEffect } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { IoPersonOutline } from "react-icons/io5";
 import { PiDownloadSimpleFill } from "react-icons/pi";
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
 const StudiesList = () => {
     const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
-        // Test data, replace with api call later
-        const testData = [
-            { header: 'Comparative example study', date: '04.03.2025', numberOfResponses: 28 },
-            { header: 'Comparative example study', date: '04.03.2025', numberOfResponses: 28 },
-            { header: 'Comparative example study', date: '04.03.2025', numberOfResponses: 28 },
-            { header: 'Comparative example study', date: '04.03.2025', numberOfResponses: 28 },
-            { header: 'Comparative example study', date: '04.03.2025', numberOfResponses: 28 },
-            { header: 'Comparative example study', date: '04.03.2025', numberOfResponses: 28 },
-        ];
-        setData(testData);
+        const fetchStudies = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const response = await fetch('/api/studies'); // Endpoint to fetch all studies
+                if (!response.ok) {
+                    throw new Error('Failed to fetch studies');
+                }
+                const studies = await response.json();
+                setData(studies);
+            } catch (err) {
+                console.error("Error fetching studies:", err);
+                setError('Failed to load studies.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStudies();
     }, []);
 
     const openShare = () => {
         document.querySelector('.sharePopup').style.display = 'flex';
     }
 
-    const openDetails = () => {
-        document.querySelector('.detailsPopup').style.display = 'flex';
+    const openDetails = (studyId) => {
+        router.push(`/study/${studyId}`); // Navigate to study details
+    }
+
+    if (loading) {
+        return <p>Loading studies...</p>;
+    }
+
+    if (error) {
+        return <p style={{ color: 'red' }}>{error}</p>;
     }
 
     return (
@@ -33,20 +54,20 @@ const StudiesList = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.map((item, index) => (
                     <div key={index} className="bg-sky-blue p-4 rounded shadow">
-                        <h2 className="text-2xl mb-2 text-center">{item.header}</h2>
+                        <h2 className="text-2xl mb-2 text-center">{item.title}</h2>
                         <div className="flex justify-between text-lg mb-4">
                             <div className="flex items-center">
                                 <CiCalendar className="mr-1" />
-                                <p>{item.date}</p>
+                                <p>{new Date(item.createdAt).toLocaleDateString()}</p>
                             </div>
                             <div className="flex items-center">
                                 <IoPersonOutline className="mr-1" />
-                                <p>{item.numberOfResponses}</p>
+                                <p>{item.questions ? item.questions.length : 0}</p>
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
                             <button onClick={openShare} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Share</button>
-                            <button onClick={openDetails} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Details</button>
+                            <button onClick={() => openDetails(item._id)} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Details</button>
                         </div>
                         <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
                             <div className="flex text-petrol-blue grow items-center justify-center">
