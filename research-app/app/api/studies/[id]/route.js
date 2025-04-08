@@ -47,3 +47,30 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ error: "Failed to delete study" }, { status: 500 });
   }
 }
+
+export async function PUT(req, { params }) {
+  try {
+    await dbConnect();
+    const { id: studyId } = await params;
+    const { question } = await req.json();
+
+    if (!ObjectId.isValid(studyId)) {
+      return NextResponse.json({ error: "Invalid study ID" }, { status: 400 });
+    }
+
+    const updatedStudy = await Study.findByIdAndUpdate(
+      studyId,
+      { question }, // Update the questions
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedStudy) {
+      return NextResponse.json({ error: "Study not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedStudy, { status: 200 });
+  } catch (error) {
+    console.error("Error updating study with questions:", error);
+    return NextResponse.json({ error: "Failed to update study questions" }, { status: 500 });
+  }
+}
