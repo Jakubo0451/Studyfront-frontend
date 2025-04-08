@@ -1,0 +1,29 @@
+.imageContainer {
+    background-color: var(--color-sky-blue);
+    padding: .5rem;
+    border-radius: .25rem;
+}
+
+.fileUpload::file-selector-button {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    transition: background-color .3s;
+    cursor: pointer;
+}
+
+.fileUpload::file-selector-button:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.fileUpload {
+    background-color: var(--color-sky-blue);
+    border-radius: .25rem;
+}
+
+.uploadArtifact label {
+    display: block;
+    text-align: left;
+    margin-bottom: .25rem;
+}

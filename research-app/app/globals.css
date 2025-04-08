@@ -18,6 +18,17 @@
   }
 }
 
+.question-type {
+  text-align: center;
+  margin: 1rem auto;
+}
+
+.question-type h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: var(--color-petrol-blue);
+}
+
 .sharePopup, .detailsPopup {
   position: fixed;
   backdrop-filter: brightness(0.5);

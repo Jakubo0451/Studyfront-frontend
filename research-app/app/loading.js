@@ -4,12 +4,12 @@ export default function Loading() {
     return (
     <div>
         <div className="flex flex-col items-center justify-center min-h-screen py-2">
-            <h1 className="loadingText">Loading...</h1>
+            <h2 className="loadingText">Loading...</h2>
             <div className="loader"></div>
         </div>
         <style jsx>{`
             .loader {
-                border: 8px solid var(--color-sky-blue); /* Light grey */
+                border: 8px solid var(--color-sky-blue);
                 border-top: 8px solid var(--color-petrol-blue);
                 border-radius: 50%;
                 width: 60px;

@@ -1,0 +1,26 @@
+.ratingScale label {
+    display: block;
+    text-align: left;
+    margin-bottom: .25rem;
+}
+
+.ratingScale div {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.ratingScale input[type="range"] {
+    width: 100%;
+}
+
+.ratingScale label {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    display: block;
+}
+
+.ratingValue {
+    padding: .5rem;
+}
