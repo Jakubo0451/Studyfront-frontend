@@ -1,6 +1,14 @@
-import mongoose from "mongoose";
+// models/study.js
+import mongoose, { Schema } from 'mongoose';
 
-const studySchema = new mongoose.Schema(
+const questionSchema = new Schema({
+  _id: { type: Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
+  type: { type: String, required: true },
+  data: { type: Schema.Types.Mixed, required: true },
+  file: { type: Schema.Types.Mixed }, // Metadata
+});
+
+const studySchema = new Schema(
   {
     title: {
       type: String,
@@ -10,15 +18,7 @@ const studySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    question: [
-      {
-        // This is an array of question objects
-        _id: { type: mongoose.Schema.Types.ObjectId, required: true },
-        type: { type: String, required: true },
-        data: { type: mongoose.Schema.Types.Mixed, required: true },
-        file: { type: mongoose.Schema.Types.Mixed }, // Metadata
-      },
-    ],
+    question: [questionSchema], // Now an array of sub-documents using questionSchema
     files: [
       {
         //Array of file metadata
@@ -35,4 +35,4 @@ const studySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Study || mongoose.model("Study", studySchema);
+export default mongoose.models.Study || mongoose.model('Study', studySchema);

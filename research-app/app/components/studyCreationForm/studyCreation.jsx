@@ -1,13 +1,11 @@
-'use client'
+'use client';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
-export default function StudyCreationForm() {
+export default function StudyCreationForm({ onStudyCreated }) { // Receive the prop
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,7 +13,7 @@ export default function StudyCreationForm() {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/studyCreation', {
+      const response = await fetch('/api/studyCreation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,7 +24,9 @@ export default function StudyCreationForm() {
       if (response.ok) {
         setLoading(false);
         const studyData = await response.json();
-        router.push(`/createStudy/${studyData.id}`);
+        if (onStudyCreated) {
+          onStudyCreated(studyData.id); // Call the prop with the new study ID
+        }
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to create study.');
@@ -40,30 +40,33 @@ export default function StudyCreationForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="title">Title:</label>
-        <input
-          type="text"
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-      </div>
-      <div>
-        <label htmlFor="description">Description:</label>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          required
-        />
-      </div>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <button type="submit" disabled={loading}>
-        {loading ? 'Creating...' : 'Create Study'}
-      </button>
-    </form>
+    <div>
+      <h2 className="text-xl font-semibold mb-4">Create New Study</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label htmlFor="title">Title:</label>
+          <input
+            type="text"
+            id="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="description">Description:</label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+          />
+        </div>
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+        <button type="submit" disabled={loading}>
+          {loading ? 'Creating...' : 'Create Study'}
+        </button>
+      </form>
+    </div>
   );
 }
