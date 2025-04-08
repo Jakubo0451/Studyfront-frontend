@@ -1,10 +1,11 @@
+// studiesList/studiesList.jsx
 'use client';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { IoPersonOutline } from "react-icons/io5";
 import { PiDownloadSimpleFill } from "react-icons/pi";
 import Link from "next/link";
-import DetailsPopup from '../components/detailsPopup/DetailsPopup'; // Import your details popup component
+import DetailsPopup from '../detailsPopup/detailsPopup.jsx';
 
 const StudiesList = () => {
     const [data, setData] = useState([]);
@@ -13,26 +14,27 @@ const StudiesList = () => {
     const [showDetailsPopup, setShowDetailsPopup] = useState(false);
     const [selectedStudyDetails, setSelectedStudyDetails] = useState(null);
 
-    useEffect(() => {
-        const fetchStudies = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const response = await fetch('/api/studies');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch studies');
-                }
-                const studies = await response.json();
-                setData(studies);
-            } catch (err) {
-                console.error("Error fetching studies:", err);
-                setError('Failed to load studies.');
-            } finally {
-                setLoading(false);
+    const fetchStudies = useCallback(async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await fetch('/api/studies');
+            if (!response.ok) {
+                throw new Error('Failed to fetch studies');
             }
-        };
-        fetchStudies();
+            const studies = await response.json();
+            setData(studies);
+        } catch (err) {
+            console.error("Error fetching studies:", err);
+            setError('Failed to load studies.');
+        } finally {
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchStudies();
+    }, [fetchStudies]);
 
     const openShare = (studyId) => {
         // Logic to open the share popup (you might need to pass the studyId)
@@ -66,13 +68,10 @@ const StudiesList = () => {
         setError(null);
     }
 
-    if (loading) {
-        return <p>Loading studies...</p>;
-    }
-
-    if (error) {
-        return <p style={{ color: 'red' }}>{error}</p>;
-    }
+    const handleStudyDeleted = useCallback(() => {
+        // Refresh the list of studies after a study is deleted
+        fetchStudies();
+    }, [fetchStudies]);
 
     return (
         <div className="w-1/2 p-4">
@@ -107,7 +106,13 @@ const StudiesList = () => {
             </div>
 
             {showDetailsPopup && selectedStudyDetails && (
-                <DetailsPopup study={selectedStudyDetails} onClose={closeDetailsPopup} loading={loading} error={error} />
+                <DetailsPopup
+                    study={selectedStudyDetails}
+                    onClose={closeDetailsPopup}
+                    onStudyDeleted={handleStudyDeleted} // Pass the refresh function
+                    loading={loading}
+                    error={error}
+                />
             )}
         </div>
     );
