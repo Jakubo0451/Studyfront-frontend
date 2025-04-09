@@ -1,4 +1,3 @@
-// studiesList/studiesList.jsx
 'use client';
 import React, { useState, useEffect, useCallback } from "react";
 import { CiCalendar } from "react-icons/ci";
@@ -31,6 +30,10 @@ const StudiesList = () => {
             setLoading(false);
         }
     }, []);
+
+    useEffect(() => {
+        fetchStudies();
+    }, [fetchStudies]);
 
     useEffect(() => {
         fetchStudies();
