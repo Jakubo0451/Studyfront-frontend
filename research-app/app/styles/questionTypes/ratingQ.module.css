@@ -1,10 +1,14 @@
+.ratingScale {
+    width: 100%;
+}
+
 .ratingScale label {
     display: block;
     text-align: left;
     margin-bottom: .25rem;
 }
 
-.ratingScale div {
+.ratingScaleRange{
     display: flex;
     align-items: center;
     margin-bottom: 1rem;
@@ -15,7 +19,7 @@
     width: 100%;
 }
 
-.ratingScale label {
+.ratingScale>label {
     margin-top: 1rem;
     margin-bottom: 0;
     display: block;
@@ -23,4 +27,61 @@
 
 .ratingValue {
     padding: .5rem;
+}
+
+.addRanking {
+    background-color: var(--color-petrol-blue);
+    color: #ffffff;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    margin: 1rem;
+    justify-self: center;
+}
+
+.addRanking:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.ratingScaleInput {
+    background-color: var(--color-sky-blue);
+    padding: .5rem;
+    border-radius: .25rem;
+    text-align: left;
+}
+
+.ratingScaleInput input {
+    background-color: #ffffff;
+    padding: .25rem;
+    border-radius: .25rem;
+}
+
+.ratingScaleInput span {
+    padding: 0 .5rem;
+}
+
+.ratingScaleInput>input {
+    width: 100%;
+    margin-bottom: .5rem;
+}
+
+.questionName {
+    margin-bottom: 1rem;
+}
+
+.questionName label {
+    display: block;
+    text-align: left;
+    margin-bottom: .25rem;
+}
+
+.questionName input {
+    background-color: #ffffff;
+    padding: .25rem;
+    border-radius: .25rem;
+    width: 100%;
 }

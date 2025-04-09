@@ -8,7 +8,7 @@
   --color-ice-blue: oklch(93.43% 0.0197 245.64);
   --color-light-grey: oklch(97.02% 0 0);
 
-  --font-kaisei: "Kaisei Opti", serif;
+  --font-frank: "Frank Ruhl Libre", serif;
   --font-readex: "Readex Pro", sans-serif;
 }
 
@@ -19,14 +19,18 @@
 }
 
 .question-type {
-  text-align: center;
   margin: 1rem auto;
+}
+
+.question-type input:focus {
+  outline: solid 3px var(--color-petrol-blue);
 }
 
 .question-type h2 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
   color: var(--color-petrol-blue);
+  text-align: center;
 }
 
 .sharePopup, .detailsPopup {

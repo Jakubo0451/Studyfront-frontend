@@ -1,16 +1,21 @@
 import React, { useState } from 'react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { FaChevronUp, FaChevronDown, FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { MdDragIndicator } from "react-icons/md";
+import { restrictToVerticalAxis, restrictToParentElement } from '@dnd-kit/modifiers';
 
 const SortableItem = ({ id, content }) => {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id, modifiers: [restrictToVerticalAxis, restrictToParentElement], handle: "drag-handle" });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
+    transform: transform ? CSS.Transform.toString({
+      ...transform,
+      x: 0,
+    }) : '',
     transition,
   };
 
@@ -18,18 +23,15 @@ const SortableItem = ({ id, content }) => {
     <div
       ref={setNodeRef}
       style={style}
-      {...attributes}
-      {...listeners}
       className="pl-2 pr-2 text-white flex justify-between items-center"
     >
       <div className="flex items-center space-x-2">
         <FaRegTrashAlt className="cursor-pointer text-red-500" />
         <div className="flex flex-col space-y-1">
-          <FaChevronUp className="cursor-pointer text-petrol-blue" />
-          <FaChevronDown className="cursor-pointer text-petrol-blue" />
+          <MdDragIndicator {...attributes} {...listeners} data-handle="drag-handle" className="cursor-grab active:cursor-grabbing text-petrol-blue text-[1.8rem]" />
         </div>
       </div>
-      <span className="flex-grow h-full text-left pl-2 ml-2 bg-petrol-blue rounded">
+      <span className="flex-grow h-full text-left pl-2 ml-2 bg-petrol-blue rounded overflow-x-hidden whitespace-nowrap text-ellipsis">
         {content}
       </span>
     </div>
@@ -70,11 +72,11 @@ const SideBar = () => {
       <button className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
         Study information
       </button>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd} modifiers={[restrictToVerticalAxis, restrictToParentElement]}>
         <SortableContext items={items.map((item) => item.id)}>
           <div className="space-y-2 flex-grow border-b-2 border-t-2 border-dotted border-petrol-blue pb-4 pt-4 text-lg">
             {items.map((item) => (
-              <SortableItem key={item.id} id={item.id} content={item.content} />
+              <SortableItem key={item.id} id={item.id} content={item.content} strategy={verticalListSortingStrategy} />
             ))}
           </div>
         </SortableContext>
