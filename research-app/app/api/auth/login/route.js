@@ -29,11 +29,10 @@ export async function POST(request) {
 
     const response = NextResponse.json({ message: "User logged in" }, { status: 200 });
 
-    // Set HTTP-only cookie for authentication
     response.cookies.set("token", token, {
-      httpOnly: true,  // Prevents XSS attacks
+      httpOnly: true, 
       secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60, // 1 day in seconds
+      maxAge: 24 * 60 * 60, 
       path: "/",
     });
 

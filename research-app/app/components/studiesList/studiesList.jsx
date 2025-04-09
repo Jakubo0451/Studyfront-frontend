@@ -37,9 +37,7 @@ const StudiesList = () => {
     }, [fetchStudies]);
 
     const openShare = (studyId) => {
-        // Logic to open the share popup (you might need to pass the studyId)
         document.querySelector('.sharePopup').style.display = 'flex';
-        // You might want to manage this state-based as well
     }
 
     const openDetails = async (studyId) => {
@@ -69,7 +67,6 @@ const StudiesList = () => {
     }
 
     const handleStudyDeleted = useCallback(() => {
-        // Refresh the list of studies after a study is deleted
         fetchStudies();
     }, [fetchStudies]);
 
@@ -109,7 +106,7 @@ const StudiesList = () => {
                 <DetailsPopup
                     study={selectedStudyDetails}
                     onClose={closeDetailsPopup}
-                    onStudyDeleted={handleStudyDeleted} // Pass the refresh function
+                    onStudyDeleted={handleStudyDeleted}
                     loading={loading}
                     error={error}
                 />

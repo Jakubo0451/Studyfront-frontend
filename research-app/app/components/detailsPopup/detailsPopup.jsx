@@ -1,6 +1,5 @@
-// components/detailsPopup/DetailsPopup.jsx
-'use client';
-import React from 'react';
+'use client'
+import React from 'react'
 import { IoIosClose } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
 import { BsCalendar4 } from "react-icons/bs";
@@ -10,88 +9,97 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { BsPersonCheck } from "react-icons/bs";
 import { BsPersonX } from "react-icons/bs";
 import { BsPeople } from "react-icons/bs";
-import { useRouter } from 'next/navigation';
+import {useRouter} from 'next/navigation';
 
-const DetailsPopup = ({ study, onClose, onStudyDeleted }) => {
+export default function DetailsPopup({study, onClose, onStudyDeleted}) {
   const router = useRouter();
-
-  if (!study) {
-    return null;
-  }
-
+  
   const handleDeleteStudy = async () => {
-    if (!window.confirm(`Are you sure you want to delete the study "${study.title}"? This action cannot be undone.`)) {
+    if (!study?._id) {
+      console.error("Study ID is missing for deletion.");
       return;
     }
 
-    try {
-      const response = await fetch(`/api/studies/${study._id}`, {
-        method: 'DELETE',
-      });
+    if (window.confirm(`Are you sure you want to delete the study "${study.title}"? This action cannot be undone.`)) {
+      try {
+        const response = await fetch(`/api/studies/${study._id}`, {
+          method: 'DELETE',
+        });
 
-      if (response.ok) {
-        console.log(`Study "${study.title}" deleted successfully.`);
-        onClose(); // Close the popup
-        if (onStudyDeleted) {
-          onStudyDeleted(); // Notify the parent component to refresh the study list
+        if (response.ok) {
+          console.log(`Study "${study.title}" deleted successfully.`);
+          onClose();
+          if (onStudyDeleted) {
+            onStudyDeleted();
+          }
+        } else {
+          const errorData = await response.json();
+          console.error('Error deleting study:', errorData.error || 'Failed to delete study.');
         }
-      } else {
-        const errorData = await response.json();
-        console.error('Error deleting study:', errorData.error || 'Failed to delete study.');
-        // Optionally display an error message to the user
+      } catch (error) {
+        console.error('Error deleting study:', error);
       }
-    } catch (error) {
-      console.error('Error deleting study:', error);
-      // Optionally display an error message to the user
     }
   };
 
-  const handleEditStudy = () => {
-    router.push(`/create?edit=${study._id}`); // Redirect to the create page with the study ID for editing
-    onClose(); // Close the popup
-  };
-
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backdropFilter: 'blur(5px)',
-      backgroundColor: 'transparent',
-      zIndex: 50, // Ensure it's on top of other elements
-    }}>
-      <div className="bg-white p-8 rounded shadow-md relative">
-        <button onClick={onClose} className="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
-          <IoIosClose size={24} />
-        </button>
+    <div className="detailsPopup" style={{display: 'flex'}}>
+      <div className="closePopupBackground" onClick={onClose}></div>
+      <div>
         <div className="studyDetails">
           <h1>Study details</h1>
+          <div htmlFor="study-select" className="dropDownIcon"><FaAngleDown /></div>
+          <select name="study" id="study-select">
+            <option value="study1">Comparative example study</option>
+            <option value="study2">Study 2</option>
+            <option value="study3">Study 3</option>
+          </select>
           <h2>Information</h2>
           <div className="study-info">
-            <p><BsCalendar4 />Study created: {new Date(study.createdAt).toLocaleDateString()}</p>
+            <p><BsCalendar4 />Study created: 04.03.2025</p>
             <table>
               <tbody>
-                <tr><td><div><BsPersonCheck />Finished participants</div></td><td>{study.finishedParticipants || 'N/A'}</td></tr>
-                <tr><td><div><BsPersonX />Unfinished participants</div></td><td>{study.unfinishedParticipants || 'N/A'}</td></tr>
-                <tr><td><div><BsPeople />Total participants</div></td><td>{study.totalParticipants || 'N/A'}</td></tr>
+                <tr>
+                  <td>
+                    <div>
+                      <BsPersonCheck />
+                      Finished participants
+                    </div>
+                  </td>
+                  <td>26</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div>
+                      <BsPersonX />
+                      Unfinished participants
+                    </div>
+                  </td>
+                  <td>2</td>
+                </tr>
+                <tr>
+                  <td>
+                    <div>
+                      <BsPeople />
+                      Total participants
+                    </div>
+                  </td>
+                  <td>28</td>
+                </tr>
               </tbody>
             </table>
           </div>
           <p>Options</p>
           <div className="details-options">
-            <button className="defaultBtn" onClick={handleEditStudy}><MdEdit />Edit study</button>
+            <button className="defaultBtn"><MdEdit />Edit study</button>
             <button className="yellowBtn"><FaPowerOff />End study</button>
-            <button className="redBtn" onClick={handleDeleteStudy}><FaRegTrashAlt />Delete study</button>
+            <button onClick={handleDeleteStudy} className="redBtn"><FaRegTrashAlt />Delete study</button>
           </div>
+        </div>
+        <div onClick={onClose}>
+          <button className="closeBtn" onClick={onClose}><IoIosClose /></button>
         </div>
       </div>
     </div>
-  );
-};
-
-export default DetailsPopup;
+  )
+}

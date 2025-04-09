@@ -1,4 +1,3 @@
-// app/api/studies/route.js
 import { NextResponse } from "next/server";
 import dbConnect from "../../lib/dbconnect";
 import Study from "../../models/study";
@@ -11,7 +10,7 @@ export async function POST(req) {
     const newStudy = new Study({ title, description });
     const savedStudy = await newStudy.save();
 
-    return NextResponse.json(savedStudy, { status: 201 }); // Send back the created study as JSON
+    return NextResponse.json(savedStudy, { status: 201 });
   } catch (error) {
     console.error("Error creating study:", error);
     return NextResponse.json({ error: "Failed to create study" }, { status: 500 });

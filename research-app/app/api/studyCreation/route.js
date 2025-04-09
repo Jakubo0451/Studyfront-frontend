@@ -24,7 +24,7 @@ export async function POST(req) {
     const result = await studies.insertOne(newStudy);
 
     return NextResponse.json({
-      id: result.insertedId, // Return the _id
+      id: result.insertedId,
       title: newStudy.title,
       description: newStudy.description,
       createdAt: newStudy.createdAt,

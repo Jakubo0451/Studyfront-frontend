@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-export default function StudyCreationForm({ onStudyCreated }) { // Receive the prop
+export default function StudyCreationForm({ onStudyCreated }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState(null);
@@ -25,7 +25,7 @@ export default function StudyCreationForm({ onStudyCreated }) { // Receive the p
         setLoading(false);
         const studyData = await response.json();
         if (onStudyCreated) {
-          onStudyCreated(studyData.id); // Call the prop with the new study ID
+          onStudyCreated(studyData.id);
         }
       } else {
         const errorData = await response.json();

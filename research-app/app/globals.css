@@ -17,8 +17,20 @@
     font-family: var(--font-readex);
   }
 }
+.detailsPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.5);
+}
 
-.sharePopup, .detailsPopup {
+.sharePopup{
   position: fixed;
   backdrop-filter: brightness(0.5);
   width: 100%;

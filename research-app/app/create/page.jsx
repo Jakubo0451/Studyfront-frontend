@@ -5,7 +5,7 @@ import Header from '../components/header/Header.jsx';
 import SideBar from "../components/studyCreator/sideBar.jsx";
 import { useSearchParams, useRouter } from 'next/navigation';
 
-// Dummy Question Components (for demonstration)
+// These are some dummy questions
 const TextQuestionDisplay = ({ question, onQuestionDataChange, onFileUpload }) => (
   <div className="border p-4 mb-4">
     <h3>Text Input Question</h3>
@@ -138,16 +138,13 @@ export default function CreateStudyPage() {
 
       if (response.ok) {
         console.log('Questions saved successfully');
-        // Optionally redirect or show a success message
-        router.push('/dashboard'); // Redirect back to dashboard after saving
+        router.push('/dashboard');
       } else {
         const errorData = await response.json();
         console.error('Error saving questions:', errorData.error || 'Failed to save questions.');
-        // Optionally display an error message to the user
       }
     } catch (error) {
       console.error('Error saving questions:', error);
-      // Optionally display an error message to the user
     }
   };
 
@@ -192,7 +189,6 @@ export default function CreateStudyPage() {
                   onFileUpload={handleFileUpload}
                 />
               )}
-              {/* Add display and editing UI for other question types based on questions[selectedQuestionIndex].type */}
             </div>
           )}
 
