@@ -9,11 +9,11 @@ import { FaRegTrashAlt } from "react-icons/fa";
 import { BsPersonCheck } from "react-icons/bs";
 import { BsPersonX } from "react-icons/bs";
 import { BsPeople } from "react-icons/bs";
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
-export default function DetailsPopup({study, onClose, onStudyDeleted}) {
+export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
   const router = useRouter();
-  
+
   const handleDeleteStudy = async () => {
     if (!study?._id) {
       console.error("Study ID is missing for deletion.");
@@ -42,8 +42,13 @@ export default function DetailsPopup({study, onClose, onStudyDeleted}) {
     }
   };
 
+  const handleEdit = () => {
+    router.push(`/create?studyId=${study._id}`);
+    onClose();
+  };
+
   return (
-    <div className="detailsPopup" style={{display: 'flex'}}>
+    <div className="detailsPopup" style={{ display: 'flex' }}>
       <div className="closePopupBackground" onClick={onClose}></div>
       <div>
         <div className="studyDetails">
@@ -90,8 +95,13 @@ export default function DetailsPopup({study, onClose, onStudyDeleted}) {
             </table>
           </div>
           <p>Options</p>
-          <div className="details-options">
-            <button className="defaultBtn"><MdEdit />Edit study</button>
+          <div className="details-options flex space-x-2 mt-4">
+            <button 
+              onClick={handleEdit}
+              className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center hover:bg-oxford-blue transition duration-300"
+            >
+              Edit Study
+            </button>
             <button className="yellowBtn"><FaPowerOff />End study</button>
             <button onClick={handleDeleteStudy} className="redBtn"><FaRegTrashAlt />Delete study</button>
           </div>

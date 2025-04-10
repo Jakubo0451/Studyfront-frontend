@@ -1,4 +1,3 @@
-// app/create/page.jsx
 "use client";
 import React, { useState, useEffect } from "react";
 import Header from '../components/header/Header.jsx';
@@ -66,7 +65,7 @@ const MultipleChoiceQuestionDisplay = ({ question, onQuestionDataChange, onFileU
 export default function CreateStudyPage() {
   const [study, setStudy] = useState(null);
   const searchParams = useSearchParams();
-  const editStudyId = searchParams.get('edit');
+  const editStudyId = searchParams.get('studyId');
   const [questions, setQuestions] = useState([]);
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(null);
   const router = useRouter();
