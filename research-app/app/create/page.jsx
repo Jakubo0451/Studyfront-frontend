@@ -167,9 +167,14 @@ export default function CreateStudyPage() {
     <div className="flex flex-col h-screen">
       <Header />
       <div className="flex h-full flex-row">
-        <SideBar questions={questions} onQuestionSelect={handleQuestionSelect} onAddQuestion={handleAddQuestion} />
+        <SideBar
+          questions={questions}
+          onQuestionSelect={handleQuestionSelect}
+          onAddQuestion={handleAddQuestion}
+          setQuestions={setQuestions}
+        />
         <div className="flex-1 p-4">
-          <h2 className="text-xl font-semibold mb-4">Edit Study: {study.title}</h2>
+          <h2 className="text-xl font-semibold mb-4">Edit Study: {study?.title}</h2>
 
           {selectedQuestionIndex !== null && questions[selectedQuestionIndex] && (
             <div>
