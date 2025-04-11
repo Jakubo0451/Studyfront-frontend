@@ -51,26 +51,29 @@ export async function DELETE(req, { params }) {
 export async function PUT(req, { params }) {
   try {
     await dbConnect();
-    const { id: studyId } = await params;
-    const { question } = await req.json();
+    const { questions } = await req.json();
+    const studyId = params.id;
 
-    if (!ObjectId.isValid(studyId)) {
-      return NextResponse.json({ error: "Invalid study ID" }, { status: 400 });
+    if (!studyId) {
+      return NextResponse.json({ error: 'Study ID is required' }, { status: 400 });
     }
 
     const updatedStudy = await Study.findByIdAndUpdate(
       studyId,
-      { question }, // Update the questions
-      { new: true, runValidators: true }
+      { $set: { questions: questions } },
+      { new: true }
     );
 
     if (!updatedStudy) {
-      return NextResponse.json({ error: "Study not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Study not found' }, { status: 404 });
     }
 
-    return NextResponse.json(updatedStudy, { status: 200 });
+    return NextResponse.json(updatedStudy);
   } catch (error) {
-    console.error("Error updating study with questions:", error);
-    return NextResponse.json({ error: "Failed to update study questions" }, { status: 500 });
+    console.error('Error updating study:', error);
+    return NextResponse.json(
+      { error: 'Failed to update study questions' },
+      { status: 500 }
+    );
   }
 }

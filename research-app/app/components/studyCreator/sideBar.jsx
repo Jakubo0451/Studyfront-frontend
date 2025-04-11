@@ -123,27 +123,23 @@ const SideBar = ({
         <SortableContext
           items={questions.map((question) => `item-${question.id}`)}
         >
-          <div className="space-y-2 flex-grow pb-4 pt-4 text-lg overflow-y-auto">
+          <div className="space-y-2 flex-grow border-b-2 border-t-2 border-dotted border-petrol-blue pb-4 pt-4 text-lg overflow-y-auto">
             {questions && questions.length > 0 ? (
-              <>
-                {" "}
-                {/* Use a React Fragment here */}
-                {questions.map((question, index) => (
-                  <SortableItem
-                    key={question.id}
-                    id={`item-${question.id}`}
-                    content={
-                      question.type === "text"
-                        ? `Text Question ${index + 1}`
-                        : question.type === "multipleChoice"
-                        ? `Multiple Choice ${index + 1}`
-                        : `Question ${index + 1}`
-                    }
-                    onQuestionSelect={onQuestionSelect}
-                    index={index}
-                  />
-                ))}
-              </>
+              questions.map((question, index) => (
+                <SortableItem
+                  key={question.id}
+                  id={`item-${question.id}`}
+                  content={
+                    question.type === "text"
+                      ? `Text Question ${index + 1}`
+                      : question.type === "multipleChoice"
+                      ? `Multiple Choice ${index + 1}`
+                      : `Question ${index + 1}`
+                  }
+                  onQuestionSelect={onQuestionSelect}
+                  index={index}
+                />
+              ))
             ) : (
               <p className="text-center text-gray-600">
                 No questions added yet.

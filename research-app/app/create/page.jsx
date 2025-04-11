@@ -78,7 +78,7 @@ export default function CreateStudyPage() {
           if (response.ok) {
             const data = await response.json();
             setStudy(data);
-            setQuestions(data.question || []);
+            setQuestions(data.questions || []);
             if (data.question && data.question.length > 0) {
               setSelectedQuestionIndex(0);
             }
@@ -125,25 +125,35 @@ export default function CreateStudyPage() {
       console.error('Study ID not found for saving questions.');
       return;
     }
-
+  
     try {
       const response = await fetch(`/api/studies/${editStudyId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ question: questions }),
+        body: JSON.stringify({
+          questions: questions.map(q => ({
+            _id: q._id, // Include if exists
+            id: q.id.toString(), // Required by schema
+            type: q.type,
+            data: q.data || {},
+            file: q.file || null // Optional
+          }))
+        }),
       });
-
-      if (response.ok) {
-        console.log('Questions saved successfully');
-        router.push('/dashboard');
-      } else {
+  
+      if (!response.ok) {
         const errorData = await response.json();
-        console.error('Error saving questions:', errorData.error || 'Failed to save questions.');
+        throw new Error(errorData.error || 'Failed to save questions');
       }
+  
+      const updatedStudy = await response.json();
+      console.log('Questions saved successfully', updatedStudy);
+      router.push('/dashboard');
     } catch (error) {
-      console.error('Error saving questions:', error);
+      console.error('Error saving questions:', error.message);
+      alert('Failed to save questions. Please try again.');
     }
   };
 
@@ -204,7 +214,7 @@ export default function CreateStudyPage() {
             <p>Click "Add Item" in the sidebar to add your first question.</p>
           )}
 
-          <button onClick={handleSaveQuestions} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-4">
+          <button onClick={handleSaveQuestions} className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
             Save Questions
           </button>
         </div>

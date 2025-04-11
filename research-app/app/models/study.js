@@ -2,9 +2,10 @@ import mongoose, { Schema } from 'mongoose';
 
 const questionSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() },
+  id: { type: String, required: true },
   type: { type: String, required: true },
   data: { type: Schema.Types.Mixed, required: true },
-  file: { type: Schema.Types.Mixed }, // Metadata
+  file: { type: Schema.Types.Mixed }
 });
 
 const studySchema = new Schema(
@@ -17,7 +18,7 @@ const studySchema = new Schema(
       type: String,
       required: true,
     },
-    question: [questionSchema],
+    questions: [questionSchema], 
     files: [
       {
         //Array of file metadata
