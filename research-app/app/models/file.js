@@ -4,12 +4,12 @@ const fileSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
-        maxlength: 255, // Example max length
+        maxlength: 255,
     },
     path: {
         type: String,
         required: true,
-        match: /^(\/[a-zA-Z0-9_\-\.]+)+$/, // Example path regex
+        match: /^(\/[a-zA-Z0-9_\-\.]+)+$/,
     },
     uploadedAt: { type: Date, default: Date.now }
 });

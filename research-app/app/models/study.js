@@ -1,4 +1,3 @@
-// models/study.js
 import mongoose, { Schema } from 'mongoose';
 
 const questionSchema = new Schema({
@@ -18,7 +17,7 @@ const studySchema = new Schema(
       type: String,
       required: true,
     },
-    question: [questionSchema], // Now an array of sub-documents using questionSchema
+    question: [questionSchema],
     files: [
       {
         //Array of file metadata

@@ -9,7 +9,7 @@ export default async function dbConnect() {
             dbName: "studyfront",
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            bufferCommands: false, // Disable buffering
+            bufferCommands: false,
         });
         isConnected = true;
         console.log("Database connected");
