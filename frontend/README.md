@@ -20,6 +20,24 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Docker 
+
+To build the frontend in an Docker container run the following command;
+```bash
+docker build -t studyfront-frontend .
+```
+
+To run the frontend in an Docker container run the following command; (this will force a rebuild of the Docker image before starting the container)
+```bash
+docker-compose up --build
+```
+
+The container can be started without rebuilding using this command;
+```bash
+docker-compose up
+```
+
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
