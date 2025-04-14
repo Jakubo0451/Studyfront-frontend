@@ -1,3 +1,5 @@
+# Studyfront frontend 
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -29,12 +31,12 @@ docker build -t studyfront-frontend .
 
 To run the frontend in an Docker container run the following command; (this will force a rebuild of the Docker image before starting the container)
 ```bash
-docker-compose up --build
+docker-compose up --build -d
 ```
 
 The container can be started without rebuilding using this command;
 ```bash
-docker-compose up
+docker-compose up -d
 ```
 
 
