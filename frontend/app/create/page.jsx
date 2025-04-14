@@ -128,18 +128,18 @@ export default function CreateStudyPage() {
     }
   
     try {
-      const response = await fetch(`/api/studies/${editStudyId}`, {
+      const response = await fetch(`${backendUrl}/api/studies/${editStudyId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           questions: questions.map(q => ({
-            _id: q._id, // Include if exists
-            id: q.id.toString(), // Required by schema
+            _id: q._id,
+            id: q.id.toString(),
             type: q.type,
             data: q.data || {},
-            file: q.file || null // Optional
+            file: q.file || null
           }))
         }),
       });

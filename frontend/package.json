@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "build:css": "npx @tailwindcss/cli -i ./app/globals.css -o ./app/output.css --watch",
     "test": "jest --watchAll"
   },
   "dependencies": {

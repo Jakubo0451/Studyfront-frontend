@@ -27,10 +27,10 @@ export default function LoginPage() {
 
       const data = await res.json();
       if (data.token) {
-        localStorage.setItem('token', data.token); // Store the token
-        console.log('Token stored:', data.token); // Debugging
-        await fetchDashboard(); // Call the function to fetch dashboard data
-        router.push('/dashboard'); // Navigate to dashboard
+        localStorage.setItem('token', data.token);
+        console.log('Token stored:', data.token);
+        await fetchDashboard();
+        router.push('/dashboard');
       } else {
         alert('Invalid credentials');
       }
@@ -46,7 +46,7 @@ export default function LoginPage() {
       const res = await fetch(`${backendUrl}/dashboard`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`, // Include the token
+          Authorization: `Bearer ${token}`,
         },
       });
 
