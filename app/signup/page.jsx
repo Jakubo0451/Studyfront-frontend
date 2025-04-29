@@ -12,6 +12,23 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validator.isLength(name, { min: 1, max: 50 })) {
+      alert("Name must be between 1 and 50 characters.");
+      return;
+    }
+    if (!validator.isEmail(email)) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+    if (
+      !validator.isLength(password, { min: 8 }) ||
+      !/\d/.test(password)
+    ) {
+      alert("Password must be at least 8 characters and include a number.");
+      return;
+    }
+
     const res = await fetch(`${backendUrl}/api/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -23,6 +40,7 @@ export default function RegisterPage() {
       alert("Failed to create user");
     }
   };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <form className="w-full max-w-lg p-12 space-y-8" onSubmit={handleSubmit}>
