@@ -32,8 +32,8 @@ export default function Dashboard() {
 
     return (
         <div>
-            <SharePopup></SharePopup>
-            <Header></Header>
+            <SharePopup/>
+            <Header/>
             <div className="flex flex-col items-center h-full">
                 <h1 className="text-6xl mb-10 mt-10">Your studies</h1>
                 <div className="w-full flex justify-center mb-10">
@@ -45,7 +45,7 @@ export default function Dashboard() {
                         Create new study
                     </button>
                 </div>
-                <StudiesList></StudiesList>
+                <StudiesList/>
             </div>
         </div>
     )
