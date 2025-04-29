@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest",
+    "test": "jest --verbose",
     "test:e2e-only": "jest --config ./jest.config.cjs --testMatch \"<rootDir>/app/auth.test.jsx\" --testNamePattern \"E2E Tests\" --runInBand --no-cache"
   },
   "dependencies": {
