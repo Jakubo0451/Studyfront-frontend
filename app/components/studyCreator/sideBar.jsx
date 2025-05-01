@@ -133,6 +133,8 @@ const SideBar = ({
                       ? `Text Question ${index + 1}`
                       : question.type === "multipleChoice"
                       ? `Multiple Choice ${index + 1}`
+                      : question.type === "checkbox"
+                      ? `Checkbox Question ${index + 1}`
                       : `Question ${index + 1}`
                   }
                   onQuestionSelect={onQuestionSelect}
