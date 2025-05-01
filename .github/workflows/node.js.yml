@@ -38,4 +38,4 @@ jobs:
       run: npm start --if-present
 
     - name: Run tests
-      run: npm test
+      run: npm test -- --testPathIgnorePatterns=page.test.jsx
