@@ -176,6 +176,13 @@ const SideBar = ({
             </button>
             <button
               type="button"
+              onClick={() => handleAddQuestionType("checkbox")}
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+            >
+              Checkbox
+            </button>
+            <button
+              type="button"
               onClick={() => handleAddQuestionType("trueFalse")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
