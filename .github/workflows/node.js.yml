@@ -34,8 +34,16 @@ jobs:
     - name: Run ESLint
       run: npx eslint
 
-    - name: run project
-      run: npm start --if-present
+    - name: Start project
+      run: npm start --if-present &
+      env:
+        BACKENDUrl: development
+
+    - name: Wait for the server to start
+      run: sleep 10
 
     - name: Run tests
       run: npm test -- --testPathIgnorePatterns=page.test.jsx
+
+    - name: Stop project
+      run: kill $(lsof -t -i:3000) || true
