@@ -1,6 +1,5 @@
 import validator from "validator";
 
-// Validation helpers
 function isValidName(name) {
   return validator.isLength(name, { min: 1, max: 50 });
 }
@@ -10,42 +9,68 @@ function isValidEmail(email) {
 }
 
 function isValidPassword(password) {
-  return validator.isLength(password, { min: 8 }) && /\d/.test(password);
+  return (
+    validator.isLength(password, { min: 8 }) &&
+    /\d/.test(password)
+  );
 }
 
-describe("Signup validation", () => {
-  // Name tests
-  test("valid name passes", () => {
+describe("Unit Tests - Validation for Signup Form", () => {
+  // Positive test cases
+  test("Valid name - 'John Doe'", () => {
     expect(isValidName("John Doe")).toBe(true);
   });
 
-  test("empty name fails", () => {
+  test("Valid email - 'john@example.com'", () => {
+    expect(isValidEmail("john@example.com")).toBe(true);
+  });
+
+  test("Valid password - 'password123'", () => {
+    expect(isValidPassword("password123")).toBe(true);
+  });
+
+  // Boundary test cases
+  test("Name with exactly 50 characters", () => {
+    const name = "A".repeat(50);
+    expect(isValidName(name)).toBe(true);
+  });
+
+  test("Password with exactly 8 characters and a number", () => {
+    expect(isValidPassword("abc12345")).toBe(true);
+  });
+
+  // Edge test cases
+  test("Name with 1 character (minimum allowed)", () => {
+    expect(isValidName("A")).toBe(true);
+  });
+
+  test("Name with 0 characters (just below valid)", () => {
     expect(isValidName("")).toBe(false);
   });
 
-  test("name longer than 50 chars fails", () => {
-    expect(isValidName("a".repeat(51))).toBe(false);
+  // Negative test cases
+  test("Invalid email - missing @", () => {
+    expect(isValidEmail("johndoeexample.com")).toBe(false);
   });
 
-  // Email tests
-  test("valid email passes", () => {
-    expect(isValidEmail("test@example.com")).toBe(true);
+  test("Invalid email - empty string", () => {
+    expect(isValidEmail("")).toBe(false);
   });
 
-  test("invalid email fails", () => {
-    expect(isValidEmail("not-an-email")).toBe(false);
+  test("Invalid password - less than 8 characters", () => {
+    expect(isValidPassword("abc123")).toBe(false);
   });
 
-  // Password tests
-  test("valid password passes", () => {
-    expect(isValidPassword("password1")).toBe(true);
+  test("Invalid password - no number included", () => {
+    expect(isValidPassword("abcdefgh")).toBe(false);
   });
 
-  test("password less than 8 chars fails", () => {
-    expect(isValidPassword("pass1")).toBe(false);
+  test("Invalid name - more than 50 characters", () => {
+    const name = "A".repeat(51);
+    expect(isValidName(name)).toBe(false);
   });
 
-  test("password without number fails", () => {
-    expect(isValidPassword("password")).toBe(false);
+  test("Invalid password - empty string", () => {
+    expect(isValidPassword("")).toBe(false);
   });
 });

@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest --verbose",
-    "test:e2e-only": "jest --config ./jest.config.cjs --testMatch \"<rootDir>/app/auth.test.jsx\" --testNamePattern \"E2E Tests\" --runInBand --no-cache"
+    "test:e2e-only": "jest --config ./jest.config.cjs --testMatch \"<rootDir>/app/__tests__/page.test.jsx\" --testNamePattern \"E2E Tests\" --runInBand --no-cache"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -18,6 +18,7 @@
     "@tailwindcss/cli": "^4.0.12",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.4.7",
+    "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.0",
     "next": "^15.2.1",
