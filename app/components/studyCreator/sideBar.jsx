@@ -134,6 +134,8 @@ const SideBar = ({
                       ? `Text Question ${index + 1}`
                       : question.type === "multipleChoice"
                       ? `Multiple Choice ${index + 1}`
+                      : question.type === "checkbox"
+                      ? `Checkbox Question ${index + 1}`
                       : `Question ${index + 1}`
                   }
                   onQuestionSelect={onQuestionSelect}
@@ -169,6 +171,12 @@ const SideBar = ({
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
               Multiple Choice
+            </button>
+            <button
+              onClick={() => onAddQuestion("checkbox")}
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+            >
+              Checkbox
             </button>
             <button
               onClick={() => handleAddQuestionType("trueFalse")}

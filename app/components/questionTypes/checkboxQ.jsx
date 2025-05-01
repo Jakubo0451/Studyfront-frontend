@@ -3,6 +3,35 @@ import React, { useState } from "react";
 export default function CheckboxQuestionBuilder({ onChange }) {
   const [questionText, setQuestionText] = useState("");
   const [options, setOptions] = useState([""]);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const handleSave = async (updatedQuestionText, updatedOptions) => {
+    const questionData = {
+      type: "checkbox",
+      questionText: updatedQuestionText,
+      options: updatedOptions,
+    };
+
+    try {
+      const response = await fetch("/api/save-question", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(questionData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save question");
+      }
+
+      const result = await response.json();
+      console.log("Question saved successfully:", result);
+      setSuccessMessage("Question saved successfully");
+    } catch (error) {
+      console.error("Error saving question:", error);
+    }
+  };
 
   const updateParent = (newQuestion, newOptions) => {
     onChange({
@@ -13,58 +42,53 @@ export default function CheckboxQuestionBuilder({ onChange }) {
   };
 
   const handleQuestionTextChange = (e) => {
-    setQuestionText(e.target.value);
-    updateParent(e.target.value, options);
+    const updatedQuestionText = e.target.value;
+    setQuestionText(updatedQuestionText);
+    updateParent(updatedQuestionText, options);
+    handleSave(updatedQuestionText, options); // Automatically save changes
   };
 
   const handleOptionChange = (index, value) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
-    updateParent(questionText, newOptions);
+    const updatedOptions = [...options];
+    updatedOptions[index] = value;
+    setOptions(updatedOptions);
+    updateParent(questionText, updatedOptions);
+    handleSave(questionText, updatedOptions); // Automatically save changes
   };
 
   const addOption = () => {
-    setOptions([...options, ""]);
+    const updatedOptions = [...options, ""];
+    setOptions(updatedOptions);
+    handleSave(questionText, updatedOptions); // Automatically save changes
   };
 
   const removeOption = (index) => {
-    const newOptions = options.filter((_, i) => i !== index);
-    setOptions(newOptions);
-    updateParent(questionText, newOptions);
+    const updatedOptions = options.filter((_, i) => i !== index);
+    setOptions(updatedOptions);
+    handleSave(questionText, updatedOptions); // Automatically save changes
   };
 
   return (
     <div>
-      <label>
-        Question:
-        <input
-          type="text"
-          value={questionText}
-          onChange={handleQuestionTextChange}
-          placeholder="Enter your question"
-        />
-      </label>
-
-      <fieldset>
-        <legend>Options:</legend>
-        {options.map((option, index) => (
-          <div key={index}>
-            <input
-              type="text"
-              value={option}
-              onChange={(e) => handleOptionChange(index, e.target.value)}
-              placeholder={`Option ${index + 1}`}
-            />
-            <button type="button" onClick={() => removeOption(index)}>
-              Remove
-            </button>
-          </div>
-        ))}
-        <button type="button" onClick={addOption}>
-          Add Option
-        </button>
-      </fieldset>
+      <input
+        type="text"
+        placeholder="Enter your question"
+        value={questionText}
+        onChange={handleQuestionTextChange}
+      />
+      {options.map((option, index) => (
+        <div key={index}>
+          <input
+            type="text"
+            placeholder={`Option ${index + 1}`}
+            value={option}
+            onChange={(e) => handleOptionChange(index, e.target.value)}
+          />
+          <button onClick={() => removeOption(index)}>Remove</button>
+        </div>
+      ))}
+      <button onClick={addOption}>Add Option</button>
+      {successMessage && <p>{successMessage}</p>}
     </div>
   );
 }
