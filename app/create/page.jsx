@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Header from '@/components/header/Header.jsx';
 import SideBar from "@/components/studyCreator/sideBar.jsx";
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -56,7 +56,7 @@ const MultipleChoiceQuestionDisplay = ({ question, onQuestionDataChange, onFileU
           onChange={(e) => handleOptionChange(index, e.target.value)}
         />
       ))}
-      <button onClick={handleAddOption} className="bg-green-500 text-white rounded px-2 py-1 mt-2">Add Option</button>
+      <button type="button" onClick={handleAddOption} className="bg-green-500 text-white rounded px-2 py-1 mt-2">Add Option</button>
       <input type="file" onChange={(e) => onFileUpload(question.id, e.target.files[0])} />
       {question.file && <p>Selected File: {question.file.name}</p>}
     </div>
@@ -215,7 +215,7 @@ export default function CreateStudyPage() {
             <p>Click "Add Item" in the sidebar to add your first question.</p>
           )}
 
-          <button onClick={handleSaveQuestions} className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
+          <button type="button" onClick={handleSaveQuestions} className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
             Save Questions
           </button>
         </div>

@@ -1,5 +1,4 @@
 'use client'
-import React from 'react'
 import { FaRegCopy } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 import { IoIosClose } from "react-icons/io";
@@ -46,16 +45,16 @@ export default function sharePopup() {
           <label htmlFor="share-link">Sharable link</label>
           <div className="share-link">
             <input type="text" id="share-link" value="https://studyfront.com/study/1" readOnly />
-            <button className="copyBtn" title="Copy link" onClick={copyLink}><FaRegCopy /></button>
+            <button type="button" className="copyBtn" title="Copy link" onClick={copyLink}><FaRegCopy /></button>
           </div>
           <label htmlFor="share-email">Share by email</label>
           <div className="share-email">
             <textarea type="email" id="share-email" placeholder="participant1@example.com participant2@example.com" />
-            <button className="sendBtn" title="Send invite(s)" onClick={sendEmails}><IoSend /></button>
+            <button type="button" className="sendBtn" title="Send invite(s)" onClick={sendEmails}><IoSend /></button>
           </div>
         </div>
         <div onClick={closePopup}>
-          <button className="closeBtn" title="Close menu" onClick={closePopup}><IoIosClose /></button>
+          <button type="button" className="closeBtn" title="Close menu" onClick={closePopup}><IoIosClose /></button>
         </div>
       </div>
     </div>

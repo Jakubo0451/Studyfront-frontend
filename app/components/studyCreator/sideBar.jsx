@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -111,7 +110,7 @@ const SideBar = ({
   return (
     <div className="w-80 bg-sky-blue h-full p-4 flex flex-col">
       <h2 className="text-xl w-full mb-4 text-center">Study Information</h2>
-      <button className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
+      <button type="button" className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
         Study information
       </button>
       <DndContext
@@ -152,6 +151,7 @@ const SideBar = ({
       </DndContext>
       <div className="relative">
         <button
+          type="button"
           onClick={handleAddButtonClick}
           className="mt-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center w-full"
         >
@@ -161,42 +161,42 @@ const SideBar = ({
         {showAddQuestionMenu && (
           <div className="absolute left-0 w-full bg-gray-100 rounded-md shadow-md mt-2 z-10">
             <button
+              type="button"
               onClick={() => handleAddQuestionType("text")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
               Text Input
             </button>
             <button
+              type="button"
               onClick={() => handleAddQuestionType("multipleChoice")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
               Multiple Choice
             </button>
             <button
-              onClick={() => onAddQuestion("checkbox")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              Checkbox
-            </button>
-            <button
+              type="button"
               onClick={() => handleAddQuestionType("trueFalse")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
               True/False
             </button>
             <button
+              type="button"
               onClick={() => handleAddQuestionType("ratingScale")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
               Rating Scale
             </button>
             <button
+              type="button"
               onClick={() => handleAddQuestionType("fileUpload")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
               File Upload Only
             </button>
             <button
+              type="button"
               onClick={() => handleAddQuestionType("longAnswer")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
