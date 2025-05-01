@@ -84,10 +84,10 @@ export default function CheckboxQuestionBuilder({ onChange }) {
             value={option}
             onChange={(e) => handleOptionChange(index, e.target.value)}
           />
-          <button onClick={() => removeOption(index)}>Remove</button>
+          <button type="button" onClick={() => removeOption(index)}>Remove</button>
         </div>
       ))}
-      <button onClick={addOption}>Add Option</button>
+      <button type="button" onClick={addOption}>Add Option</button>
       {successMessage && <p>{successMessage}</p>}
     </div>
   );
