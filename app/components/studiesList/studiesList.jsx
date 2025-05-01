@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { IoPersonOutline } from "react-icons/io5";
 import { PiDownloadSimpleFill } from "react-icons/pi";
@@ -40,7 +40,7 @@ const StudiesList = () => {
         fetchStudies();
     }, [fetchStudies]);
 
-    const openShare = (studyId) => {
+    const openShare = () => {
         document.querySelector('.sharePopup').style.display = 'flex';
     }
 
@@ -91,8 +91,8 @@ const StudiesList = () => {
                             </div>
                         </div>
                         <div className="flex space-x-2 mb-2">
-                            <button onClick={() => openShare(item._id)} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Share</button>
-                            <button onClick={() => openDetails(item._id)} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Details</button>
+                            <button type="button" onClick={() => openShare(item._id)} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Share</button>
+                            <button type="button" onClick={() => openDetails(item._id)} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Details</button>
                         </div>
                         <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
                             <div className="flex text-petrol-blue grow items-center justify-center">
