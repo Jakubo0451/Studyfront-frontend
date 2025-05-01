@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import backendUrl from 'environment';
+import validator from "validator";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
