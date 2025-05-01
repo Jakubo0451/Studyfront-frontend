@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Header from '@/components/header/Header.jsx';
 import SideBar from "@/components/studyCreator/sideBar.jsx";
+import CheckboxQuestionBuilder from "@/components/questionTypes/checkboxQ"; // Added
 import { useSearchParams, useRouter } from 'next/navigation';
 import backendUrl from 'environment';
 
@@ -98,9 +99,7 @@ export default function CreateStudyPage() {
   const handleAddQuestion = (type) => {
     const newQuestion = { id: Date.now(), type: type, data: {}, file: null };
     setQuestions([...questions, newQuestion]);
-    if (questions.length === 0) {
-      setSelectedQuestionIndex(0);
-    }
+    setSelectedQuestionIndex(questions.length); // Added
   };
 
   const handleQuestionSelect = (index) => {
@@ -202,6 +201,13 @@ export default function CreateStudyPage() {
                   question={questions[selectedQuestionIndex]}
                   onQuestionDataChange={handleQuestionDataChange}
                   onFileUpload={handleFileUpload}
+                />
+              )}
+              {questions[selectedQuestionIndex].type === 'checkbox' && (
+                <CheckboxQuestionBuilder
+                  onChange={(updateData) =>
+                    handleQuestionDataChange(questions[selectedQuestionIndex].id, updatedData)
+                  }
                 />
               )}
             </div>
