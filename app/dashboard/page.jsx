@@ -38,6 +38,7 @@ export default function Dashboard() {
                 <h1 className="text-6xl mb-10 mt-10">Your studies</h1>
                 <div className="w-full flex justify-center mb-10">
                     <button 
+                        type="button"
                         onClick={handleCreateStudy}
                         className="bg-petrol-blue text-white rounded px-4 py-2 flex items-center hover:bg-oxford-blue transition duration-300"
                     >

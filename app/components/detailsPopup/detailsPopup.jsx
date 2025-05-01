@@ -1,5 +1,4 @@
 'use client'
-import React from 'react'
 import { IoIosClose } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
 import { BsCalendar4 } from "react-icons/bs";
@@ -96,18 +95,19 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
           </div>
           <p>Options</p>
           <div className="details-options flex space-x-2 mt-4">
-            <button 
+            <button
+              type="button"
               onClick={handleEdit}
               className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center hover:bg-oxford-blue transition duration-300"
             >
               Edit Study
             </button>
-            <button className="yellowBtn"><FaPowerOff />End study</button>
-            <button onClick={handleDeleteStudy} className="redBtn"><FaRegTrashAlt />Delete study</button>
+            <button type="button" className="yellowBtn"><FaPowerOff />End study</button>
+            <button type="button" onClick={handleDeleteStudy} className="redBtn"><FaRegTrashAlt />Delete study</button>
           </div>
         </div>
         <div onClick={onClose}>
-          <button className="closeBtn" onClick={onClose}><IoIosClose /></button>
+          <button type="button" className="closeBtn" onClick={onClose}><IoIosClose /></button>
         </div>
       </div>
     </div>
