@@ -35,4 +35,4 @@ jobs:
       run: npx eslint
 
     - name: Run tests
-      run: npm test -- --testPathIgnorePatterns=auth.test.jsx,page.test.jsx
+      run: npm test -- --testPathIgnorePatterns=[auth.test.jsx,page.test.jsx]
