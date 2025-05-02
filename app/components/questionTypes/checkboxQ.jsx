@@ -1,28 +1,56 @@
+import { useState, useEffect } from "react";
+
 const DEFAULT_QUESTION_DATA = { questionText: "", options: [""] };
 
-export default function CheckboxQuestionBuilder({ onChange, questionData = DEFAULT_QUESTION_DATA }) {
-  const questionText = questionData.questionText || "";
-  const options = questionData.options || [""];
+export default function CheckboxQuestionBuilder({
+  onChange,
+  questionData = DEFAULT_QUESTION_DATA,
+}) {
+  const [questionText, setQuestionText] = useState(
+    questionData.questionText || ""
+  );
+  const [options, setOptions] = useState(questionData.options || [""]);
+
+  useEffect(() => {
+    setQuestionText((prev) =>
+      questionData.questionText !== prev
+        ? questionData.questionText || ""
+        : prev
+    );
+    setOptions((prev) =>
+      JSON.stringify(questionData.options) !== JSON.stringify(prev)
+        ? questionData.options || [""]
+        : prev
+    );
+  }, [questionData]);
 
   const handleQuestionTextChange = (e) => {
-    onChange({ ...questionData, questionText: e.target.value });
+    const updatedQuestionText = e.target.value;
+    setQuestionText(updatedQuestionText);
+    onChange({ type: "checkbox", questionText: updatedQuestionText, options });
   };
 
   const handleOptionChange = (index, value) => {
     const updatedOptions = [...options];
     updatedOptions[index] = value;
-    onChange({ ...questionData, options: updatedOptions });
+    setOptions(updatedOptions);
+    onChange({ type: "checkbox", questionText, options: updatedOptions });
   };
 
   const addOption = () => {
     const updatedOptions = [...options, ""];
-    onChange({ ...questionData, options: updatedOptions });
+    setOptions(updatedOptions);
+    onChange({ type: "checkbox", questionText, options: updatedOptions });
   };
 
   const removeOption = (index) => {
+    if (options.length <= 1) return; // Prevent removing the last option
+  
     const updatedOptions = options.filter((_, i) => i !== index);
-    onChange({ ...questionData, options: updatedOptions });
+    setOptions(updatedOptions);
+    onChange({ type: "checkbox", questionText, options: updatedOptions });
   };
+  
 
   return (
     <div className="border p-4 mb-4">
@@ -37,24 +65,25 @@ export default function CheckboxQuestionBuilder({ onChange, questionData = DEFAU
         onChange={handleQuestionTextChange}
       />
       <label>Options:</label>
-      {options.map((option, index) => (
-        <div key={index} className="flex items-center mb-1">
-          <input
-            type="text"
-            className="w-full border rounded p-2"
-            placeholder={`Option ${index + 1}`}
-            value={option}
-            onChange={(e) => handleOptionChange(index, e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={() => removeOption(index)}
-            className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
-          >
-            Remove
-          </button>
-        </div>
-      ))}
+      {options.length > 0 &&
+        options.map((option, index) => (
+          <div key={index} className="flex items-center mb-1">
+            <input
+              type="text"
+              className="w-full border rounded p-2"
+              placeholder={`Option ${index + 1}`}
+              value={option}
+              onChange={(e) => handleOptionChange(index, e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => removeOption(index)}
+              className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
+            >
+              Remove
+            </button>
+          </div>
+        ))}
       <button
         type="button"
         onClick={addOption}
