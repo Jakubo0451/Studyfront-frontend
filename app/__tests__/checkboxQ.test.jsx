@@ -18,8 +18,13 @@ describe("CheckboxQuestionBuilder", () => {
   });
 
   test("renders input for question and one option (positive)", () => {
-    render(<CheckboxQuestionBuilder onChange={() => {}} />);
-
+    render(
+      <CheckboxQuestionBuilder
+        onChange={() => {}}
+        questionData={{ questionText: "Sample Question", options: ["Option 1"] }}
+      />
+    );
+  
     expect(screen.getByPlaceholderText("Enter your question")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Option 1")).toBeInTheDocument();
   });
@@ -63,7 +68,7 @@ describe("CheckboxQuestionBuilder", () => {
       fireEvent.change(questionInput, { target: { value: "New Question" } });
     });
 
-    expect(fetch).toHaveBeenCalledWith("/api/save-question", {
+    expect(fetch).toHaveBeenCalledWith(`${backendUrl}/api/studies/${editStudyId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
