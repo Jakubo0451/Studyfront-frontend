@@ -42,8 +42,8 @@ describe("CheckboxQuestionBuilder", () => {
     });
   
     const inputs = screen.getAllByPlaceholderText(/Option/i);
-    expect(inputs.length).toBe(2); // Verify that a new option is added
-    expect(inputs[1].value).toBe(""); // Verify that the new option is empty
+    expect(inputs.length).toBe(2);
+    expect(inputs[1].value).toBe("");
   });
 
   test("removes option when 'Remove' is clicked (boundary case)", async () => {
@@ -64,8 +64,8 @@ describe("CheckboxQuestionBuilder", () => {
   
     // Verify that only one option remains
     const inputs = screen.getAllByPlaceholderText(/Option/i);
-    expect(inputs.length).toBe(1); // Only one option should remain
-    expect(screen.queryByPlaceholderText("Option 1")).toBeInTheDocument(); // Remaining option becomes "Option 1"
+    expect(inputs.length).toBe(1);
+    expect(screen.queryByPlaceholderText("Option 1")).toBeInTheDocument();
   });
 
   test("handles edge case of all options removed (edge)", async () => {
@@ -134,7 +134,7 @@ describe("CheckboxQuestionBuilder", () => {
     });
 
     const inputs = screen.getAllByPlaceholderText(/Option/i);
-    expect(inputs.length).toBe(2); // Only one new option should be added
-    expect(inputs[1].value).toBe(""); // The new option should be empty
+    expect(inputs.length).toBe(2);
+    expect(inputs[1].value).toBe("");
   });
 });
