@@ -126,7 +126,7 @@ const SideBar = ({
             {questions && questions.length > 0 ? (
               questions.map((question, index) => (
                 <SortableItem
-                  key={question.id}
+                  key={`${question.id}-${index}`}
                   id={`item-${question.id}`}
                   content={
                     question.type === "text"
