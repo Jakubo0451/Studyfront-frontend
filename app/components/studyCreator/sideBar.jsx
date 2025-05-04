@@ -126,7 +126,7 @@ const SideBar = ({
             {questions && questions.length > 0 ? (
               questions.map((question, index) => (
                 <SortableItem
-                  key={question.id}
+                  key={`${question.id}-${index}`}
                   id={`item-${question.id}`}
                   content={
                     question.type === "text"
@@ -173,6 +173,13 @@ const SideBar = ({
               className="block w-full text-left px-4 py-2 hover:bg-gray-200"
             >
               Multiple Choice
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAddQuestionType("checkbox")}
+              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
+            >
+              Checkbox
             </button>
             <button
               type="button"

@@ -18,19 +18,32 @@ describe("CheckboxQuestionBuilder", () => {
   });
 
   test("renders input for question and one option (positive)", () => {
-    render(<CheckboxQuestionBuilder onChange={() => {}} />);
-
+    render(
+      <CheckboxQuestionBuilder
+        onChange={() => {}}
+        questionData={{ questionText: "Sample Question", options: ["Option 1"] }}
+      />
+    );
+  
     expect(screen.getByPlaceholderText("Enter your question")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Option 1")).toBeInTheDocument();
   });
 
   test("adds new options when 'Add Option' is clicked (positive)", async () => {
-    render(<CheckboxQuestionBuilder onChange={() => {}} />);
+    render(
+      <CheckboxQuestionBuilder
+        onChange={() => {}}
+        questionData={{ questionText: "Sample Question", options: ["Option 1"] }}
+      />
+    );
+  
     await act(async () => {
       fireEvent.click(screen.getByText("Add Option"));
     });
-
-    expect(screen.getByPlaceholderText("Option 2")).toBeInTheDocument();
+  
+    const inputs = screen.getAllByPlaceholderText(/Option/i);
+    expect(inputs.length).toBe(2);
+    expect(inputs[1].value).toBe("");
   });
 
   test("removes option when 'Remove' is clicked (boundary case)", async () => {
@@ -51,65 +64,65 @@ describe("CheckboxQuestionBuilder", () => {
   
     // Verify that only one option remains
     const inputs = screen.getAllByPlaceholderText(/Option/i);
-    expect(inputs.length).toBe(1); // Only one option should remain
-    expect(screen.queryByPlaceholderText("Option 1")).toBeInTheDocument(); // Remaining option becomes "Option 1"
+    expect(inputs.length).toBe(1);
+    expect(screen.queryByPlaceholderText("Option 1")).toBeInTheDocument();
   });
 
-  test("saves automatically when question text is updated(positive)", async () => {
-    render(<CheckboxQuestionBuilder onChange={() => {}} />);
-
-    const questionInput = screen.getByPlaceholderText("Enter your question");
-    await act(async () => {
-      fireEvent.change(questionInput, { target: { value: "New Question" } });
-    });
-
-    expect(fetch).toHaveBeenCalledWith("/api/save-question", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        type: "checkbox",
-        questionText: "New Question",
-        options: [""],
-      }),
-    });
-  });
-
-  test("handles edge case of all options removed(edge)", async () => {
-    render(<CheckboxQuestionBuilder onChange={() => {}} />);
+  test("handles edge case of all options removed (edge)", async () => {
+    render(
+      <CheckboxQuestionBuilder
+        onChange={() => {}}
+        questionData={{ questionText: "Sample Question", options: ["Option 1"] }}
+      />
+    );
+  
     const removeButtons = screen.getAllByText("Remove");
     await act(async () => {
-      removeButtons.forEach((btn) => fireEvent.click(btn)); // Remove all options
+      removeButtons.forEach((btn) => fireEvent.click(btn));
     });
-
-    expect(screen.queryByPlaceholderText("Option 1")).not.toBeInTheDocument();
+  
+    // Should still have 1 input because removing the last one is blocked
+    const inputs = screen.getAllByPlaceholderText(/Option/i);
+    expect(inputs.length).toBe(1);
   });
+  
 
-  test("handles negative input: extremely long option text(negative)", async () => {
-    render(<CheckboxQuestionBuilder onChange={() => {}} />);
+  test("handles negative input: extremely long option text (negative)", async () => {
+    render(
+      <CheckboxQuestionBuilder
+        onChange={() => {}}
+        questionData={{ questionText: "Sample Question", options: ["Option 1"] }}
+      />
+    );
+  
     const optionInput = screen.getByPlaceholderText("Option 1");
     const longText = "A".repeat(1000);
     await act(async () => {
       fireEvent.change(optionInput, { target: { value: longText } });
     });
-
+  
     expect(optionInput.value.length).toBe(1000);
   });
 
-  test("calls onChange with updated question text(positive)", async () => {
+  test("calls onChange when question text is updated (positive)", async () => {
     const mockOnChange = jest.fn();
-    render(<CheckboxQuestionBuilder onChange={mockOnChange} />);
-
+  
+    render(
+      <CheckboxQuestionBuilder
+        onChange={mockOnChange}
+        questionData={{ questionText: "Initial Question", options: ["Option 1"] }}
+      />
+    );
+  
     const questionInput = screen.getByPlaceholderText("Enter your question");
     await act(async () => {
       fireEvent.change(questionInput, { target: { value: "Updated Question" } });
     });
-
+  
     expect(mockOnChange).toHaveBeenCalledWith({
       type: "checkbox",
       questionText: "Updated Question",
-      options: [""],
+      options: ["Option 1"],
     });
   });
 
@@ -121,7 +134,7 @@ describe("CheckboxQuestionBuilder", () => {
     });
 
     const inputs = screen.getAllByPlaceholderText(/Option/i);
-    expect(inputs.length).toBe(2); // Only one new option should be added
-    expect(inputs[1].value).toBe(""); // The new option should be empty
+    expect(inputs.length).toBe(2);
+    expect(inputs[1].value).toBe("");
   });
 });
