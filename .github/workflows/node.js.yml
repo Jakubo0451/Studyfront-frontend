@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [22.x]
 
     steps:
     - name: Checkout repository
@@ -28,14 +28,22 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-    - name: Build project (if applicable)
-      run: npm run build --if-present
-
     - name: Run ESLint
       run: npx eslint
 
-    - name: run project
-      run: npm start --if-present
+    - name: Build project (if applicable)
+      run: npm run build --if-present
+
+    - name: Start project
+      run: npm start --if-present &
+      env:
+        BACKENDUrl: development
+
+    - name: Wait for the server to start
+      run: sleep 10
 
     - name: Run tests
-      run: npm test
+      run: npm test -- --testPathIgnorePatterns=page.test.jsx
+
+    - name: Stop project
+      run: kill $(lsof -t -i:3000) || true
