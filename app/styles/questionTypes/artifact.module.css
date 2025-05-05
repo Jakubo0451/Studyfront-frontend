@@ -1,0 +1,136 @@
+.imageContainer {
+    background-color: var(--color-sky-blue);
+    padding: .5rem;
+    border-radius: .25rem;
+}
+
+.fileUpload::file-selector-button {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    font-family: var(--font-readex);
+}
+
+.fileUpload::file-selector-button:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.fileUpload {
+    background-color: var(--color-ice-blue);
+    border-radius: .25rem;
+}
+
+.uploadArtifact label {
+    display: block;
+    text-align: left;
+    margin-bottom: .25rem;
+}
+
+.selectArtifact>div {
+    display: flex;
+}
+
+.selectArtifact button {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    font-family: var(--font-readex);
+}
+
+.selectArtifact button:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.selectArtifact p {
+    background-color: var(--color-sky-blue);
+    color: black;
+    padding: .5rem 1rem;
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+    font-family: var(--font-frank);
+    display: inline-block;
+    flex: 1;
+}
+
+.selectArtifact input {
+    background-color: #ffffff;
+    padding: .5rem;
+    border-radius: .25rem;
+    width: 100%;
+    margin-top: .25rem;
+}
+
+.selectArtifactPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    backdrop-filter: brightness(0.5);
+    width: 100%;
+    height: 100vh;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.selectArtifactMenu {
+    background-color: var(--color-sky-blue);
+  padding: 1.5rem;
+  border-radius:.25rem;
+  border-top-right-radius: 0;
+}
+
+.selectArtifactPopup>div {
+    display: flex;
+  }
+
+.fileList{
+    margin-top: .25rem;
+}
+
+.fileItem input {
+    background-color: white;
+    padding: .5rem;
+    border-radius: .25rem;
+    text-align: left;
+    width: 100%;
+    margin: .25rem 0;
+}
+
+.fileItem input:focus {
+    outline: solid 3px var(--color-petrol-blue);
+}
+
+.uploadArtifact h3 {
+    display: block;
+    font-size: 1rem;
+    padding: .5rem 0 0 0;
+}
+
+.uploadArtifact button {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    font-family: var(--font-readex);
+    display: flex;
+    margin: .5rem auto;
+}
+
+.uploadArtifact button>svg {
+    margin-right: .25rem;
+    height: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.uploadArtifact button:hover {
+    background-color: var(--color-oxford-blue);
+}
