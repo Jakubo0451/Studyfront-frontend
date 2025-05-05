@@ -39,44 +39,58 @@ export const downloadAsJSON = async (studyId, fileName = "study.json") => {
 // Convert JSON to CSV
 export const downloadAsCSV = async (studyId, fileName = "study.csv") => {
     try {
-        const jsonObject = await fetchStudyResults(studyId);
-        const keys = Object.keys(jsonObject);
+        const jsonArray = await fetchStudyResults(studyId);
+
+        // Extract all unique question IDs from the answers
+        const questionIds = new Set();
+        jsonArray.forEach((entry) => {
+            entry.answers.forEach((answer) => {
+                questionIds.add(answer.questionId);
+            });
+        });
+
+        // Convert the Set to an array for consistent ordering
+        const questionIdArray = Array.from(questionIds);
+
+        // Build the CSV header
+        const headers = [
+            "_id",
+            "studyId",
+            ...questionIdArray.map((id) => `question_${id}`), // Add columns for each question
+            "submittedAt",
+            "createdAt",
+            "updatedAt",
+        ];
+
+        // Build the CSV rows
+        const rows = jsonArray.map((entry) => {
+            // Flatten the answers into a single row
+            const answersMap = {};
+            entry.answers.forEach((answer) => {
+                answersMap[`question_${answer.questionId}`] = answer.answer;
+            });
+
+            // Return a row with all fields
+            return [
+                entry._id,
+                entry.studyId,
+                ...questionIdArray.map((id) => answersMap[`question_${id}`] || ""), // Fill in answers or leave blank
+                entry.submittedAt,
+                entry.createdAt,
+                entry.updatedAt,
+            ];
+        });
+
+        // Combine the header and rows into CSV content
         const csvContent = [
-            keys.join(","),
-            keys.map((key) => `"${jsonObject[key] || ""}"`).join(",")
+            headers.join(","), // Header row
+            ...rows.map((row) => row.map((value) => `"${value}"`).join(",")), // Data rows
         ].join("\n");
 
+        // Trigger the file download
         downloadFile(csvContent, fileName, "text/csv");
     } catch (error) {
         console.error("Error downloading CSV:", error);
-    }
-};
-
-// Convert JSON to XML
-export const downloadAsXML = async (studyId, fileName = "study.xml") => {
-    try {
-        const jsonObject = await fetchStudyResults(studyId);
-        const convertToXML = (obj, rootName = "root") => {
-            let xml = `<${rootName}>`;
-            for (const key in obj) {
-                if (Array.isArray(obj[key])) {
-                    xml += obj[key]
-                        .map((item) => convertToXML(item, key))
-                        .join("");
-                } else if (typeof obj[key] === "object" && obj[key] !== null) {
-                    xml += convertToXML(obj[key], key);
-                } else {
-                    xml += `<${key}>${obj[key] || ""}</${key}>`;
-                }
-            }
-            xml += `</${rootName}>`;
-            return xml;
-        };
-
-        const xmlContent = convertToXML(jsonObject, "study");
-        downloadFile(xmlContent, fileName, "application/xml");
-    } catch (error) {
-        console.error("Error downloading XML:", error);
     }
 };
 

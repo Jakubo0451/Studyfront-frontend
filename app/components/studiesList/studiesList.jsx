@@ -141,12 +141,6 @@ const StudiesList = () => {
                                                     .csv
                                                 </button>
                                                 <button
-                                                    onClick={() => downloadAsXML(item._id)}
-                                                    className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
-                                                >
-                                                    .xml
-                                                </button>
-                                                <button
                                                     onClick={() => downloadAsJSON(item._id)}
                                                     className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
                                                 >
@@ -207,22 +201,10 @@ const StudiesList = () => {
                                                         .csv
                                                     </button>
                                                     <button
-                                                        onClick={() => downloadAsXML(item._id, `${item.title || "study"}.xml`)}
-                                                        className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
-                                                    >
-                                                        .xml
-                                                    </button>
-                                                    <button
                                                         onClick={() => downloadAsJSON(item._id, `${item.title || "study"}.json`)}
                                                         className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
                                                     >
                                                         .json
-                                                    </button>
-                                                    <button
-                                                        onClick={() => downloadAsPlainText(item._id, `${item.title || "study"}.txt`)}
-                                                        className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
-                                                    >
-                                                        .txt
                                                     </button>
                                                 </div>
                                             </div>
