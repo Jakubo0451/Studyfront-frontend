@@ -112,27 +112,46 @@ export default function CreateStudyPage() {
     const fetchStudyDetails = async () => {
       if (editStudyId) {
         try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            router.push('/login');
+            return;
+          }
+
           const response = await fetch(
-            `${backendUrl}/api/studies/${editStudyId}`
-          );
-          if (response.ok) {
-            const data = await response.json();
-            setStudy(data);
-            setQuestions(data.questions || []);
-            if (data.questions && data.questions.length > 0) {
-              setSelectedQuestionIndex(0);
+            `${backendUrl}/api/studies/${editStudyId}`,
+            {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
             }
-          } else {
-            console.error("Failed to fetch study details for editing");
+          );
+
+          if (!response.ok) {
+            if (response.status === 401) {
+              localStorage.clear();
+              router.push('/login');
+              return;
+            }
+            throw new Error('Failed to fetch study details for editing');
+          }
+
+          const data = await response.json();
+          setStudy(data);
+          setQuestions(data.questions || []);
+          if (data.questions && data.questions.length > 0) {
+            setSelectedQuestionIndex(0);
           }
         } catch (error) {
           console.error("Error fetching study details:", error);
+          alert("Failed to fetch study details. Please try again.");
         }
       }
     };
 
     fetchStudyDetails();
-  }, [editStudyId]);
+  }, [editStudyId, router]);
 
   const handleAddQuestion = (type) => {
     const newQuestion = { 
@@ -170,10 +189,17 @@ export default function CreateStudyPage() {
     }
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
+
       const response = await fetch(`${backendUrl}/api/studies/${editStudyId}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           questions: questions.map((q) => ({
@@ -187,6 +213,11 @@ export default function CreateStudyPage() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.clear();
+          router.push('/login');
+          return;
+        }
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to save questions");
       }

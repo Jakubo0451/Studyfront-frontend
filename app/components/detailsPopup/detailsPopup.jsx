@@ -21,8 +21,18 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
 
     if (window.confirm(`Are you sure you want to delete the study "${study.title}"? This action cannot be undone.`)) {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          router.push('/login');
+          return;
+        }
+
         const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         });
 
         if (response.ok) {
@@ -33,10 +43,11 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
           }
         } else {
           const errorData = await response.json();
-          console.error('Error deleting study:', errorData.error || 'Failed to delete study.');
+          throw new Error(errorData.error || 'Failed to delete study');
         }
       } catch (error) {
-        console.error('Error deleting study:', error);
+        console.error('Error deleting study:', error.message);
+        alert('Failed to delete study. Please try again.');
       }
     }
   };
