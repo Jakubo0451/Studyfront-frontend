@@ -10,7 +10,7 @@ import { BsPeople } from "react-icons/bs";
 import { useRouter } from 'next/navigation';
 import backendUrl from 'environment';
 
-export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
+export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyUpdated }) {
   const router = useRouter();
 
   const handleDeleteStudy = async () => {
@@ -38,6 +38,68 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
       } catch (error) {
         console.error('Error deleting study:', error);
       }
+    }
+  };
+
+  const handleStartStudy = async () => {
+    if (!study?._id) {
+      console.error("Study ID is missing for starting the study.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ active: true }), 
+      });
+
+      if (response.ok) {
+        const updatedStudy = await response.json();
+        console.log(`Study "${updatedStudy.title}" started successfully.`);
+        if (onStudyUpdated) {
+          onStudyUpdated(updatedStudy);
+        }
+        onClose();
+      } else {
+        const errorData = await response.json();
+        console.error("Error starting study:", errorData.error || "Failed to start study.");
+      }
+    } catch (error) {
+      console.error("Error starting study:", error);
+    }
+  };
+
+  const handleEndStudy = async () => {
+    if (!study?._id) {
+      console.error("Study ID is missing for ending the study.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ active: false }),
+      });
+
+      if (response.ok) {
+        const updatedStudy = await response.json();
+        console.log(`Study "${updatedStudy.title}" ended successfully.`);
+        if (onStudyUpdated) {
+          onStudyUpdated(updatedStudy);
+        }
+        onClose();
+      } else {
+        const errorData = await response.json();
+        console.error("Error ending study:", errorData.error || "Failed to end study.");
+      }
+    } catch (error) {
+      console.error("Error ending study:", error);
     }
   };
 
@@ -102,7 +164,26 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
             >
               Edit Study
             </button>
-            <button type="button" className="yellowBtn"><FaPowerOff />End study</button>
+
+            {study.active ? (  
+              <button 
+                type="button" 
+                className="yellowBtn"
+                onClick={handleEndStudy}
+              >
+                <FaPowerOff />End study
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                className="greenBtn"
+                onClick={handleStartStudy}
+              >
+                <FaPowerOff />Start study
+              </button>
+
+            )}
+            
             <button type="button" onClick={handleDeleteStudy} className="redBtn"><FaRegTrashAlt />Delete study</button>
           </div>
         </div>
