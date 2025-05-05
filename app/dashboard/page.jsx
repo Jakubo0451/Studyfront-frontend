@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 export default function Dashboard() {
     const router = useRouter();
-    const [shouldRefresh, setShouldRefresh] = useState(false);
+    const [shouldRefresh] = useState(false);
 
     const handleCreateStudy = async () => {
         try {
@@ -35,7 +35,9 @@ export default function Dashboard() {
                 throw new Error('Failed to create study');
             }
 
-            setShouldRefresh(prev => !prev);
+            const newStudy = await response.json();
+            // Redirect to the edit page with the new study ID
+            router.push(`/create?studyId=${newStudy._id}`);
         } catch (error) {
             console.error('Error creating study:', error);
             alert(error.message);
