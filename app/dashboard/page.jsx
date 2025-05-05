@@ -5,9 +5,12 @@ import { FaPlus } from "react-icons/fa";
 import SharePopup from 'app/components/sharePopup/sharePopup.jsx';
 import backendUrl from 'environment';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function Dashboard() {
     const router = useRouter();
+    const [shouldRefresh, setShouldRefresh] = useState(false);
+
     const handleCreateStudy = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -24,21 +27,15 @@ export default function Dashboard() {
                 },
                 body: JSON.stringify({
                     title: 'Untitled Study',
-                    description: 'No description',
-                    userId: localStorage.getItem('userId')
+                    description: 'No description'
                 })
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to create study');
+                throw new Error('Failed to create study');
             }
 
-            const data = await response.json();
-            if (data) {
-                router.refresh();
-            }
-
+            setShouldRefresh(prev => !prev);
         } catch (error) {
             console.error('Error creating study:', error);
             alert(error.message);
@@ -61,7 +58,7 @@ export default function Dashboard() {
                         Create new study
                     </button>
                 </div>
-                <StudiesList/>
+                <StudiesList refreshTrigger={shouldRefresh} />
             </div>
         </div>
     )

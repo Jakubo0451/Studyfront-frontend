@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import backendUrl from 'environment';
 
-export default function StudyCreationForm({ onStudyCreated }) {
+export default function StudyCreationForm({ onStudyCreated, onSuccess }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState(null);
@@ -40,7 +40,10 @@ export default function StudyCreationForm({ onStudyCreated }) {
       const studyData = await createStudy({ title, description });
       setLoading(false);
       if (onStudyCreated) {
-        onStudyCreated(studyData.id);
+        onStudyCreated(studyData._id);
+      }
+      if (onSuccess) {
+        onSuccess();
       }
     } catch (err) {
       setError(err.message || 'An unexpected error occurred.');

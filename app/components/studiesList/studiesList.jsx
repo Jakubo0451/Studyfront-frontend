@@ -8,7 +8,7 @@ import DetailsPopup from '../detailsPopup/detailsPopup.jsx';
 import backendUrl from 'environment';
 import { useRouter } from 'next/navigation';
 
-const StudiesList = () => {
+const StudiesList = ({ refreshTrigger }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -55,7 +55,7 @@ const StudiesList = () => {
 
     useEffect(() => {
         fetchStudies();
-    }, [fetchStudies]);
+    }, [fetchStudies, refreshTrigger]);
 
     const openShare = () => {
         document.querySelector('.sharePopup').style.display = 'flex';
