@@ -84,7 +84,7 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyUp
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ active: false }),
+        body: JSON.stringify({ active: false, completed: true }),
       });
 
       if (response.ok) {
