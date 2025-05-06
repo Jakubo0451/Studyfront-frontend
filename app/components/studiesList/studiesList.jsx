@@ -3,10 +3,12 @@ import { useState, useEffect, useCallback } from "react";
 import { CiCalendar } from "react-icons/ci";
 import { IoPersonOutline } from "react-icons/io5";
 import { PiDownloadSimpleFill } from "react-icons/pi";
-import Link from "next/link";
 import DetailsPopup from '../detailsPopup/detailsPopup.jsx';
 import backendUrl from 'environment';
+import Loading from "@/loading.js";
 import { useRouter } from 'next/navigation';
+import { downloadAsCSV, downloadAsJSON } from "@/utils/download.js";
+import { startStudy, editStudy } from "@/utils/studyActions.js";
 
 const StudiesList = ({ refreshTrigger }) => {
     const [data, setData] = useState([]);
@@ -19,7 +21,7 @@ const StudiesList = ({ refreshTrigger }) => {
     const fetchStudies = useCallback(async () => {
         setLoading(true);
         setError(null);
-        
+
         const token = localStorage.getItem('token');
         if (!token) {
             router.push('/login');
@@ -87,7 +89,7 @@ const StudiesList = ({ refreshTrigger }) => {
                 }
                 throw new Error(`Failed to fetch study details for ID: ${studyId}`);
             }
-            
+
             const details = await response.json();
             setSelectedStudyDetails(details);
         } catch (err) {
@@ -97,59 +99,205 @@ const StudiesList = ({ refreshTrigger }) => {
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const closeDetailsPopup = () => {
         setShowDetailsPopup(false);
         setSelectedStudyDetails(null);
         setError(null);
-    }
+    };
 
     const handleStudyDeleted = useCallback(() => {
         fetchStudies();
     }, [fetchStudies]);
 
+    const handleStudyUpdated = (updatedStudy) => {
+        setData((prevData) =>
+            prevData.map((study) =>
+                study._id === updatedStudy._id ? updatedStudy : study
+            )
+        );
+    };
+
     return (
         <div className="w-1/2 p-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {data.map((item, index) => (
-                    <div key={index} className="bg-sky-blue p-4 rounded shadow">
-                        <h2 className="text-2xl mb-2 text-center">{item.title}</h2>
-                        <div className="flex justify-between text-lg mb-4">
-                            <div className="flex items-center">
-                                <CiCalendar className="mr-1" />
-                                <p>{new Date(item.createdAt).toLocaleDateString()}</p>
-                            </div>
-                            <div className="flex items-center">
-                                <IoPersonOutline className="mr-1" />
-                                <p>{item.questions ? item.questions.length : 0}</p>
+            {loading ? (
+                <Loading />
+            ) : error ? (
+                <div className="text-center text-red-500">
+                    <p>{error}</p>
+                </div>
+            ) : (
+                <>
+                    {/* Active Studies Section */}
+                    {data.some((item) => item.active) && (
+                        <div className="mb-8">
+                            <h2 className="text-xl font-semibold mb-4">Active Studies</h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 border-2 border-petrol-blue rounded p-4">
+                                {data
+                                    .filter((item) => item.active)
+                                    .map((item, index) => (
+                                        <div key={index} className="bg-sky-blue p-4 rounded shadow">
+                                            <h2 className="text-2xl mb-2 text-center">{item.title}</h2>
+                                            <div className="flex justify-between text-lg mb-4">
+                                                <div className="flex items-center">
+                                                    <CiCalendar className="mr-1" />
+                                                    <p>{new Date(item.createdAt).toLocaleDateString()}</p>
+                                                </div>
+                                                <div className="flex items-center">
+                                                    <IoPersonOutline className="mr-1" />
+                                                    <p>{item.questions ? item.questions.length : 0}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex space-x-2 mb-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openShare(item._id)}
+                                                    className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
+                                                >
+                                                    Share
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openDetails(item._id)}
+                                                    className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
+                                                >
+                                                    Details
+                                                </button>
+                                            </div>
+                                            <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
+                                                <div className="flex text-petrol-blue grow items-center justify-center">
+                                                    <PiDownloadSimpleFill className="!w-full !h-full" />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => downloadAsCSV(item._id)}
+                                                    className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
+                                                >
+                                                    .csv
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => downloadAsJSON(item._id)}
+                                                    className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
+                                                >
+                                                    .json
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                             </div>
                         </div>
-                        <div className="flex space-x-2 mb-2">
-                            <button type="button" onClick={() => openShare(item._id)} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Share</button>
-                            <button type="button" onClick={() => openDetails(item._id)} className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300">Details</button>
-                        </div>
-                        <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
-                            <div className="flex text-petrol-blue grow items-center justify-center">
-                                <PiDownloadSimpleFill className="!w-full !h-full"/>
+                    )}
+
+                    {/* Inactive Studies Section */}
+                    {data.some((item) => !item.active) && (
+                        <div>
+                            <h2 className="text-xl font-semibold mb-4">Inactive Studies</h2>
+                            <div className="border-2 border-petrol-blue rounded p-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {data
+                                        .filter((item) => !item.active)
+                                        .map((item, index) => (
+                                            <div key={index} className="bg-sky-blue p-4 rounded shadow">
+                                                <h2 className="text-2xl mb-2 text-center">{item.title}</h2>
+
+                                                {item.completed ? (
+                                                    <div className="flex items-center justify-center bg-green-500 rounded-sm mb-2">
+                                                        <p className="text-white">Compleated</p>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                    </div>
+                                                )}
+
+                                                <div className="flex justify-between text-lg mb-4">
+                                                    <div className="flex items-center">
+                                                        <CiCalendar className="mr-1" />
+                                                        <p>{new Date(item.createdAt).toLocaleDateString()}</p>
+                                                    </div>
+                                                    <div className="flex items-center">
+                                                        <IoPersonOutline className="mr-1" />
+                                                        <p>{item.questions ? item.questions.length : 0}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex space-x-2 mb-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => editStudy(item, router)}
+                                                        className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openDetails(item._id)}
+                                                        className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
+                                                    >
+                                                        Details
+                                                    </button>
+                                                </div>
+                                                {item.completed ? (
+                                                    <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
+                                                    <div className="flex text-gray-500 grow items-center justify-center">
+                                                        <PiDownloadSimpleFill className="!w-full !h-full" />
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => downloadAsCSV(item._id, `${item.title || "study"}.csv`)}
+                                                        className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
+                                                    >
+                                                        .csv
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => downloadAsJSON(item._id, `${item.title || "study"}.json`)}
+                                                        className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
+                                                    >
+                                                        .json
+                                                    </button>
+                                                    </div>
+                                                ):(
+                                                    <div className="flex w-full">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                startStudy(item, (updatedStudy) => {
+                                                                    setData((prevData) =>
+                                                                        prevData.map((study) =>
+                                                                            study._id === updatedStudy._id ? updatedStudy : study
+                                                                        )
+                                                                    );
+                                                                }, (error) => {
+                                                                    console.error("Failed to start study:", error);
+                                                                });
+                                                            }}
+                                                            className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
+                                                        >
+                                                            Publish Study
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                
+                                            </div>
+                                        ))}
+                                </div>
                             </div>
-                            <Link href={`/csvDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300">.csv</Link>
-                            <Link href={`/xmlDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300">.xml</Link>
-                            <Link href={`/jsonDownloadLink/`} className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300">.json</Link>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    )}
+                </>
+            )}
 
             {showDetailsPopup && selectedStudyDetails && (
                 <DetailsPopup
-                    study={selectedStudyDetails}
-                    onClose={closeDetailsPopup}
-                    onStudyDeleted={handleStudyDeleted}
-                    onStudyChange={newStudy => setSelectedStudyDetails(newStudy)}
-                    loading={loading}
-                    error={error}
-                />
+                study={selectedStudyDetails}
+                onClose={closeDetailsPopup}
+                onStudyDeleted={handleStudyDeleted}
+                onStudyChange={(updatedStudy) => {
+                    handleStudyUpdated(updatedStudy);
+                    setSelectedStudyDetails(updatedStudy);
+                }}
+            />
             )}
         </div>
     );
