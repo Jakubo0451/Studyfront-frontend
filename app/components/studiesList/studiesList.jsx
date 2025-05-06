@@ -8,6 +8,7 @@ import backendUrl from 'environment';
 import Loading from "@/loading.js";
 import { useRouter } from 'next/navigation';
 import { downloadAsCSV, downloadAsJSON } from "@/utils/download.js";
+import { startStudy, editStudy } from "@/utils/studyActions.js";
 
 
 const StudiesList = () => {
@@ -86,10 +87,6 @@ const StudiesList = () => {
             )
         );
     };
-
-    const handleEdit = (study) => {
-        router.push(`/create?studyId=${study._id}`);
-      };
 
     return (
         <div className="w-1/2 p-4">
@@ -196,7 +193,7 @@ const StudiesList = () => {
                                                 <div className="flex space-x-2 mb-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleEdit(item)}
+                                                        onClick={() => editStudy(item, router)}
                                                         className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
                                                     >
                                                         Edit
@@ -209,7 +206,8 @@ const StudiesList = () => {
                                                         Details
                                                     </button>
                                                 </div>
-                                                <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
+                                                {item.completed ? (
+                                                    <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
                                                     <div className="flex text-gray-500 grow items-center justify-center">
                                                         <PiDownloadSimpleFill className="!w-full !h-full" />
                                                     </div>
@@ -227,7 +225,29 @@ const StudiesList = () => {
                                                     >
                                                         .json
                                                     </button>
-                                                </div>
+                                                    </div>
+                                                ):(
+                                                    <div className="flex w-full">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                startStudy(item, (updatedStudy) => {
+                                                                    setData((prevData) =>
+                                                                        prevData.map((study) =>
+                                                                            study._id === updatedStudy._id ? updatedStudy : study
+                                                                        )
+                                                                    );
+                                                                }, (error) => {
+                                                                    console.error("Failed to start study:", error);
+                                                                });
+                                                            }}
+                                                            className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
+                                                        >
+                                                            Publish Study
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                
                                             </div>
                                         ))}
                                 </div>
