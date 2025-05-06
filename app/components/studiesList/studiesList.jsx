@@ -6,22 +6,43 @@ import { PiDownloadSimpleFill } from "react-icons/pi";
 import Link from "next/link";
 import DetailsPopup from '../detailsPopup/detailsPopup.jsx';
 import backendUrl from 'environment';
+import { useRouter } from 'next/navigation';
 
-const StudiesList = () => {
+const StudiesList = ({ refreshTrigger }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [showDetailsPopup, setShowDetailsPopup] = useState(false);
     const [selectedStudyDetails, setSelectedStudyDetails] = useState(null);
+    const router = useRouter();
 
     const fetchStudies = useCallback(async () => {
         setLoading(true);
         setError(null);
+        
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/login');
+            return;
+        }
+
         try {
-            const response = await fetch(`${backendUrl}/api/studies`);
+            const response = await fetch(`${backendUrl}/api/studies`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
             if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.clear();
+                    router.push('/login');
+                    return;
+                }
                 throw new Error('Failed to fetch studies');
             }
+
             const studies = await response.json();
             setData(studies);
         } catch (err) {
@@ -30,15 +51,11 @@ const StudiesList = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [router]);
 
     useEffect(() => {
         fetchStudies();
-    }, [fetchStudies]);
-
-    useEffect(() => {
-        fetchStudies();
-    }, [fetchStudies]);
+    }, [fetchStudies, refreshTrigger]);
 
     const openShare = () => {
         document.querySelector('.sharePopup').style.display = 'flex';
@@ -49,10 +66,28 @@ const StudiesList = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${backendUrl}/api/studies/${studyId}`);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                router.push('/login');
+                return;
+            }
+
+            const response = await fetch(`${backendUrl}/api/studies/${studyId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
             if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.clear();
+                    router.push('/login');
+                    return;
+                }
                 throw new Error(`Failed to fetch study details for ID: ${studyId}`);
             }
+            
             const details = await response.json();
             setSelectedStudyDetails(details);
         } catch (err) {
@@ -111,6 +146,7 @@ const StudiesList = () => {
                     study={selectedStudyDetails}
                     onClose={closeDetailsPopup}
                     onStudyDeleted={handleStudyDeleted}
+                    onStudyChange={newStudy => setSelectedStudyDetails(newStudy)}
                     loading={loading}
                     error={error}
                 />
