@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react';
 import { IoIosClose } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
 import { BsCalendar4 } from "react-icons/bs";
@@ -10,8 +11,79 @@ import { BsPeople } from "react-icons/bs";
 import { useRouter } from 'next/navigation';
 import backendUrl from 'environment';
 
-export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
+export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyChange }) {
   const router = useRouter();
+  const [studies, setStudies] = useState([]);
+
+  // Fetch all studies for the dropdown
+  useEffect(() => {
+    const fetchStudies = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          router.push('/login');
+          return;
+        }
+
+        const response = await fetch(`${backendUrl}/api/studies`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch studies');
+        }
+
+        const data = await response.json();
+        setStudies(data);
+      } catch (error) {
+        console.error('Error fetching studies:', error);
+      }
+    };
+
+    fetchStudies();
+  }, [router]);
+
+  // Handle study selection change
+  const handleStudyChange = (e) => {
+    const selectedStudyId = e.target.value;
+    const selectedStudy = studies.find(s => s._id === selectedStudyId);
+    if (selectedStudy) {
+      // Fetch the selected study's details
+      const fetchStudyDetails = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            router.push('/login');
+            return;
+          }
+
+          const response = await fetch(`${backendUrl}/api/studies/${selectedStudyId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch study details');
+          }
+
+          const studyDetails = await response.json();
+          // Update the study prop through a callback
+          if (onStudyChange) {
+            onStudyChange(studyDetails);
+          }
+        } catch (error) {
+          console.error('Error fetching study details:', error);
+        }
+      };
+
+      fetchStudyDetails();
+    }
+  };
 
   const handleDeleteStudy = async () => {
     if (!study?._id) {
@@ -64,14 +136,24 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted }) {
         <div className="studyDetails">
           <h1>Study details</h1>
           <div htmlFor="study-select" className="dropDownIcon"><FaAngleDown /></div>
-          <select name="study" id="study-select">
-            <option value="study1">{study.title}</option>
-            <option value="study2">Study 2</option>
-            <option value="study3">Study 3</option>
+          <select 
+            name="study" 
+            id="study-select"
+            value={study._id}
+            onChange={handleStudyChange}
+          >
+            {studies.map((s) => (
+              <option key={s._id} value={s._id}>
+                {s.title}
+              </option>
+            ))}
           </select>
           <h2>Information</h2>
           <div className="study-info">
-            <p><BsCalendar4 />Study created: 04.03.2025</p>
+            <p>
+              <BsCalendar4 />
+              Study created: {new Date(study.createdAt).toLocaleDateString()}
+            </p>
             <table>
               <tbody>
                 <tr>

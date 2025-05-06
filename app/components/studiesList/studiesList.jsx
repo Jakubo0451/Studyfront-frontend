@@ -146,6 +146,7 @@ const StudiesList = ({ refreshTrigger }) => {
                     study={selectedStudyDetails}
                     onClose={closeDetailsPopup}
                     onStudyDeleted={handleStudyDeleted}
+                    onStudyChange={newStudy => setSelectedStudyDetails(newStudy)}
                     loading={loading}
                     error={error}
                 />
