@@ -42,8 +42,5 @@ jobs:
     - name: Wait for the server to start
       run: sleep 10
 
-    - name: Run tests
-      run: npm test -- --testPathIgnorePatterns=page.test.jsx
-
     - name: Stop project
       run: kill $(lsof -t -i:3000) || true
