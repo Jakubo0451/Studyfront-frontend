@@ -6,7 +6,8 @@ import { PiDownloadSimpleFill } from "react-icons/pi";
 import DetailsPopup from '../detailsPopup/detailsPopup.jsx';
 import backendUrl from 'environment';
 import Loading from "@/loading.js";
-import { downloadAsCSV, downloadAsXML, downloadAsPlainText, downloadAsJSON } from "@/utils/download.js";
+import { useRouter } from 'next/navigation';
+import { downloadAsCSV, downloadAsJSON } from "@/utils/download.js";
 
 
 const StudiesList = () => {
@@ -15,8 +16,10 @@ const StudiesList = () => {
     const [error, setError] = useState(null);
     const [showDetailsPopup, setShowDetailsPopup] = useState(false);
     const [selectedStudyDetails, setSelectedStudyDetails] = useState(null);
+    const router = useRouter();
 
     const fetchStudies = useCallback(async () => {
+        
         setLoading(true);
         setError(null);
         try {
@@ -83,6 +86,11 @@ const StudiesList = () => {
             )
         );
     };
+
+    const handleEdit = () => {
+        router.push(`/create?studyId=${study._id}`);
+        onClose();
+      };
 
     return (
         <div className="w-1/2 p-4">
@@ -177,10 +185,10 @@ const StudiesList = () => {
                                                 <div className="flex space-x-2 mb-2">
                                                     <button
                                                         type="button"
-                                                        onClick={() => openShare(item._id)}
+                                                        onClick={handleEdit}
                                                         className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
                                                     >
-                                                        Share
+                                                        Edit
                                                     </button>
                                                     <button
                                                         type="button"
