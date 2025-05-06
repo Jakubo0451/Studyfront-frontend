@@ -58,16 +58,22 @@ export default function SharePopup({ study, onStudyChange }) {
   }
 
   function copyLink() {
-    // selects the input field with the sharable link and copies it
-    const link = document.getElementById('share-link');
-    link.select();
-    link.setSelectionRange(0, 99999);
-    document.execCommand('copy');
-    // show Copied! message after copying
-    document.querySelector('.copyBtn').classList.add('copiedLink');
-    setTimeout(() => {
-      document.querySelector('.copyBtn').classList.remove('copiedLink');
-    }, 3000);
+    // Ensure this code runs only on the client side
+    if (typeof window !== "undefined") {
+        const link = document.getElementById("share-link");
+        link.select();
+        link.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+
+        // Show "Copied!" message after copying
+        const copyButton = document.querySelector(".copyBtn");
+        if (copyButton) {
+            copyButton.classList.add("copiedLink");
+            setTimeout(() => {
+                copyButton.classList.remove("copiedLink");
+            }, 3000);
+        }
+    }
   }
 
   function sendEmails() {
@@ -102,7 +108,11 @@ export default function SharePopup({ study, onStudyChange }) {
             <input 
               type="text" 
               id="share-link" 
-              value={`${window.location.origin}/study/${currentStudy?._id}`} 
+              value={
+                typeof window !== "undefined"
+                  ? `${window.location.origin}/study/${currentStudy?._id}`
+                  : ""
+              } 
               readOnly 
             />
             <button type="button" className="copyBtn" title="Copy link" onClick={copyLink}>
