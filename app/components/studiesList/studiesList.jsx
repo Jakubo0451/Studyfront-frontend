@@ -87,9 +87,8 @@ const StudiesList = () => {
         );
     };
 
-    const handleEdit = () => {
+    const handleEdit = (study) => {
         router.push(`/create?studyId=${study._id}`);
-        onClose();
       };
 
     return (
@@ -185,7 +184,7 @@ const StudiesList = () => {
                                                 <div className="flex space-x-2 mb-2">
                                                     <button
                                                         type="button"
-                                                        onClick={handleEdit}
+                                                        onClick={() => handleEdit(item)}
                                                         className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
                                                     >
                                                         Edit
