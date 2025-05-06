@@ -16,6 +16,7 @@ export default function Header() {
                                 src={logo}
                                 alt="Logo"
                                 height={40}
+                                priority={true}
                             />
                         </Link>
                     </div>                
