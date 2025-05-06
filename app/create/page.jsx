@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import Header from "@/components/header/Header.jsx";
 import SideBar from "@/components/studyCreator/sideBar.jsx";
 import CheckboxQuestionBuilder from "@/components/questionTypes/checkboxQ"; // Added
-import { useSearchParams, /* useRouter */ } from "next/navigation";
+import { useSearchParams/*,  useRouter */ } from "next/navigation";
 import backendUrl from "environment";
 import RatingScaleQuestionBuilder from "@/components/questionTypes/ratingQ"; // Add this import
 
