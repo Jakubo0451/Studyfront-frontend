@@ -19,6 +19,34 @@ export default function Dashboard() {
                 return;
             }
 
+            // First fetch existing studies to determine the next number
+            const studiesResponse = await fetch(`${backendUrl}/api/studies`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!studiesResponse.ok) {
+                throw new Error('Failed to fetch studies');
+            }
+
+            const existingStudies = await studiesResponse.json();
+            
+            // Find the highest number in existing "Untitled Study X" titles
+            const untitledPattern = /^Untitled Study (\d+)$/;
+            let highestNumber = 0;
+
+            existingStudies.forEach(study => {
+                const match = study.title.match(untitledPattern);
+                if (match) {
+                    const number = parseInt(match[1]);
+                    highestNumber = Math.max(highestNumber, number);
+                }
+            });
+
+            // Create new study with incremented number
+            const newNumber = highestNumber + 1;
             const response = await fetch(`${backendUrl}/api/studies`, {
                 method: 'POST',
                 headers: {
@@ -26,7 +54,7 @@ export default function Dashboard() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    title: 'Untitled Study',
+                    title: `Untitled Study ${newNumber}`,
                     description: 'No description'
                 })
             });
@@ -36,7 +64,6 @@ export default function Dashboard() {
             }
 
             const newStudy = await response.json();
-            // Redirect to the edit page with the new study ID
             router.push(`/create?studyId=${newStudy._id}`);
         } catch (error) {
             console.error('Error creating study:', error);
