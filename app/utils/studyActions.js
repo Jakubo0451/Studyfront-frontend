@@ -162,9 +162,16 @@ export const startStudy = async (study, onStudyUpdated, onError) => {
     }
 
     try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("No token provided. Redirecting to login.");
+            return;
+        }
+
         const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
             method: "PUT",
             headers: {
+                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ active: true }),
@@ -194,9 +201,16 @@ export const endStudy = async (study, onStudyUpdated, onError) => {
     }
 
     try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("No token provided. Redirecting to login.");
+            return;
+        }
+
         const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
             method: "PUT",
             headers: {
+                "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({ active: false, completed: true }),
