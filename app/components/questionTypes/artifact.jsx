@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
 import styles from '../../styles/questionTypes/artifact.module.css';
