@@ -15,8 +15,13 @@ export default function LoginPage() {
     try {
       const res = await fetch(`${backendUrl}/api/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ 
+          email, 
+          password 
+        }),
       });
 
       if (!res.ok) {
@@ -28,7 +33,9 @@ export default function LoginPage() {
       const data = await res.json();
       if (data.token) {
         localStorage.setItem('token', data.token);
-        console.log('Token stored:', data.token);
+        // Decode token and store user data
+        const payload = JSON.parse(atob(data.token.split('.')[1]));
+        localStorage.setItem('userId', payload._id);
         await fetchDashboard();
         router.push('/dashboard');
       } else {
@@ -43,23 +50,29 @@ export default function LoginPage() {
   const fetchDashboard = async () => {
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No token found');
+      }
+
       const res = await fetch(`${backendUrl}/dashboard`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
       });
 
       if (!res.ok) {
         const errorData = await res.json();
-        console.error('Error fetching dashboard:', errorData.message);
-        return;
+        throw new Error(errorData.message || 'Failed to fetch dashboard');
       }
 
       const data = await res.json();
       console.log('Dashboard data:', data);
+      return data;
     } catch (error) {
       console.error('Error fetching dashboard:', error);
+      throw error;
     }
   };
 

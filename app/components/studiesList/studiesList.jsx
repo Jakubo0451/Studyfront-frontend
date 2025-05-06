@@ -10,8 +10,7 @@ import { useRouter } from 'next/navigation';
 import { downloadAsCSV, downloadAsJSON } from "@/utils/download.js";
 import { startStudy, editStudy } from "@/utils/studyActions.js";
 
-
-const StudiesList = () => {
+const StudiesList = ({ refreshTrigger }) => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -20,14 +19,32 @@ const StudiesList = () => {
     const router = useRouter();
 
     const fetchStudies = useCallback(async () => {
-        
         setLoading(true);
         setError(null);
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            router.push('/login');
+            return;
+        }
+
         try {
-            const response = await fetch(`${backendUrl}/api/studies`);
+            const response = await fetch(`${backendUrl}/api/studies`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
             if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.clear();
+                    router.push('/login');
+                    return;
+                }
                 throw new Error('Failed to fetch studies');
             }
+
             const studies = await response.json();
             setData(studies);
         } catch (err) {
@@ -36,15 +53,11 @@ const StudiesList = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [router]);
 
     useEffect(() => {
         fetchStudies();
-    }, [fetchStudies]);
-
-    useEffect(() => {
-        fetchStudies();
-    }, [fetchStudies]);
+    }, [fetchStudies, refreshTrigger]);
 
     const openShare = () => {
         document.querySelector('.sharePopup').style.display = 'flex';
@@ -55,10 +68,28 @@ const StudiesList = () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await fetch(`${backendUrl}/api/studies/${studyId}`);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                router.push('/login');
+                return;
+            }
+
+            const response = await fetch(`${backendUrl}/api/studies/${studyId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+
             if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.clear();
+                    router.push('/login');
+                    return;
+                }
                 throw new Error(`Failed to fetch study details for ID: ${studyId}`);
             }
+
             const details = await response.json();
             setSelectedStudyDetails(details);
         } catch (err) {
@@ -68,13 +99,13 @@ const StudiesList = () => {
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const closeDetailsPopup = () => {
         setShowDetailsPopup(false);
         setSelectedStudyDetails(null);
         setError(null);
-    }
+    };
 
     const handleStudyDeleted = useCallback(() => {
         fetchStudies();
@@ -158,7 +189,7 @@ const StudiesList = () => {
                             </div>
                         </div>
                     )}
-    
+
                     {/* Inactive Studies Section */}
                     {data.some((item) => !item.active) && (
                         <div>
@@ -256,18 +287,20 @@ const StudiesList = () => {
                     )}
                 </>
             )}
-    
+
             {showDetailsPopup && selectedStudyDetails && (
                 <DetailsPopup
-                    study={selectedStudyDetails}
-                    onClose={closeDetailsPopup}
-                    onStudyDeleted={handleStudyDeleted}
-                    onStudyUpdated={handleStudyUpdated}
-                    loading={loading}
-                    error={error}
-                />
+                study={selectedStudyDetails}
+                onClose={closeDetailsPopup}
+                onStudyDeleted={handleStudyDeleted}
+                onStudyChange={(updatedStudy) => {
+                    handleStudyUpdated(updatedStudy);
+                    setSelectedStudyDetails(updatedStudy);
+                }}
+            />
             )}
         </div>
     );
 };
+
 export default StudiesList;

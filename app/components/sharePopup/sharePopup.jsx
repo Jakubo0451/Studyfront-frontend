@@ -1,51 +1,123 @@
 'use client'
+import { useState, useEffect } from 'react';
 import { FaRegCopy } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 import { IoIosClose } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
+import { useRouter } from 'next/navigation';
+import backendUrl from 'environment';
 
-function closePopup() {
-  document.querySelector('.sharePopup').style.display = 'none';
-}
+export default function SharePopup({ study, onStudyChange }) {
+  const router = useRouter();
+  const [studies, setStudies] = useState([]);
+  const [currentStudy, setCurrentStudy] = useState(study);
 
-function copyLink() {
-  // selects the input field with the sharable link and copies it
-  const link = document.getElementById('share-link');
-  link.select();
-  link.setSelectionRange(0, 99999);
-  document.execCommand('copy');
-  // show Copied! message after copying
-  document.querySelector('.copyBtn').classList.add('copiedLink');
-  setTimeout(() => {
-    document.querySelector('.copyBtn').classList.remove('copiedLink');
-  }, 3000);
-}
+  useEffect(() => {
+    const fetchStudies = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          router.push('/login');
+          return;
+        }
 
-function sendEmails() {
-  // after emails have successfully been sent
-  document.querySelector('.sendBtn').classList.add('sentEmails');
-  setTimeout(() => {
-    document.querySelector('.sendBtn').classList.remove('sentEmails');
-  }, 3000);
-}
+        const response = await fetch(`${backendUrl}/api/studies`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
-export default function sharePopup() {
+        if (!response.ok) {
+          throw new Error('Failed to fetch studies');
+        }
+
+        const data = await response.json();
+        setStudies(data);
+      } catch (error) {
+        console.error('Error fetching studies:', error);
+      }
+    };
+
+    fetchStudies();
+  }, [router]);
+
+  const handleStudyChange = (e) => {
+    const selectedStudyId = e.target.value;
+    const selectedStudy = studies.find(s => s._id === selectedStudyId);
+    if (selectedStudy) {
+      setCurrentStudy(selectedStudy);
+      if (onStudyChange) {
+        onStudyChange(selectedStudy);
+      }
+    }
+  };
+
+  function closePopup() {
+    document.querySelector('.sharePopup').style.display = 'none';
+  }
+
+  function copyLink() {
+    // Ensure this code runs only on the client side
+    if (typeof window !== "undefined") {
+        const link = document.getElementById("share-link");
+        link.select();
+        link.setSelectionRange(0, 99999);
+        document.execCommand("copy");
+
+        // Show "Copied!" message after copying
+        const copyButton = document.querySelector(".copyBtn");
+        if (copyButton) {
+            copyButton.classList.add("copiedLink");
+            setTimeout(() => {
+                copyButton.classList.remove("copiedLink");
+            }, 3000);
+        }
+    }
+  }
+
+  function sendEmails() {
+    // after emails have successfully been sent
+    document.querySelector('.sendBtn').classList.add('sentEmails');
+    setTimeout(() => {
+      document.querySelector('.sendBtn').classList.remove('sentEmails');
+    }, 3000);
+  }
+
   return (
     <div className="sharePopup">
       <div className="closePopupBackground" onClick={closePopup}></div>
       <div>
-        <div  className="shareStudy">
+        <div className="shareStudy">
           <h1>Share study</h1>
           <div htmlFor="study-select" className="dropDownIcon"><FaAngleDown /></div>
-          <select name="study" id="study-select">
-            <option value="study1">Comparative example study</option>
-            <option value="study2">Study 2</option>
-            <option value="study3">Study 3</option>
+          <select 
+            name="study" 
+            id="study-select"
+            value={currentStudy?._id}
+            onChange={handleStudyChange}
+          >
+            {studies.map((s) => (
+              <option key={s._id} value={s._id}>
+                {s.title}
+              </option>
+            ))}
           </select>
           <label htmlFor="share-link">Sharable link</label>
           <div className="share-link">
-            <input type="text" id="share-link" value="https://studyfront.com/study/1" readOnly />
-            <button type="button" className="copyBtn" title="Copy link" onClick={copyLink}><FaRegCopy /></button>
+            <input 
+              type="text" 
+              id="share-link" 
+              value={
+                typeof window !== "undefined"
+                  ? `${window.location.origin}/study/${currentStudy?._id}`
+                  : ""
+              } 
+              readOnly 
+            />
+            <button type="button" className="copyBtn" title="Copy link" onClick={copyLink}>
+              <FaRegCopy />
+            </button>
           </div>
           <label htmlFor="share-email">Share by email</label>
           <div className="share-email">
@@ -58,5 +130,5 @@ export default function sharePopup() {
         </div>
       </div>
     </div>
-  )
+  );
 }

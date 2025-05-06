@@ -3,31 +3,18 @@ import Header from 'app/components/header/Header.jsx';
 import StudiesList from 'app/components/studiesList/studiesList.jsx';
 import { FaPlus } from "react-icons/fa";
 import SharePopup from 'app/components/sharePopup/sharePopup.jsx';
-import backendUrl from 'environment';
+import { createStudy } from 'app/utils/studyActions.js';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function Dashboard() {
-    const handleCreateStudy = async () => {
-        try {
-            const response = await fetch(`${backendUrl}/api/studies`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    title: 'Untitled Study',
-                    description: 'No description'
-                })
-            });
+    const router = useRouter();
+    const [shouldRefresh] = useState(false);
 
-            if (!response.ok) {
-                throw new Error('Failed to create study');
-            }
-
-            window.location.reload();
-
-        } catch (error) {
-            console.error('Error creating study:', error);
-        }
+    const handleCreateStudy = () => {
+        createStudy(router, (errorMessage) => {
+            alert(errorMessage);
+        });
     };
 
     return (
@@ -46,8 +33,8 @@ export default function Dashboard() {
                         Create new study
                     </button>
                 </div>
-                <StudiesList/>
+                <StudiesList refreshTrigger={shouldRefresh} />
             </div>
         </div>
-    )
+    );
 }
