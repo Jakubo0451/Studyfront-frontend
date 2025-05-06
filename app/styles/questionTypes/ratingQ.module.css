@@ -1,0 +1,140 @@
+.ratingScale {
+    width: 100%;
+}
+
+.ratingScale label {
+    display: block;
+    text-align: left;
+    margin-bottom: .25rem;
+}
+
+.ratingScaleRange{
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.rangeInputs {
+    display: flex;
+    gap: 0.2rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .rangeInputs input {
+    flex: 1;
+  }
+
+  .rangeInputs span {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+.ratingScale input[type="range"] {
+    width: 100%;
+}
+
+.ratingScale>label {
+    margin-top: 1rem;
+    margin-bottom: .25rem;
+    display: block;
+    font-weight: bold;
+}
+
+.ratingValue {
+    padding: .5rem;
+}
+
+.addRanking {
+    background-color: var(--color-petrol-blue);
+    color: #ffffff;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    margin: 1rem;
+    justify-self: center;
+}
+
+.addRanking:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.ratingScaleInput {
+    background-color: var(--color-sky-blue);
+    padding: .5rem;
+    border-radius: .25rem;
+    text-align: left;
+}
+
+.ratingScaleInput input {
+    background-color: #ffffff;
+    padding: .5rem;
+    border-radius: .25rem;
+    width: fit-content;
+}
+
+.ratingScaleInput span {
+    padding: 0 .5rem;
+}
+
+.ratingScaleInput>input {
+    width: 100%;
+    margin-bottom: .5rem;
+}
+
+.questionName {
+    margin-bottom: 1rem;
+}
+
+.questionName label {
+    display: block;
+    text-align: left;
+    margin-bottom: .25rem;
+}
+
+.questionName input {
+    background-color: #ffffff;
+    padding: .5rem;
+    border-radius: .25rem;
+    width: 100%;
+}
+
+.artifacts>label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: .25rem;
+    margin-top: .25rem;
+  }
+
+  .artifactContainer {
+    margin-bottom: 15px;
+  }
+  
+  .artifactHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  
+  .removeBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  
+  .removeBtn:hover {
+    background-color: #d32f2f;
+  }

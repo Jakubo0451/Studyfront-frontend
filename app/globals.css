@@ -8,7 +8,7 @@
   --color-ice-blue: oklch(93.43% 0.0197 245.64);
   --color-light-grey: oklch(97.02% 0 0);
 
-  --font-kaisei: "Kaisei Opti", serif;
+  --font-frank: "Frank Ruhl Libre", serif;
   --font-readex: "Readex Pro", sans-serif;
 }
 
@@ -28,6 +28,17 @@
   align-items: center;
   z-index: 1000;
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+.question-type {
+  width: 50%;
+  margin: 0 auto;
+}
+
+.question-type h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
 .sharePopup{

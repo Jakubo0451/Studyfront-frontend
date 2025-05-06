@@ -109,7 +109,7 @@ const SideBar = ({
 
   return (
     <div className="w-80 bg-sky-blue h-full p-4 flex flex-col">
-      <h2 className="text-xl w-full mb-4 text-center">Study Information</h2>
+      <h2 className="text-xl w-full mb-4 text-center">Untitled Study</h2>
       <button type="button" className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
         Study information
       </button>

@@ -1,5 +1,5 @@
 import { Readex_Pro } from "next/font/google";
-import { Kaisei_Opti } from "next/font/google";
+import { Frank_Ruhl_Libre } from "next/font/google";
 import "./globals.css";
 
 const readexPro = Readex_Pro({
@@ -8,10 +8,10 @@ const readexPro = Readex_Pro({
   weight: ['200', '300', '400', '500', '600', '700'],
 });
 
-const kaiseiOpti = Kaisei_Opti({
-  variable: "--font-Kaisei-Opti",
+const frankRuhlLibre = Frank_Ruhl_Libre({
+  variable: "--font-Frank-Ruhl-Libre",
   subsets: ["latin"],
-  weight: ['400', '500', '700'],
+  weight: ['300', '400', '500', '600', '700', '800', '900'],
 });
 
 export const metadata = {
@@ -22,7 +22,7 @@ export const metadata = {
 export default function RootLayout({ children}) {
   return (
     <html lang="en">
-      <body className={ readexPro.className + " " + kaiseiOpti.className + " " + 'bg-ice-blue'  }>
+      <body className={ readexPro.className + " " + frankRuhlLibre.className + " " + 'bg-ice-blue'  }>
         {children}
       </body>
     </html>

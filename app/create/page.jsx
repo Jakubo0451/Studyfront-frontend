@@ -1,10 +1,14 @@
+/* eslint-disable */
+
+
 "use client";
 import { useState, useEffect } from "react";
 import Header from "@/components/header/Header.jsx";
 import SideBar from "@/components/studyCreator/sideBar.jsx";
 import CheckboxQuestionBuilder from "@/components/questionTypes/checkboxQ"; // Added
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams/*,  useRouter */ } from "next/navigation";
 import backendUrl from "environment";
+import RatingScaleQuestionBuilder from "@/components/questionTypes/ratingQ"; // Add this import
 
 // These are some dummy questions
 const TextQuestionDisplay = ({
@@ -106,7 +110,7 @@ export default function CreateStudyPage() {
   const editStudyId = searchParams.get("studyId");
   const [questions, setQuestions] = useState([]);
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(null);
-  const router = useRouter();
+  /* const router = useRouter(); */
 
   useEffect(() => {
     const fetchStudyDetails = async () => {
@@ -182,7 +186,7 @@ export default function CreateStudyPage() {
     setQuestions(updatedQuestions);
   };
 
-  const handleSaveQuestions = async () => {
+  /* const handleSaveQuestions = async () => {
     if (!editStudyId) {
       console.error("Study ID not found for saving questions.");
       return;
@@ -229,7 +233,7 @@ export default function CreateStudyPage() {
       console.error("Error saving questions:", error.message);
       alert("Failed to save questions. Please try again.");
     }
-  };
+  }; */
 
   if (!editStudyId) {
     return (
@@ -259,15 +263,15 @@ export default function CreateStudyPage() {
           onAddQuestion={handleAddQuestion}
           setQuestions={setQuestions}
         />
-        <div className="flex-1 p-4">
-          <h2 className="text-xl font-semibold mb-4">
+        <div className="flex-1 p-4 overflow-auto max-h-[90vh]">
+          {/* <h2 className="text-xl font-semibold mb-4">
             Edit Study: {study?.title}
-          </h2>
+          </h2> */}
 
           {selectedQuestionIndex !== null &&
             questions[selectedQuestionIndex] && (
               <div>
-                <h3 className="text-lg font-semibold mb-2">Question Details</h3>
+                {/* <h3 className="text-lg font-semibold mb-2">Question Details</h3> */}
                 {questions[selectedQuestionIndex].type === "text" && (
                   <TextQuestionDisplay
                     question={questions[selectedQuestionIndex]}
@@ -290,6 +294,14 @@ export default function CreateStudyPage() {
                     }
                   />
                 )}
+                {questions[selectedQuestionIndex].type === "ratingScale" && (
+                  <RatingScaleQuestionBuilder
+                    questionData={questions[selectedQuestionIndex].data}
+                    onChange={(updatedData) => 
+                      handleQuestionDataChange(questions[selectedQuestionIndex].id, updatedData)
+                    }
+                  />
+                )}
               </div>
             )}
 
@@ -303,13 +315,13 @@ export default function CreateStudyPage() {
             <p>Click "Add Item" in the sidebar to add your first question.</p>
           )}
 
-          <button
+          {/* <button
             type="button"
             onClick={handleSaveQuestions}
             className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center"
           >
             Save Questions
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

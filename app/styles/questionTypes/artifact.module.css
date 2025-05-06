@@ -1,0 +1,304 @@
+.imageContainer {
+    background-color: var(--color-sky-blue);
+    padding: .5rem;
+    border-radius: .25rem;
+}
+
+.fileUpload::file-selector-button {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    font-family: var(--font-readex);
+}
+
+.fileUpload::file-selector-button:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.fileUpload {
+    background-color: var(--color-ice-blue);
+    border-radius: .25rem;
+    width: 100%;
+}
+
+.uploadArtifact label {
+    display: block;
+    text-align: left;
+    margin-bottom: .25rem;
+    margin-top: .25rem;
+}
+
+.selectArtifact>div {
+    display: flex;
+}
+
+.selectArtifact button {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-top-left-radius: .25rem;
+    border-bottom-left-radius: .25rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    font-family: var(--font-readex);
+}
+
+.selectArtifact button:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.selectArtifact p {
+    background-color: var(--color-sky-blue);
+    color: black;
+    padding: .5rem 1rem;
+    border-top-right-radius: .25rem;
+    border-bottom-right-radius: .25rem;
+    font-family: var(--font-frank);
+    display: inline-block;
+    flex: 1;
+}
+
+.selectArtifact input {
+    background-color: #ffffff;
+    padding: .5rem;
+    border-radius: .25rem;
+    width: 100%;
+    margin-top: .25rem;
+}
+
+.selectArtifactPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    backdrop-filter: brightness(0.5);
+    width: 100%;
+    height: 100vh;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.selectArtifactMenu {
+    background-color: var(--color-sky-blue);
+  padding: 1.5rem;
+  border-radius:.25rem;
+  border-top-right-radius: 0;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.selectArtifactPopup>div {
+    display: flex;
+  }
+
+.fileList{
+    margin-top: .25rem;
+}
+
+.fileItem input {
+    background-color: white;
+    padding: .5rem;
+    border-radius: .25rem;
+    text-align: left;
+    width: 100%;
+    margin: .25rem 0;
+}
+
+.fileItem input:focus {
+    outline: solid 3px var(--color-petrol-blue);
+}
+
+.uploadArtifact h3 {
+    display: block;
+    font-size: 1rem;
+    padding: .5rem 0 0 0;
+}
+
+.uploadArtifactsBtn {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    font-family: var(--font-readex);
+    display: flex;
+    margin: .5rem auto;
+}
+
+.uploadArtifactsBtn>svg {
+    margin-right: .25rem;
+    height: 1.5rem;
+    font-size: 1.5rem;
+}
+
+.uploadArtifactsBtn:hover {
+    background-color: var(--color-oxford-blue);
+}
+
+.artifactsList {
+    background-color: var(--color-ice-blue);
+    padding: .5rem;
+    border-radius: .25rem;
+}
+
+.artifactsList p {
+    color: var(--color-oxford-blue);
+    display: flex;
+    align-items: center;
+    gap: .2rem;
+    margin-bottom: .5rem;
+}
+
+.artifactsList p>svg {
+    font-size: 1.2rem;
+}
+
+.artifactsList p>span {
+    text-decoration: underline;
+    text-underline-offset: 0.2rem;
+}
+
+.artifactItems {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: repeat(3, 100px);
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-gutter: stable;
+}
+
+.artifactItem {
+    height: 100px;
+    width: 100px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+}
+
+.artifactItem:hover p {
+    padding: 8px 8px;
+}
+
+.artifactItem:hover img {
+    filter: brightness(.9);
+}
+
+.artifactItem img {
+    border-radius: .25rem;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter .3s ease;
+}
+
+.artifactItem > p {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: white;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+    margin: 0;
+    padding: 4px 8px;
+    display: inline-block; /* this makes ellipsis work */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    border-radius: .25rem;
+    font-size: .8rem;
+    font-family: var(--font-readex);
+    transition: padding .3s ease;
+}
+
+.clearFiles {
+    color: white;
+    background-color: #BE3F3F;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    border-radius: .25rem;
+    padding: 0 1rem 0 .5rem;
+    margin: .5rem auto;
+}
+
+.clearFiles:hover {
+    background-color: #a42c2c;
+}
+
+.clearFiles svg {
+    font-size: 2rem;
+}
+
+.filePreview {
+    height: 40px;
+    width: 40px;
+    object-fit: cover;
+    border-radius: .25rem;
+    margin: .25rem .25rem 0 0;
+}
+
+.fileItem {
+    display: flex;
+}
+
+.artifactsContainer {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .artifactContainer {
+    margin-bottom: 15px;
+  }
+  
+  .artifactHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  
+  .removeBtn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  
+  .removeBtn:hover {
+    background-color: #d32f2f;
+  }
+  
+  .removeBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+  
+  .addArtifactBtn {
+    background-color: var(--color-petrol-blue);
+    color: white;
+    padding: .5rem 1rem;
+    border-radius: .25rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    transition: background-color .3s;
+    cursor: pointer;
+    font-family: var(--font-readex);
+    margin: 0.5rem auto;
+  }
+  
+  .addArtifactBtn:hover {
+    background-color: var(--color-oxford-blue);
+  }
