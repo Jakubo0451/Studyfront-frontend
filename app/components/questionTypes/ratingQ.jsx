@@ -1,17 +1,23 @@
 'use client'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styles from '../../styles/questionTypes/ratingQ.module.css'
 import Artifact from './artifact'
 import { FaPlus } from "react-icons/fa";
 
 export default function ratingQ() {
-  document.addEventListener('input', function (e) {
-    if (e.target.matches('input[type="range"]')) {
-        const value = e.target.value;
-        const ratingValue = e.target.nextElementSibling;
-        ratingValue.textContent = value;
-    }
-  });
+  useEffect(() => {
+    document.addEventListener('input', function (e) {
+      if (e.target.matches('input[type="range"]')) {
+          const value = e.target.value;
+          const ratingValue = e.target.nextElementSibling;
+          ratingValue.textContent = value;
+      }
+    });
+
+    return () => {
+      document.removeEventListener('input', function() {});
+    };
+  }, []);
 
   return (
     <div className={styles.ratingQ + " question-type"}>
@@ -20,15 +26,10 @@ export default function ratingQ() {
           <label htmlFor="questionName">Qustion title:</label>
           <input type="text" name="questionName" id="questionName" placeholder="Title" />
         </div>
-        <div id="artifacts" className={styles.artifacts}>
-          <label>Artifact 1:</label>
-          <Artifact artifactType="select" />
-        </div>
-        {/* <Artifact artifactType="text" artifactSrc="This is a text Artifact!" />
-        <Artifact artifactType="image" artifactSrc="https://picsum.photos/300/200" />
-        <Artifact artifactType="video" artifactSrc="https://www.w3schools.com/html/mov_bbb.mp4" />
-        <Artifact artifactType="audio" artifactSrc="https://www.w3schools.com/html/horse.mp3" /> */}
-        <button className={styles.addRanking}><FaPlus /> Add another artifact</button>
+        
+        {/* Use the Artifact component in standalone mode */}
+        <Artifact mode="standalone" allowMultiple={true} />
+        
         <div className={styles.ratingScale}>
             <label htmlFor="rating1">Rating factor 1:</label>
             <div className={styles.ratingScaleInput}>
@@ -43,10 +44,6 @@ export default function ratingQ() {
                 </div>
               </div>
             </div>
-            {/* <div className={styles.ratingScaleRange}>
-              <input type="range" id="rating1" name="rating1" min="1" max="5" step="1" />
-              <span className={styles.ratingValue}>3</span>
-            </div> */}
         </div>
         <button className={styles.addRanking}><FaPlus /> Add another rating scale</button>
     </div>

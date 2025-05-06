@@ -229,7 +229,7 @@ export default function CreateStudyPage() {
           onAddQuestion={handleAddQuestion}
           setQuestions={setQuestions}
         />
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-4 overflow-auto max-h-[90vh]">
           {/* <h2 className="text-xl font-semibold mb-4">
             Edit Study: {study?.title}
           </h2> */}
