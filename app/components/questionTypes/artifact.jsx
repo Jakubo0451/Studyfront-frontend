@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from '../../styles/questionTypes/artifact.module.css';
 import { IoIosClose } from "react-icons/io";
 import { MdOutlineNoteAdd } from "react-icons/md";
@@ -14,7 +14,7 @@ export default function Artifact({
 }) {
     // State for selected artifact(s)
     const [selectedArtifactName, setSelectedArtifactName] = useState("No artifact selected");
-    const [selectedArtifactId, setSelectedArtifactId] = useState(initialArtifactId || null);
+    const [/*selectedArtifactId,*/ setSelectedArtifactId] = useState(initialArtifactId || null);
 
     // State for managing multiple artifacts in standalone mode
     const [artifacts, setArtifacts] = useState(mode === 'standalone' ? [{ id: 1, type: 'select' }] : []);
@@ -110,7 +110,7 @@ export default function Artifact({
     }
 
     // The single artifact component
-    const SingleArtifact = ({ artifactType = 'select', id }) => {
+    const SingleArtifact = (/*{ artifactType = 'select', id }*/) => {
       return (
         <div className={styles.selectArtifact}>
             <div>

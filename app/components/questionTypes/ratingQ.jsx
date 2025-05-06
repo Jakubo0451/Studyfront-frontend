@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import styles from '../../styles/questionTypes/ratingQ.module.css'
 import Artifact from './artifact'
 import { FaPlus } from "react-icons/fa";
