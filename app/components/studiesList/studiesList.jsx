@@ -142,12 +142,14 @@ const StudiesList = () => {
                                                     <PiDownloadSimpleFill className="!w-full !h-full" />
                                                 </div>
                                                 <button
+                                                    type="button"
                                                     onClick={() => downloadAsCSV(item._id)}
                                                     className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
                                                 >
                                                     .csv
                                                 </button>
                                                 <button
+                                                    type="button"
                                                     onClick={() => downloadAsJSON(item._id)}
                                                     className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
                                                 >
@@ -171,6 +173,16 @@ const StudiesList = () => {
                                         .map((item, index) => (
                                             <div key={index} className="bg-sky-blue p-4 rounded shadow">
                                                 <h2 className="text-2xl mb-2 text-center">{item.title}</h2>
+
+                                                {item.completed ? (
+                                                    <div className="flex items-center justify-center bg-green-500 rounded-sm mb-2">
+                                                        <p className="text-white">Compleated</p>
+                                                    </div>
+                                                ) : (
+                                                    <div>
+                                                    </div>
+                                                )}
+
                                                 <div className="flex justify-between text-lg mb-4">
                                                     <div className="flex items-center">
                                                         <CiCalendar className="mr-1" />
@@ -202,12 +214,14 @@ const StudiesList = () => {
                                                         <PiDownloadSimpleFill className="!w-full !h-full" />
                                                     </div>
                                                     <button
+                                                        type="button"
                                                         onClick={() => downloadAsCSV(item._id, `${item.title || "study"}.csv`)}
                                                         className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
                                                     >
                                                         .csv
                                                     </button>
                                                     <button
+                                                        type="button"
                                                         onClick={() => downloadAsJSON(item._id, `${item.title || "study"}.json`)}
                                                         className="bg-petrol-blue text-white rounded px-2 py-1 flex-grow text-center hover:bg-oxford-blue transition duration-300"
                                                     >
