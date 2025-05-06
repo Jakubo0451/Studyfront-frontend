@@ -1,6 +1,5 @@
 /* eslint-disable */
 
-
 "use client";
 import { useState, useEffect } from "react";
 import Header from "@/components/header/Header.jsx";
