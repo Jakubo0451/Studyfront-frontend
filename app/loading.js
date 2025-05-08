@@ -3,7 +3,7 @@
 export default function Loading() {
     return (
     <div>
-        <div className="flex flex-col items-center justify-center min-h-screen py-2">
+        <div className="flex flex-col items-center justify-center min-h-full py-2">
             <h1 className="loadingText">Loading...</h1>
             <div className="loader"></div>
         </div>
