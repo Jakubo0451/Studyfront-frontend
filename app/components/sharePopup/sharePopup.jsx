@@ -11,6 +11,7 @@ export default function SharePopup({ study, onStudyChange }) {
   const router = useRouter();
   const [studies, setStudies] = useState([]);
   const [currentStudy, setCurrentStudy] = useState(study);
+  const [studyDetails, setStudyDetails] = useState(null);
 
   useEffect(() => {
     const fetchStudies = async () => {
@@ -34,19 +35,47 @@ export default function SharePopup({ study, onStudyChange }) {
 
         const data = await response.json();
         setStudies(data);
+        
+        // If a study prop was passed, set it as current
+        if (study) {
+          setCurrentStudy(study);
+          fetchStudyDetails(study._id);
+        } else if (data.length > 0) {
+          setCurrentStudy(data[0]);
+          fetchStudyDetails(data[0]._id);
+        }
       } catch (error) {
         console.error('Error fetching studies:', error);
       }
     };
 
     fetchStudies();
-  }, [router]);
+  }, [router, study]);
+
+  const fetchStudyDetails = async (studyId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${backendUrl}/api/studies/${studyId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch study details');
+      const details = await response.json();
+      setStudyDetails(details);
+    } catch (error) {
+      console.error('Error fetching study details:', error);
+    }
+  };
 
   const handleStudyChange = (e) => {
     const selectedStudyId = e.target.value;
     const selectedStudy = studies.find(s => s._id === selectedStudyId);
     if (selectedStudy) {
       setCurrentStudy(selectedStudy);
+      fetchStudyDetails(selectedStudyId);
       if (onStudyChange) {
         onStudyChange(selectedStudy);
       }
@@ -90,11 +119,11 @@ export default function SharePopup({ study, onStudyChange }) {
       <div>
         <div className="shareStudy">
           <h1>Share study</h1>
-          <div htmlFor="study-select" className="dropDownIcon"><FaAngleDown /></div>
+          <div className="dropDownIcon"><FaAngleDown /></div>
           <select 
             name="study" 
             id="study-select"
-            value={currentStudy?._id}
+            value={currentStudy?._id || ''}
             onChange={handleStudyChange}
           >
             {studies.map((s) => (
@@ -103,14 +132,21 @@ export default function SharePopup({ study, onStudyChange }) {
               </option>
             ))}
           </select>
+
+          {studyDetails && (
+            <div className="study-info mt-4 mb-4">
+              <h2 className="text-lg font-semibold">{studyDetails.title}</h2>
+            </div>
+          )}
+
           <label htmlFor="share-link">Sharable link</label>
           <div className="share-link">
             <input 
               type="text" 
               id="share-link" 
               value={
-                typeof window !== "undefined"
-                  ? `${window.location.origin}/study/${currentStudy?._id}`
+                typeof window !== "undefined" && currentStudy?._id
+                  ? `${window.location.origin}/study/${currentStudy._id}`
                   : ""
               } 
               readOnly 
