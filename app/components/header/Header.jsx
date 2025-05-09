@@ -36,6 +36,13 @@ export default function Header() {
                             </div>
                         </Link>
                     </div>
+                    <div className="flex items-center space-x-4">
+                        <Link href="/about" passHref>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-gray-700 hover:text-gray-900 hover:border-b">About</span>
+                            </div>
+                        </Link>
+                    </div>
                 </li>
                 <LogoutButton></LogoutButton>
             </ul>
