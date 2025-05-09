@@ -146,7 +146,7 @@ export default function SharePopup({ study, onStudyChange }) {
               id="share-link" 
               value={
                 typeof window !== "undefined" && currentStudy?._id
-                  ? `${window.location.origin}/study/${currentStudy._id}/take`
+                  ? `${window.location.origin}/study/${currentStudy._id}`
                   : ""
               } 
               readOnly 
