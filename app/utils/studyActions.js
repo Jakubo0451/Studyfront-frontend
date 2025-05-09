@@ -122,51 +122,41 @@ export const deleteStudy = async (study, router, onClose, onStudyDeleted, onErro
         return;
     }
 
-    if (window.confirm(`Are you sure you want to delete the study "${study.title}"? This action cannot be undone.`)) {
-        try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                router.push("/login");
-                return;
-            }
-
-            const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (response.ok) {
-                console.log(`Study "${study.title}" deleted successfully.`);
-                onClose();
-                if (onStudyDeleted) {
-                    onStudyDeleted();
-                }
-            } else {
-                const errorData = await response.json();
-                throw new Error(errorData.error || "Failed to delete study");
-            }
-        } catch (error) {
-            console.error("Error deleting study:", error.message);
-            if (onError) onError(error.message);
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            router.push("/login");
+            return;
         }
+
+        const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
+            method: "DELETE",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            if (onClose) onClose();
+            if (onStudyDeleted) onStudyDeleted();
+        } else {
+            throw new Error(data.error || "Failed to delete study");
+        }
+    } catch (error) {
+        console.error("Error deleting study:", error);
+        if (onError) onError(error.message);
     }
 };
 
 export const startStudy = async (study, onStudyUpdated, onError) => {
-    if (!study?._id) {
-        console.error("Study ID is missing for starting the study.");
-        return;
-    }
+    if (!study?._id) return;
 
     try {
         const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("No token provided. Redirecting to login.");
-            return;
-        }
+        if (!token) return;
 
         const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
             method: "PUT",
@@ -174,19 +164,22 @@ export const startStudy = async (study, onStudyUpdated, onError) => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ active: true }),
+            body: JSON.stringify({ active: true, completed: false }),
         });
 
         if (response.ok) {
-            const updatedStudy = await response.json();
-            console.log(`Study "${updatedStudy.title}" started successfully.`);
-            if (onStudyUpdated) {
-                onStudyUpdated(updatedStudy);
-            }
+            const data = await response.json();
+            if (onStudyUpdated) onStudyUpdated(data);
         } else {
-            const errorData = await response.json();
-            console.error("Error starting study:", errorData.error || "Failed to start study.");
-            if (onError) onError(errorData.error || "Failed to start study.");
+            const errorText = await response.text();
+            let errorMessage;
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.error || 'Failed to start study';
+            } catch (e) {
+                errorMessage = errorText || 'Failed to start study', e;
+            }
+            throw new Error(errorMessage);
         }
     } catch (error) {
         console.error("Error starting study:", error);
@@ -195,17 +188,11 @@ export const startStudy = async (study, onStudyUpdated, onError) => {
 };
 
 export const endStudy = async (study, onStudyUpdated, onError) => {
-    if (!study?._id) {
-        console.error("Study ID is missing for ending the study.");
-        return;
-    }
+    if (!study?._id) return;
 
     try {
         const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("No token provided. Redirecting to login.");
-            return;
-        }
+        if (!token) return;
 
         const response = await fetch(`${backendUrl}/api/studies/${study._id}`, {
             method: "PUT",
@@ -217,15 +204,18 @@ export const endStudy = async (study, onStudyUpdated, onError) => {
         });
 
         if (response.ok) {
-            const updatedStudy = await response.json();
-            console.log(`Study "${updatedStudy.title}" ended successfully.`);
-            if (onStudyUpdated) {
-                onStudyUpdated(updatedStudy);
-            }
+            const data = await response.json();
+            if (onStudyUpdated) onStudyUpdated(data);
         } else {
-            const errorData = await response.json();
-            console.error("Error ending study:", errorData.error || "Failed to end study.");
-            if (onError) onError(errorData.error || "Failed to end study.");
+            const errorText = await response.text();
+            let errorMessage;
+            try {
+                const errorData = JSON.parse(errorText);
+                errorMessage = errorData.error || 'Failed to end study';
+            } catch (e) {
+                errorMessage = errorText || 'Failed to end study', e;
+            }
+            throw new Error(errorMessage);
         }
     } catch (error) {
         console.error("Error ending study:", error);
