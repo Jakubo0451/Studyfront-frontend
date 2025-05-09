@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -20,7 +21,7 @@ import {
   restrictToParentElement,
 } from "@dnd-kit/modifiers";
 
-const SortableItem = ({ id, content, onQuestionSelect, index }) => {
+const SortableItem = ({ id, content, onQuestionSelect, index, onDeleteQuestion }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id,
@@ -38,6 +39,13 @@ const SortableItem = ({ id, content, onQuestionSelect, index }) => {
     transition,
   };
 
+  const handleDelete = (e) => {
+    e.stopPropagation();
+    console.log(`Delete question at index: ${index}`);
+    console.log(`Delete question with id: ${id}`);
+    onDeleteQuestion(index);
+  }
+
   return (
     <div
       ref={setNodeRef}
@@ -46,7 +54,7 @@ const SortableItem = ({ id, content, onQuestionSelect, index }) => {
       onClick={() => onQuestionSelect(index)}
     >
       <div className="flex items-center space-x-2">
-        <FaRegTrashAlt className="cursor-pointer text-red-500" />{" "}
+        <FaRegTrashAlt onClick={handleDelete} className="cursor-pointer text-red-500" />{" "}
         {/* Placeholder for delete functionality */}
         <div className="flex flex-col space-y-1">
           <MdDragIndicator
@@ -69,7 +77,17 @@ const SideBar = ({
   onQuestionSelect,
   onAddQuestion,
   setQuestions,
+  studyTitle,
+  onViewStudyDetails, // New prop
 }) => {
+  const params = useParams();
+
+  useEffect(() => {
+    if (params?.id) {
+      setStudyId(params.id);
+    }
+  }, [params]);
+
   const [showAddQuestionMenu, setShowAddQuestionMenu] = useState(false);
 
   const handleAddButtonClick = () => {
@@ -80,6 +98,12 @@ const SideBar = ({
     onAddQuestion(type);
     setShowAddQuestionMenu(false);
   };
+
+  const onDeleteQuestion = (index, id) => {
+    setQuestions((prevQuestions) =>
+      prevQuestions.filter((_, i) => i !== index)
+    );
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -109,9 +133,13 @@ const SideBar = ({
 
   return (
     <div className="w-80 bg-sky-blue h-full p-4 flex flex-col">
-      <h2 className="text-xl w-full mb-4 text-center">Untitled Study</h2>
-      <button type="button" className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center">
-        Study information
+      <h2 className="text-xl w-full mb-4 text-center">{studyTitle}</h2>
+      <button
+        onClick={onViewStudyDetails}
+        type="button"
+        className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center"
+      >
+        Study Information
       </button>
       <DndContext
         sensors={sensors}
@@ -138,6 +166,7 @@ const SideBar = ({
                       : `Question ${index + 1}`
                   }
                   onQuestionSelect={onQuestionSelect}
+                  onDeleteQuestion={onDeleteQuestion}
                   index={index}
                 />
               ))
@@ -159,7 +188,7 @@ const SideBar = ({
           Add Item
         </button>
         {showAddQuestionMenu && (
-          <div className="absolute left-0 w-full bg-gray-100 rounded-md shadow-md mt-2 z-10">
+          <div className="absolute left-0 w-full bg-gray-100 rounded-md shadow-md mt-2 z-10 bottom-[100%]">
             <button
               type="button"
               onClick={() => handleAddQuestionType("text")}
