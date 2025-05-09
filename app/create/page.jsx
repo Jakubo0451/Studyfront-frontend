@@ -137,6 +137,7 @@ export default function CreateStudyPage() {
           setQuestions={setQuestions}
           onViewStudyDetails={handleViewStudyDetails}
           onChange={handleQuestionsChange}
+          selectedQuestionIndex={selectedQuestionIndex}
         />
         <div className="flex-1 p-4 overflow-auto max-h-[90vh]">
           {viewingStudyDetails ? (

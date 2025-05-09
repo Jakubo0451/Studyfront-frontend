@@ -20,8 +20,10 @@ import {
   restrictToVerticalAxis,
   restrictToParentElement,
 } from "@dnd-kit/modifiers";
+import styles from '../../styles/studyCreator/sidebar.module.css';
+import { IoIosClose } from "react-icons/io";
 
-const SortableItem = ({ id, content, onQuestionSelect, index, onDeleteQuestion }) => {
+const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDeleteQuestion }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
       id,
@@ -37,6 +39,10 @@ const SortableItem = ({ id, content, onQuestionSelect, index, onDeleteQuestion }
         })
       : "",
     transition,
+    // Add outline styling when selected
+    ...(isSelected && { 
+      outline: '',
+    })
   };
 
   const handleDelete = (e) => {
@@ -50,7 +56,7 @@ const SortableItem = ({ id, content, onQuestionSelect, index, onDeleteQuestion }
     <div
       ref={setNodeRef}
       style={style}
-      className="pl-2 pr-2 text-white flex justify-between items-center cursor-pointer rounded"
+      className={`pl-2 pr-2 text-white flex justify-between items-center cursor-pointer rounded`}
       onClick={() => onQuestionSelect(index)}
     >
       <div className="flex items-center space-x-2">
@@ -65,7 +71,8 @@ const SortableItem = ({ id, content, onQuestionSelect, index, onDeleteQuestion }
           />
         </div>
       </div>
-      <span className="flex-grow h-full text-left pl-2 ml-2 bg-petrol-blue rounded overflow-x-hidden whitespace-nowrap text-ellipsis">
+      <span className={`flex-grow h-full text-left pl-2 ml-2 bg-petrol-blue rounded overflow-x-hidden whitespace-nowrap text-ellipsis 
+        ${isSelected ? 'outline-solid outline-white' : ''}`}>
         {content}
       </span>
     </div>
@@ -77,6 +84,7 @@ const SideBar = ({
   onQuestionSelect,
   onAddQuestion,
   setQuestions,
+  selectedQuestionIndex, // Add this prop
   studyTitle,
   onViewStudyDetails,
   onChange,
@@ -150,21 +158,32 @@ const SideBar = ({
         modifiers={[restrictToVerticalAxis, restrictToParentElement]}
       >
         <SortableContext
-          items={questions.map((question) => `item-${question.id}`)}
-        >
-          <div className="space-y-2 flex-grow border-b-2 border-t-2 border-dotted border-petrol-blue pb-4 pt-4 text-lg overflow-y-auto">
-            {questions && questions.length > 0 ? (
-              questions.map((question, index) => (
-                <SortableItem
-                  key={`${question.id}-${index}`}
-                  id={`item-${question.id}`}
-                  content={question.title ? question.title : `Question ${index + 1}`}
-                  onQuestionSelect={onQuestionSelect}
-                  onDeleteQuestion={onDeleteQuestion}
-                  index={index}
-                />
-              ))
-            ) : (
+      items={questions.map((question) => `item-${question.id}`)}
+    >
+      <div className="space-y-2 flex-grow border-b-2 border-t-2 border-dotted border-petrol-blue pb-4 pt-4 text-lg overflow-y-auto">
+        {questions && questions.length > 0 ? (
+          questions.map((question, index) => (
+            <SortableItem
+              key={`${question.id}-${index}`}
+              id={`item-${question.id}`}
+              content={
+                    question.type === "text"
+                      ? `${index + 1}: Text Question`
+                      : question.type === "multipleChoice"
+                      ? `${index + 1}: Multiple Choice`
+                      : question.type === "checkbox"
+                      ? `${index + 1}: Checkbox Question`
+                      : question.type === "ratingScale"
+                      ? `${index + 1}: Rating Scale Question`
+                      : `Question ${index + 1}`
+                    }
+                    onQuestionSelect={onQuestionSelect}
+                    index={index}
+                    onDeleteQuestion={onDeleteQuestion}
+                    isSelected={index === selectedQuestionIndex} // Add this prop
+                  />
+                ))
+              ) : (
               <p className="text-center text-gray-600">
                 No questions added yet.
               </p>
@@ -176,62 +195,38 @@ const SideBar = ({
         <button
           type="button"
           onClick={handleAddButtonClick}
-          className="mt-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center w-full"
+          className="mt-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center w-full hover:bg-oxford-blue transition duration-300 cursor-pointer"
         >
           <FaPlus className="mr-2" />
-          Add Item
+          Add Question
         </button>
         {showAddQuestionMenu && (
-          <div className="absolute left-0 w-full bg-gray-100 rounded-md shadow-md mt-2 z-10 bottom-[100%]">
-            <button
-              type="button"
-              onClick={() => handleAddQuestionType("text")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              Text Input
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddQuestionType("multipleChoice")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              Multiple Choice
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddQuestionType("checkbox")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              Checkbox
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddQuestionType("trueFalse")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              True/False
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddQuestionType("ratingScale")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              Rating Scale
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddQuestionType("fileUpload")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              File Upload Only
-            </button>
-            <button
-              type="button"
-              onClick={() => handleAddQuestionType("longAnswer")}
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200"
-            >
-              Long Answer
-            </button>
+          <div className={styles.addQuestionPopup}>
+            <div className="closePopupBackground" onClick={handleAddButtonClick}></div>
+            <div>
+              <div className={styles.addQuestionMenu}>
+                <h2>Add question</h2>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("ratingScale")}
+                  >
+                    <img src="/questionTypes/ratingQ.svg" alt="Rating scale" />
+                    Rating Scale
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("checkbox")}
+                  >
+                    <img src="/questionTypes/checkboxQ.svg" alt="Rating scale" />
+                    Checkbox
+                  </button>
+                </div>
+              </div>
+              <div onClick={handleAddButtonClick}>
+                <button type="button" className="closeBtn" title="Close menu" onClick={handleAddButtonClick}><IoIosClose /></button>
+              </div>
+            </div>
           </div>
         )}
       </div>
