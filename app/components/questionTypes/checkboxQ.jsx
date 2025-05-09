@@ -1,96 +1,87 @@
-import { useState, useEffect } from "react";
+'use client'
+import { useState } from 'react' // Add useState import
+import checkboxStyles from '../../styles/questionTypes/checkboxQ.module.css'
+import commonStyles from '../../styles/questionTypes/common.module.css'
+import Artifact from './artifact'
+import { FaPlus, FaTrash } from "react-icons/fa"; // Added FaTrash import
 
-const DEFAULT_QUESTION_DATA = { questionText: "", options: [""] };
+export default function checkboxQ() {
+  // State to manage multiple checkbox questions
+  const [checkboxes, setCheckboxes] = useState([
+    { id: 1, question: '' }
+  ]);
 
-export default function CheckboxQuestionBuilder({
-  onChange,
-  questionData = DEFAULT_QUESTION_DATA,
-}) {
-  const [questionText, setQuestionText] = useState(
-    questionData.questionText || ""
-  );
-  const [options, setOptions] = useState(questionData.options || [""]);
-
-  useEffect(() => {
-    setQuestionText((prev) =>
-      questionData.questionText !== prev
-        ? questionData.questionText || ""
-        : prev
-    );
-    setOptions((prev) =>
-      JSON.stringify(questionData.options) !== JSON.stringify(prev)
-        ? questionData.options || [""]
-        : prev
-    );
-  }, [questionData]);
-
-  const handleQuestionTextChange = (e) => {
-    const updatedQuestionText = e.target.value;
-    setQuestionText(updatedQuestionText);
-    onChange({ type: "checkbox", questionText: updatedQuestionText, options });
+  // Function to add a new checkbox
+  const addCheckbox = () => {
+    const newId = checkboxes.length + 1;
+    setCheckboxes([...checkboxes, { id: newId, question: '' }]);
   };
 
-  const handleOptionChange = (index, value) => {
-    const updatedOptions = [...options];
-    updatedOptions[index] = value;
-    setOptions(updatedOptions);
-    onChange({ type: "checkbox", questionText, options: updatedOptions });
+  // Function to remove a checkbox
+  const removeCheckbox = (idToRemove) => {
+    // Don't remove if it's the last checkbox
+    if (checkboxes.length <= 1) {
+      return;
+    }
+    
+    // Remove the checkbox with the specified ID
+    const filteredCheckboxes = checkboxes.filter(checkbox => checkbox.id !== idToRemove);
+    
+    // Renumber the remaining checkboxes sequentially
+    const renumberedCheckboxes = filteredCheckboxes.map((checkbox, index) => ({
+      ...checkbox,
+      id: index + 1
+    }));
+    
+    setCheckboxes(renumberedCheckboxes);
   };
 
-  const addOption = () => {
-    const updatedOptions = [...options, ""];
-    setOptions(updatedOptions);
-    onChange({ type: "checkbox", questionText, options: updatedOptions });
+  // Function to handle input changes
+  const handleCheckboxChange = (id, value) => {
+    setCheckboxes(checkboxes.map(checkbox => 
+      checkbox.id === id ? { ...checkbox, question: value } : checkbox
+    ));
   };
-
-  const removeOption = (index) => {
-    if (options.length <= 1) return; // Prevent removing the last option
-  
-    const updatedOptions = options.filter((_, i) => i !== index);
-    setOptions(updatedOptions);
-    onChange({ type: "checkbox", questionText, options: updatedOptions });
-  };
-  
 
   return (
-    <div className="border p-4 mb-4">
-      <h3>Checkbox Question</h3>
-      <label htmlFor="questionText">Question:</label>
-      <input
-        type="text"
-        id="questionText"
-        className="w-full border rounded p-2 mb-2"
-        placeholder="Enter your question"
-        value={questionText}
-        onChange={handleQuestionTextChange}
-      />
-      <label>Options:</label>
-      {options.length > 0 &&
-        options.map((option, index) => (
-          <div key={index} className="flex items-center mb-1">
-            <input
-              type="text"
-              className="w-full border rounded p-2"
-              placeholder={`Option ${index + 1}`}
-              value={option}
-              onChange={(e) => handleOptionChange(index, e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={() => removeOption(index)}
-              className="ml-2 bg-red-500 text-white px-2 py-1 rounded"
-            >
-              Remove
-            </button>
+    <div className={commonStyles.questionType + " question-type"}>
+        <h2>Checkbox question</h2>
+        <div className={commonStyles.questionName}>
+          <label htmlFor="questionName">Question title:</label>
+          <input type="text" name="questionName" id="questionName" placeholder="Title" />
+        </div>
+        
+        {/* Use the Artifact component in standalone mode */}
+        <Artifact mode="standalone" allowMultiple={true} />
+        
+        {/* Map through checkboxes and render each one */}
+        {checkboxes.map((checkbox) => (
+          <div key={checkbox.id} className={commonStyles.itemBox}>
+              <div className={commonStyles.itemHeader}>
+                <label htmlFor={`checkbox${checkbox.id}`}>Checkbox {checkbox.id}:</label>
+                <button 
+                  type="button" 
+                  className={commonStyles.removeBtn}
+                  onClick={() => removeCheckbox(checkbox.id)}
+                  disabled={checkboxes.length <= 1}
+                >
+                  <FaTrash /> Remove
+                </button>
+              </div>
+              <div className={commonStyles.itemGroup}>
+                <label htmlFor={`checkbox${checkbox.id}`}>Checkbox name:</label>
+                <input 
+                  type="text" 
+                  name={`checkbox${checkbox.id}`} 
+                  id={`checkbox${checkbox.id}`} 
+                  placeholder="Name"
+                  value={checkbox.question}
+                  onChange={(e) => handleCheckboxChange(checkbox.id, e.target.value)} 
+                />
+              </div>
           </div>
         ))}
-      <button
-        type="button"
-        onClick={addOption}
-        className="mt-2 bg-green-500 text-white px-3 py-1 rounded"
-      >
-        Add Option
-      </button>
+        <button className={commonStyles.addItemBtn} onClick={addCheckbox}><FaPlus /> Add another checkbox</button>
     </div>
-  );
-}
+  )
+};

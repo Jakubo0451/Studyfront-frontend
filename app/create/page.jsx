@@ -261,6 +261,7 @@ export default function CreateStudyPage() {
           onQuestionSelect={handleQuestionSelect}
           onAddQuestion={handleAddQuestion}
           setQuestions={setQuestions}
+          selectedQuestionIndex={selectedQuestionIndex}
         />
         <div className="flex-1 p-4 overflow-auto max-h-[90vh]">
           {/* <h2 className="text-xl font-semibold mb-4">
