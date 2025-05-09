@@ -78,7 +78,8 @@ const SideBar = ({
   onAddQuestion,
   setQuestions,
   studyTitle,
-  onViewStudyDetails, // New prop
+  onViewStudyDetails,
+  onChange,
 }) => {
   const params = useParams();
 
@@ -95,6 +96,7 @@ const SideBar = ({
   };
 
   const handleAddQuestionType = (type) => {
+    onChange()
     onAddQuestion(type);
     setShowAddQuestionMenu(false);
   };
@@ -156,15 +158,7 @@ const SideBar = ({
                 <SortableItem
                   key={`${question.id}-${index}`}
                   id={`item-${question.id}`}
-                  content={
-                    question.type === "text"
-                      ? `Text Question ${index + 1}`
-                      : question.type === "multipleChoice"
-                      ? `Multiple Choice ${index + 1}`
-                      : question.type === "checkbox"
-                      ? `Checkbox Question ${index + 1}`
-                      : `Question ${index + 1}`
-                  }
+                  content={question.title ? question.title : `Question ${index + 1}`}
                   onQuestionSelect={onQuestionSelect}
                   onDeleteQuestion={onDeleteQuestion}
                   index={index}
