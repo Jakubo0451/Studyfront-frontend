@@ -185,9 +185,15 @@ export default function CreateStudyPage() {
     setQuestions(updatedQuestions);
   };
 
-  /* const handleSaveQuestions = async () => {
+  const handleSaveQuestions = async () => {
     if (!editStudyId) {
       console.error("Study ID not found for saving questions.");
+      return;
+    }
+
+    // Validate that there are questions to save
+    if (questions.length === 0) {
+      alert("Please add at least one question before saving.");
       return;
     }
 
@@ -207,7 +213,6 @@ export default function CreateStudyPage() {
         body: JSON.stringify({
           questions: questions.map((q) => ({
             _id: q._id,
-            id: q.id.toString(),
             type: q.type,
             data: q.data || {},
             file: q.file || null,
@@ -226,13 +231,13 @@ export default function CreateStudyPage() {
       }
 
       const updatedStudy = await response.json();
-      console.log("Questions saved successfully", updatedStudy);
+      alert("Questions saved successfully!");
       router.push("/dashboard");
     } catch (error) {
       console.error("Error saving questions:", error.message);
       alert("Failed to save questions. Please try again.");
     }
-  }; */
+  };
 
   if (!editStudyId) {
     return (
@@ -314,13 +319,16 @@ export default function CreateStudyPage() {
             <p>Click "Add Item" in the sidebar to add your first question.</p>
           )}
 
-          {/* <button
+          <button
             type="button"
             onClick={handleSaveQuestions}
-            className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center"
+            className="fixed bottom-4 right-4 bg-petrol-blue hover:bg-oxford-blue text-white rounded-lg px-6 py-3 flex items-center justify-center shadow-lg transition-colors duration-300"
           >
-            Save Questions
-          </button> */}
+            <span className="mr-2">Save Questions</span>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>
