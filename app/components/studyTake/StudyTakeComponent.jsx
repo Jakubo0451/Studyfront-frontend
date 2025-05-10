@@ -1,6 +1,6 @@
 "use client";
-import { useState} from "react";
-import axios from "axios";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
 
@@ -14,6 +14,8 @@ export default function StudyTakeComponent({ study }) {
   const [responses, setResponses] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [redirectCountdown, setRedirectCountdown] = useState(30);
+  const router = useRouter();
   const generateParticipantId = () => {
     return `p_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
   };
@@ -61,6 +63,7 @@ export default function StudyTakeComponent({ study }) {
     }
   };
 
+  // Update the handleSubmit function
   const handleSubmit = async () => {
     if (!study._id) return;
     
@@ -84,28 +87,63 @@ export default function StudyTakeComponent({ study }) {
         }))
       };
       
-      const result = await axios.post(`${backendUrl}/api/responses/submit`, submissionData);
+      const result = await fetch(`${backendUrl}/api/studies/results`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // No Authorization header needed since this is a public endpoint
+        },
+        body: JSON.stringify(submissionData)
+      });
+
+      if (!result.ok) {
+        throw new Error('Submission failed');
+      }
       
-      // Check for 201 status code as per backend
       if (result.status === 201) {
         setCompleted(true);
       } else {
-        throw new Error(result.data?.message || 'Submission failed');
+        throw new Error(result.data?.error || 'Submission failed');
       }
     } catch (err) {
       console.error("Error submitting responses:", err);
-      alert(err.response?.data?.message || "There was an error submitting your responses. Please try again.");
+      alert("There was an error submitting your responses. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   if (completed) {
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setRedirectCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            router.push('/login');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }, [router]);
+
     return (
       <div className="bg-white rounded-lg shadow-md p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Thank You!</h2>
+        <h2 className="text-2xl font-bold mb-4">Thank You for Your Participation!</h2>
         <p className="mb-6">Your responses have been submitted successfully.</p>
-        <p className="text-gray-600">You may now close this window.</p>
+        <div className="my-8">
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+            <div 
+              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+              style={{ width: `${(redirectCountdown / 30) * 100}%` }}
+            ></div>
+          </div>
+          <p className="text-gray-600">
+            Redirecting in {redirectCountdown} seconds...
+          </p>
+        </div>
       </div>
     );
   }
