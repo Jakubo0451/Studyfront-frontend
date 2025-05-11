@@ -58,6 +58,12 @@ export default function Profile() {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       
+      if (!token || !userId) {
+        setError('Authentication required');
+        router.push('/login');
+        return;
+      }
+
       const response = await fetch(`${backendUrl}/api/users/${userId}/email`, {
         method: 'PUT',
         headers: {
@@ -67,29 +73,39 @@ export default function Profile() {
         body: JSON.stringify({ email: newEmail }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         setUser({ ...user, email: newEmail });
         setShowEmailPrompt(false);
         setNewEmail('');
+        setError('');
       } else {
-        setError('Failed to update email');
+        setError(data.message || 'Failed to update email');
       }
     } catch (error) {
-      setError('An error occurred', error);
+      console.error('Error updating email:', error);
+      setError('Network error occurred while updating email');
     }
   };
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
-    if (passwords.new !== passwords.confirm) {
-      setError('Passwords do not match');
-      return;
-    }
-
     try {
+      if (passwords.new !== passwords.confirm) {
+        setError('Passwords do not match');
+        return;
+      }
+
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       
+      if (!token || !userId) {
+        setError('Authentication required');
+        router.push('/login');
+        return;
+      }
+
       const response = await fetch(`${backendUrl}/api/users/${userId}/password`, {
         method: 'PUT',
         headers: {
@@ -102,14 +118,18 @@ export default function Profile() {
         }),
       });
 
+      const data = await response.json();
+
       if (response.ok) {
         setShowPasswordPrompt(false);
         setPasswords({ current: '', new: '', confirm: '' });
+        setError('');
       } else {
-        setError('Failed to update password');
+        setError(data.message || 'Failed to update password');
       }
     } catch (error) {
-      setError('An error occurred', error);
+      console.error('Error updating password:', error);
+      setError('Network error occurred while updating password');
     }
   };
 
