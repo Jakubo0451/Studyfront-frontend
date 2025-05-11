@@ -10,7 +10,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
   const renderTextQuestion = () => (
     <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+      <label className="block text-lg mb-2">{question.data.prompt || question.data.questionText}</label>
       <textarea
         className="w-full p-2 border rounded-md"
         rows="4"
@@ -23,7 +23,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
   const renderNumberQuestion = () => (
     <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+      <label className="block text-lg mb-2">{question.data.prompt || question.data.questionText}</label>
       <input
         type="number"
         className="w-full p-2 border rounded-md"
@@ -36,7 +36,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
   const renderMultiChoiceQuestion = () => (
     <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+      <label className="block text-lg mb-2">{question.data.prompt || question.data.questionText}</label>
       <div className="space-y-2">
         {question.data.options.map((option, index) => (
           <label key={index} className="flex items-center space-x-2 cursor-pointer">
@@ -57,7 +57,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
   const renderCheckboxQuestion = () => (
     <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+      <label className="block text-lg mb-2">{question.data.prompt || question.data.questionText}</label>
       <div className="space-y-2">
         {question.data.options.map((option, index) => (
           <label key={index} className="flex items-center space-x-2 cursor-pointer">
@@ -82,7 +82,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
   const renderRatingQuestion = () => (
     <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+      <label className="block text-lg mb-2">{question.data.prompt || question.data.questionText}</label>
       <div className="flex items-center space-x-4">
         {Array.from({ length: question.data.maxRating }, (_, i) => i + 1).map((value) => (
           <button
@@ -101,6 +101,9 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
       </div>
     </div>
   );
+
+  // Add debugging log to check question data
+  console.log('Question data:', question);
 
   switch (question.type) {
     case 'text':
