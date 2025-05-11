@@ -170,11 +170,13 @@ const SideBar = ({
                     question.type === "text"
                       ? `${index + 1}: Text Question`
                       : question.type === "multipleChoice"
-                      ? `${index + 1}: Multiple Choice`
+                      ? `${index + 1}: Multiple Choice Question`
                       : question.type === "checkbox"
                       ? `${index + 1}: Checkbox Question`
                       : question.type === "ratingScale"
                       ? `${index + 1}: Rating Scale Question`
+                      : question.type === "dropdown"
+                      ? `${index + 1}: Dropdown Question`
                       : `Question ${index + 1}`
                     }
                     onQuestionSelect={onQuestionSelect}
@@ -218,8 +220,29 @@ const SideBar = ({
                     type="button"
                     onClick={() => handleAddQuestionType("checkbox")}
                   >
-                    <img src="/questionTypes/checkboxQ.svg" alt="Rating scale" />
+                    <img src="/questionTypes/checkboxQ.svg" alt="Checkbox" />
                     Checkbox
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("text")}
+                  >
+                    <img src="/questionTypes/textanswerQ.svg" alt="Text" />
+                    Text Answer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("multipleChoice")}
+                  >
+                    <img src="/questionTypes/multiplechoiceQ.svg" alt="Multiple choice" />
+                    Multiple Choice
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("dropdown")}
+                  >
+                    <img src="/questionTypes/dropdownQ.svg" alt="Dropdown" />
+                    Dropdown
                   </button>
                 </div>
               </div>

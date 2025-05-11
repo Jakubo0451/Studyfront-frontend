@@ -54,6 +54,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.8rem;
+    transition: background-color .3s ease;
   }
   
   .removeBtn:hover {
@@ -109,4 +110,23 @@
 
 .addItemBtn:hover {
     background-color: var(--color-oxford-blue);
+}
+
+.itemGroup h4 {
+  margin-top: .5rem;
+}
+
+.singleOptionBox {
+    background-color: var(--color-sky-blue);
+    padding: .5rem;
+    border-left: solid 3px var(--color-petrol-blue);
+    margin-bottom: .5rem;
+}
+
+.singleOptionBox input:focus {
+    outline: solid 3px var(--color-petrol-blue);
+}
+
+.singleOptionBox label {
+    margin-bottom: 0;
 }

@@ -8,6 +8,9 @@ import CheckboxQuestionBuilder from "@/components/questionTypes/checkboxQ";
 import { useSearchParams, useRouter } from "next/navigation";
 import backendUrl from "environment";
 import RatingScaleQuestionBuilder from "@/components/questionTypes/ratingQ";
+import TextanswerQuestionBuilder from "@/components/questionTypes/textanswerQ";
+import MultipleChoiceQuestionBuilder from "@/components/questionTypes/multiplechoiceQ";
+import DropdownQuestionBuilder from "@/components/questionTypes/dropdownQ";
 import StudyDetails from "@/components/questionTypes/studyDetails";
 import { fetchStudyDetails, updateQuestions } from "@/utils/studyActions";
 
@@ -153,7 +156,7 @@ export default function CreateStudyPage() {
                 questions[selectedQuestionIndex] && (
                   <div>
                     {questions[selectedQuestionIndex].type === "text" && (
-                      <TextQuestionDisplay
+                      <TextanswerQuestionBuilder
                         question={questions[selectedQuestionIndex]}
                         onQuestionDataChange={(id, data) =>
                           setQuestions((prev) =>
@@ -165,7 +168,7 @@ export default function CreateStudyPage() {
                       />
                     )}
                     {questions[selectedQuestionIndex].type === "multipleChoice" && (
-                      <MultipleChoiceQuestionDisplay
+                      <MultipleChoiceQuestionBuilder
                         question={questions[selectedQuestionIndex]}
                         onQuestionDataChange={(id, data) =>
                           setQuestions((prev) =>
@@ -192,6 +195,20 @@ export default function CreateStudyPage() {
                     )}
                     {questions[selectedQuestionIndex].type === "ratingScale" && (
                       <RatingScaleQuestionBuilder
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={(updatedData) =>
+                          setQuestions((prev) =>
+                            prev.map((q) =>
+                              q.id === questions[selectedQuestionIndex].id
+                                ? { ...q, data: updatedData }
+                                : q
+                            )
+                          )
+                        }
+                      />
+                    )}
+                    {questions[selectedQuestionIndex].type === "dropdown" && (
+                      <DropdownQuestionBuilder
                         questionData={questions[selectedQuestionIndex].data}
                         onChange={(updatedData) =>
                           setQuestions((prev) =>
