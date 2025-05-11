@@ -11,6 +11,7 @@ export default function TakeStudyPage() {
   const [study, setStudy] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [redirectCountdown, setRedirectCountdown] = useState(30);
 
   useEffect(() => {
     const fetchStudy = async () => {
@@ -27,6 +28,8 @@ export default function TakeStudyPage() {
         }
 
         const data = await response.json();
+        console.log('Fetched study data:', data);
+        console.log('Study active status:', data.active);
         setStudy(data);
         setLoading(false);
       } catch (error) {
@@ -38,6 +41,23 @@ export default function TakeStudyPage() {
 
     fetchStudy();
   }, [params.id]);
+
+  useEffect(() => {
+    if (study && !study.active) {
+      const timer = setInterval(() => {
+        setRedirectCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            router.push('/');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [study, router]);
 
   if (loading) {
     return <div className="p-8">Loading study...</div>;
@@ -54,6 +74,26 @@ export default function TakeStudyPage() {
         >
           Return to Home
         </button>
+      </div>
+    );
+  }
+
+  if (!study?.active) {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-8 text-center">
+        <h2 className="text-2xl font-bold mb-4">Study Has Ended</h2>
+        <p className="mb-6">Thank you for your interest, but this study is no longer accepting responses.</p>
+        <div className="my-8">
+          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+            <div 
+              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+              style={{ width: `${(redirectCountdown / 30) * 100}%` }}
+            ></div>
+          </div>
+          <p className="text-gray-600">
+            Redirecting in {redirectCountdown} seconds...
+          </p>
+        </div>
       </div>
     );
   }
