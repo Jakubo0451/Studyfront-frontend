@@ -5,7 +5,6 @@ import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
 
 export default function StudyTakeComponent({ study }) {
-  // Add validation for study prop
   if (!study?._id) {
     return <div className="p-8">Invalid study configuration.</div>;
   }
@@ -87,34 +86,31 @@ export default function StudyTakeComponent({ study }) {
         }))
       };
       
-      const result = await fetch(`${backendUrl}/api/studies/results`, {
+      const result = await fetch(`${backendUrl}/api/responses/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // No Authorization header needed since this is a public endpoint
         },
         body: JSON.stringify(submissionData)
       });
 
+      const data = await result.json();
+
       if (!result.ok) {
-        throw new Error('Submission failed');
+        throw new Error(data.message || 'Submission failed');
       }
       
-      if (result.status === 201) {
-        setCompleted(true);
-      } else {
-        throw new Error(result.data?.error || 'Submission failed');
-      }
+      setCompleted(true);
     } catch (err) {
       console.error("Error submitting responses:", err);
-      alert("There was an error submitting your responses. Please try again.");
+      alert(err.message || "There was an error submitting your responses. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (completed) {
-    useEffect(() => {
+  useEffect(() => {
+    if (completed) {
       const timer = setInterval(() => {
         setRedirectCountdown((prev) => {
           if (prev <= 1) {
@@ -127,8 +123,10 @@ export default function StudyTakeComponent({ study }) {
       }, 1000);
 
       return () => clearInterval(timer);
-    }, [router]);
+    }
+  }, [completed, router]);
 
+  if (completed) {
     return (
       <div className="bg-white rounded-lg shadow-md p-8 text-center">
         <h2 className="text-2xl font-bold mb-4">Thank You for Your Participation!</h2>
