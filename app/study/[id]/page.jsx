@@ -60,43 +60,57 @@ export default function TakeStudyPage() {
   }, [study, router]);
 
   if (loading) {
-    return <div className="p-8">Loading study...</div>;
+    return (
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="text-xl text-petrol-blue">Loading study...</div>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="p-8">
-        <div className="text-red-500">{error}</div>
-        <button 
-          type="button"
-          onClick={() => router.push('/')}
-          className="mt-4 text-blue-500 hover:underline"
-        >
-          Return to Home
-        </button>
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full text-center">
+          <div className="text-red-500 text-lg mb-4">{error}</div>
+          <button 
+            type="button"
+            onClick={() => router.push('/')}
+            className="px-4 py-2 bg-petrol-blue text-white rounded hover:bg-oxford-blue transition-colors duration-300"
+          >
+            Return to Home
+          </button>
+        </div>
       </div>
     );
   }
 
   if (!study?.active) {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">Study Has Ended</h2>
-        <p className="mb-6">Thank you for your interest, but this study is no longer accepting responses.</p>
-        <div className="my-8">
-          <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-            <div 
-              className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
-              style={{ width: `${(redirectCountdown / 30) * 100}%` }}
-            ></div>
-          </div>
-          <p className="text-gray-600">
-            Redirecting in {redirectCountdown} seconds...
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full text-center">
+          <h2 className="text-2xl font-bold text-petrol-blue mb-4">Study Has Ended</h2>
+          <p className="mb-6 text-gray-600">
+            Thank you for your interest, but this study is no longer accepting responses.
           </p>
+          <div className="my-8">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+              <div 
+                className="bg-petrol-blue h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${(redirectCountdown / 30) * 100}%` }}
+              ></div>
+            </div>
+            <p className="text-gray-600">
+              Redirecting in {redirectCountdown} seconds...
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
-  return <StudyTakeComponent study={study} />;
+  return (
+    <div className="min-h-screen bg-sky-blue p-8">
+      <StudyTakeComponent study={study} />
+    </div>
+  );
 }
