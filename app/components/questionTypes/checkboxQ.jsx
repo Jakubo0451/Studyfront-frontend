@@ -5,7 +5,7 @@ import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact'
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-export default function CheckboxQuestionBuilder() {
+export default function checkboxQ() {
   // State to manage multiple checkbox groups, each with their own options
   const [checkboxGroups, setCheckboxGroups] = useState([
     {

@@ -5,7 +5,7 @@ import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact'
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-export default function DropdownQuestionBuilder() {
+export default function dropdownQ() {
   // State to manage multiple dropdown questions, each with their own options
   const [dropdowns, setDropdowns] = useState([
     {

@@ -5,7 +5,7 @@ import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact'
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-export default function MultipleChoiceQuestionBuilder() {
+export default function multiplechoiceQ() {
   // State to manage multiple choice groups, each with their own options
   const [choiceGroups, setChoiceGroups] = useState([
     {
@@ -151,11 +151,11 @@ export default function MultipleChoiceQuestionBuilder() {
             />
           
           <h4>Options (select one):</h4>
-          <div className={multiplechoiceStyles.optionsContainer || 'mt-2 space-y-2'}>
+          <div className={multiplechoiceStyles.optionsContainer}>
             
             {/* Map through options for this choice group */}
             {group.options.map((option) => (
-              <div key={option.id} className={commonStyles.singleOptionBox || 'border-l-2 border-petrol-blue pl-4 py-2'}>
+              <div key={option.id} className={commonStyles.singleOptionBox}>
                 <div className={commonStyles.itemHeader}>
                   <label htmlFor={`group${group.id}Option${option.id}`}>Option {option.id}:</label>
                   <button 

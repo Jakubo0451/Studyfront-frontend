@@ -177,6 +177,10 @@ const SideBar = ({
                       ? `${index + 1}: Rating Scale Question`
                       : question.type === "dropdown"
                       ? `${index + 1}: Dropdown Question`
+                      : question.type === "ranking"
+                      ? `${index + 1}: Ranking Question`
+                      : question.type === "matrix"
+                      ? `${index + 1}: Matrix Question`
                       : `Question ${index + 1}`
                     }
                     onQuestionSelect={onQuestionSelect}
@@ -243,6 +247,20 @@ const SideBar = ({
                   >
                     <img src="/questionTypes/dropdownQ.svg" alt="Dropdown" />
                     Dropdown
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("ranking")}
+                  >
+                    <img src="/questionTypes/rankQ.svg" alt="Ranking" />
+                    Ranking
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("matrix")}
+                  >
+                    <img src="/questionTypes/matrixQ.svg" alt="Matrix" />
+                    Matrix
                   </button>
                 </div>
               </div>
