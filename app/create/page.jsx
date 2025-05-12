@@ -286,7 +286,6 @@ export default function CreateStudyPage() {
           updatedDataFromChild,
           /* eslint-disable-next-line */
           (_updatedData) => {
-            console.log("Question data saved successfully");
             setSaveStatus("Question saved!");
             setTimeout(() => setSaveStatus(""), 3000);
           },
