@@ -10,6 +10,11 @@ import { useState } from 'react';
 export default function Dashboard() {
     const router = useRouter();
     const [shouldRefresh] = useState(false);
+    const [createdStudy, setCreatedStudy] = useState(null);
+
+    const handleStudyChange = (study) => {
+        setCreatedStudy(study);
+    };
 
     const handleCreateStudy = () => {
         createStudy(router, (errorMessage) => {
@@ -19,7 +24,7 @@ export default function Dashboard() {
 
     return (
         <div>
-            <SharePopup/>
+            <SharePopup study={createdStudy} onStudyChange={handleStudyChange} />
             <Header/>
             <div className="flex flex-col items-center h-full">
                 <h1 className="text-6xl mb-10 mt-10">Your studies</h1>

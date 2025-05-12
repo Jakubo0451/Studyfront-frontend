@@ -22,8 +22,19 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyCh
         fetchStudyDetails(selectedStudyId, router, onStudyChange, console.error);
     };
 
+    const handleStudyUpdate = () => {
+        if (onStudyDeleted) {
+            onStudyDeleted();
+        }
+        onClose();
+    };
+
     const handleDeleteStudy = () => {
-        deleteStudy(study, router, onClose, onStudyDeleted, console.error);
+        if (window.confirm('Are you sure you want to delete this study?')) {
+            deleteStudy(study, router, onClose, onStudyDeleted, (error) => {
+                alert('Failed to delete study: ' + error);
+            });
+        }
     };
 
     const handleEdit = () => {
@@ -32,15 +43,15 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyCh
     };
 
     const handleStartStudy = () => {
-        startStudy(study, (updatedStudy) => {
-            onStudyChange(updatedStudy);
-        }, console.error);
+        startStudy(study, handleStudyUpdate, (error) => {
+            alert('Failed to start study: ' + error);
+        });
     };
 
     const handleEndStudy = () => {
-        endStudy(study, (updatedStudy) => {
-            onStudyChange(updatedStudy);
-        }, console.error);
+        endStudy(study, handleStudyUpdate, (error) => {
+            alert('Failed to end study: ' + error);
+        });
     };
 
     return (
