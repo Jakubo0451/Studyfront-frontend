@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ratingStyles from '../../styles/questionTypes/ratingQ.module.css';
 import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact';
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-export default function RatingScaleQuestionBuilder({ questionData, onChange }) {
+function RatingScaleQuestionComponent({ questionData, onChange }) {
   const [ratingScales, setRatingScales] = useState(
     questionData?.ratingScales || [{ id: Date.now(), name: '', min: '', max: '' }]
   );
@@ -110,3 +110,6 @@ export default function RatingScaleQuestionBuilder({ questionData, onChange }) {
     </div>
   );
 }
+
+const RatingScaleQuestionBuilder = React.memo(RatingScaleQuestionComponent);
+export default RatingScaleQuestionBuilder;

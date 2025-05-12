@@ -139,7 +139,6 @@ export const deleteStudy = async (study, router, onClose, onStudyDeleted, onErro
             });
 
             if (response.ok) {
-                console.log(`Study "${study.title}" deleted successfully.`);
                 onClose();
                 if (onStudyDeleted) {
                     onStudyDeleted();
@@ -179,7 +178,6 @@ export const startStudy = async (study, onStudyUpdated, onError) => {
 
         if (response.ok) {
             const updatedStudy = await response.json();
-            console.log(`Study "${updatedStudy.title}" started successfully.`);
             if (onStudyUpdated) {
                 onStudyUpdated(updatedStudy);
             }
@@ -218,7 +216,6 @@ export const endStudy = async (study, onStudyUpdated, onError) => {
 
         if (response.ok) {
             const updatedStudy = await response.json();
-            console.log(`Study "${updatedStudy.title}" ended successfully.`);
             if (onStudyUpdated) {
                 onStudyUpdated(updatedStudy);
             }
@@ -265,7 +262,6 @@ export const updateStudy = async (studyId, updatedFields, onSuccess, onError) =>
 
         if (response.ok) {
             const updatedStudy = await response.json();
-            console.log(`Study "${updatedStudy.title}" updated successfully.`);
             if (onSuccess) {
                 onSuccess(updatedStudy);
             }
@@ -304,7 +300,6 @@ export const updateQuestions = async (studyId, updatedQuestions, onSuccess, onEr
 
         if (response.ok) {
             const updatedStudy = await response.json();
-            console.log("Questions updated successfully:", updatedStudy.questions);
             if (onSuccess) {
                 onSuccess(updatedStudy.questions);
             }
@@ -343,7 +338,6 @@ export const addQuestion = async (studyId, newQuestion, onSuccess, onError) => {
 
         if (response.ok) {
             const updatedStudy = await response.json();
-            console.log("New question added successfully:", updatedStudy);
             if (onSuccess) {
                 onSuccess(updatedStudy);
             }
@@ -371,8 +365,6 @@ export const updateQuestion = async (studyId, questionId, payload, onSuccess, on
             return;
         }
 
-        console.log("Sending payload to update question:", payload);
-
         const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions/${questionId}`, {
             method: "PUT",
             headers: {
@@ -384,7 +376,6 @@ export const updateQuestion = async (studyId, questionId, payload, onSuccess, on
 
         if (response.ok) {
             const updatedStudy = await response.json();
-            console.log("Question updated successfully:", updatedStudy);
             if (onSuccess) {
                 onSuccess(updatedStudy);
             }
@@ -422,7 +413,6 @@ export const deleteQuestion = async (studyId, questionId, onSuccess, onError) =>
 
         if (response.ok) {
             const updatedStudy = await response.json();
-            console.log("Question deleted successfully:", updatedStudy);
             if (onSuccess) {
                 onSuccess(updatedStudy);
             }

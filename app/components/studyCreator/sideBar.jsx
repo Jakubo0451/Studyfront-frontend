@@ -47,8 +47,6 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
 
   const handleDelete = (e) => {
     e.stopPropagation();
-    console.log(`Delete question at index: ${index}`);
-    console.log(`Delete question with id: ${id}`);
     onDeleteQuestion(index);
   }
 
@@ -127,7 +125,6 @@ const SideBar = ({
       study._id,
       questionToDelete._id,
       (updatedStudy) => {
-        console.log("Question deleted successfully.");
         setQuestions(updatedStudy.questions);
       },
       (error) => {

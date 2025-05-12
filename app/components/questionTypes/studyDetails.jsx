@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import commonStyles from '../../styles/questionTypes/common.module.css'
 import detailsStyles from '../../styles/questionTypes/studyDetails.module.css'
 import { IoIosInformationCircleOutline } from "react-icons/io";
@@ -8,11 +8,14 @@ export default function StudyDetails({
   studyId,
   studyName,
   studyDescription,
+  studyTermsEnabled,
+  studyTerms,
   onStudyUpdated,
 }) {
   const [name, setName] = useState(studyName);
   const [description, setDescription] = useState(studyDescription);
-  const [termsEnabled, setTermsEnabled] = useState(false);
+  const [termsEnabled, setTermsEnabled] = useState(studyTermsEnabled || false);
+  const [termsText, setTermsText] = useState(studyTerms || "");
 
   const handleNameChange = (e) => {
     const newName = e.target.value;
@@ -21,7 +24,6 @@ export default function StudyDetails({
       studyId,
       { title: newName },
       () => {
-        console.log("Study title updated successfully.");
         if (onStudyUpdated) onStudyUpdated();
       },
       (error) => {
@@ -37,7 +39,6 @@ export default function StudyDetails({
       studyId,
       { description: newDescription },
       () => {
-        console.log("Study description updated successfully.");
         if (onStudyUpdated) onStudyUpdated();
       },
       (error) => {
@@ -47,8 +48,41 @@ export default function StudyDetails({
   };
 
   const handleTermsChange = (e) => {
-    setTermsEnabled(e.target.checked);
-  };
+    const newTermsEnabled = e.target.checked;
+    setTermsEnabled(newTermsEnabled);
+    updateStudy(
+      studyId,
+      { hasTermsAndConditions: newTermsEnabled },
+      () => {
+        if (onStudyUpdated) onStudyUpdated();
+      },
+      (error) => {
+        console.error("Failed to update study terms enabled:", error);
+      }
+    );
+  }
+
+  const handleTermsTextChange = (e) => {
+    const newTermsText = e.target.value;
+    setTermsText(newTermsText);
+    updateStudy(
+      studyId,
+      { termsAndConditions: newTermsText },
+      () => {
+        if (onStudyUpdated) onStudyUpdated();
+      },
+      (error) => {
+        console.error("Failed to update study terms text:", error);
+      }
+    );
+  }
+
+  useEffect(() => {
+    setName(studyName || '');
+    setDescription(studyDescription || '');
+    setTermsEnabled(studyTermsEnabled || false);
+    setTermsText(studyTerms || '');
+  }, [studyName, studyDescription, studyTermsEnabled, studyTerms]);
 
   return (
     <div className={commonStyles.questionType + " question-type"}>
@@ -97,6 +131,8 @@ export default function StudyDetails({
             id="studyTerms"
             placeholder="Terms and conditions"
             rows="4"
+            value={termsText}
+            onChange={handleTermsTextChange}
           ></textarea>
         </div>
       )}

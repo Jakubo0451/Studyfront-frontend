@@ -18,8 +18,67 @@ import { fetchStudyDetails, updateQuestions, updateQuestion, addQuestion, delete
 import { debounce, throttle } from "lodash";
 
 const defaultQuestionData = {
-  checkbox: { title: "", options: ['',] },
-  ratingScale: { title: "", ratingScales: ['',] },
+  checkbox: {
+    title: "",
+    checkboxGroups: [
+      {
+        id: `${Date.now()}-cg-initial`,
+        label: "",
+        options: [{ id: `${Date.now()}-opt-initial`, text: "" }],
+      },
+    ],
+  },
+  ratingScale: {
+    title: "",
+    ratingScales: [
+      { id: `${Date.now()}-rs-initial`, name: "", min: "", max: "" },
+    ],
+  },
+  text: {
+    title: "",
+    textAreas: [{ id: `${Date.now()}-ta-initial`, label: "" }],
+  },
+  multipleChoice: {
+    title: "",
+    choiceGroups: [
+      {
+        id: `${Date.now()}-mcg-initial`,
+        label: "",
+        options: [{ id: `${Date.now()}-mco-initial`, text: "" }],
+      },
+    ],
+  },
+  dropdown: {
+    title: "",
+    dropdowns: [
+      {
+        id: `${Date.now()}-dd-initial`,
+        label: "",
+        options: [{ id: `${Date.now()}-ddo-initial`, text: "" }],
+      },
+    ],
+  },
+  ranking: {
+    title: "",
+    rankGroups: [
+      {
+        id: `${Date.now()}-rg-initial`,
+        label: "",
+        options: [{ id: `${Date.now()}-ro-initial`, text: "" }],
+      },
+    ],
+  },
+  matrix: {
+    title: "",
+    matrixGroups: [
+      {
+        id: `${Date.now()}-mg-initial`,
+        label: "",
+        horizontalItems: [{ id: `${Date.now()}-mgh-initial`, text: "" }],
+        verticalItems: [{ id: `${Date.now()}-mgv-initial`, text: "" }],
+      },
+    ],
+  },
 };
 
 export default function CreateStudyPage() {
@@ -28,60 +87,58 @@ export default function CreateStudyPage() {
   const [selectedQuestionIndex, setSelectedQuestionIndex] = useState(null);
   const [viewingStudyDetails, setViewingStudyDetails] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
   const searchParams = useSearchParams();
   const editStudyId = searchParams.get("studyId");
   const router = useRouter();
 
-const debouncedSave = useCallback(
-  debounce((studyId, questionId, updatedData, onSuccess, onError) => {
-    console.log("Debounced save triggered:", { studyId, questionId, updatedData });
-    const payload = { data: updatedData };
-    updateQuestion(studyId, questionId, payload, onSuccess, onError);
-  }, 1000),
-  []
-);
+  const debouncedSave = useCallback(
+    debounce((studyId, questionId, dataToSave, onSuccess, onError) => {
+      const payload = { data: dataToSave };
+      updateQuestion(studyId, questionId, payload, onSuccess, onError);
+    }, 1000),
+    []
+  );
 
-const throttledSave = throttle(async (currentQuestion) => {
-  if (!study?._id || !currentQuestion) return;
+  const throttledSave = throttle(async (currentQuestion) => {
+    if (!study?._id || !currentQuestion) return;
 
-  try {
-    if (!currentQuestion._id) {
-      await addQuestion(
-        study._id,
-        currentQuestion,
-        (updatedStudy) => {
-          console.log("New question added successfully:", updatedStudy.questions);
-          setQuestions(updatedStudy.questions);
-          setSaveStatus("Study saved successfully!");
-          setTimeout(() => setSaveStatus(""), 3000);
-        },
-        (error) => {
-          console.error("Failed to add the new question:", error);
-          alert("Failed to add the new question. Please try again.");
-        }
-      );
-    } else {
-      await updateQuestion(
-        study._id,
-        currentQuestion._id,
-        currentQuestion.data,
-        (updatedStudy) => {
-          console.log("Current question updated successfully slowed:", updatedStudy);
-          setSaveStatus("Study saved successfully!");
-          setTimeout(() => setSaveStatus(""), 3000);
-        },
-        (error) => {
-          console.error("Failed to update the current question:", error);
-          alert("Failed to update the current question. Please try again.");
-        }
-      );
+    try {
+      if (!currentQuestion._id) {
+        await addQuestion(
+          study._id,
+          currentQuestion,
+          (updatedStudy) => {
+            setQuestions(updatedStudy.questions);
+            setSaveStatus("Study saved successfully!");
+            setTimeout(() => setSaveStatus(""), 3000);
+          },
+          (error) => {
+            console.error("Failed to add the new question:", error);
+            alert("Failed to add the new question. Please try again.");
+          }
+        );
+      } else {
+        await updateQuestion(
+          study._id,
+          currentQuestion._id,
+          currentQuestion.data,
+          (updatedStudy) => {
+            setSaveStatus("Study saved successfully!");
+            setTimeout(() => setSaveStatus(""), 3000);
+          },
+          (error) => {
+            console.error("Failed to update the current question:", error);
+            alert("Failed to update the current question. Please try again.");
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Error saving question:", error);
+      alert("Failed to save the question. Please try again.");
     }
-  } catch (error) {
-    console.error("Error saving question:", error);
-    alert("Failed to save the question. Please try again.");
-  }
-}, 2000);
-
+  }, 2000);
 
   useEffect(() => {
     const fetchStudyDetails = async () => {
@@ -114,17 +171,58 @@ const throttledSave = throttle(async (currentQuestion) => {
 
           const data = await response.json();
 
-          const flattenedQuestions = data.questions;
+          const initializedQuestions = data.questions.map((q) => ({
+            ...q,
+            _id: q._id || `${Date.now()}-q-${Math.random()}`,
+            data: {
+              ...q.data,
+              ratingScales:
+                q.data?.ratingScales?.map((rs, index) => ({
+                  ...rs,
+                  id: rs.id || `${Date.now()}-rs-${index}`,
+                })) ||
+                (q.type === "ratingScale"
+                  ? defaultQuestionData.ratingScale.ratingScales
+                  : undefined),
+              checkboxGroups:
+                q.data?.checkboxGroups?.map((cg, cgIdx) => ({
+                  ...cg,
+                  id: cg.id || `${Date.now()}-cg-${cgIdx}`,
+                  options:
+                    cg.options?.map((opt, optIdx) => ({
+                      ...opt,
+                      id: opt.id || `${Date.now()}-cg-${cgIdx}-opt-${optIdx}`,
+                    })) ||
+                    defaultQuestionData.checkbox.checkboxGroups[0].options,
+                })) ||
+                (q.type === "checkbox"
+                  ? defaultQuestionData.checkbox.checkboxGroups
+                  : undefined),
+              textAreas:
+                q.data?.textAreas?.map((ta, index) => ({
+                  ...ta,
+                  id: ta.id || `${Date.now()}-ta-${index}`,
+                })) ||
+                (q.type === "text"
+                  ? defaultQuestionData.text.textAreas
+                  : undefined),
+            },
+          }));
 
+          console.log("Fetched study details:", data);
           setStudy(data);
-          setQuestions(flattenedQuestions);
-          if (flattenedQuestions.length > 0) {
+          setQuestions(initializedQuestions);
+          if (initializedQuestions.length > 0) {
             setSelectedQuestionIndex(0);
           }
         } catch (error) {
           console.error("Error fetching study details:", error);
           alert("Failed to fetch study details. Please try again.");
+        } finally {
+          setIsLoading(false);
         }
+      } else {
+        setIsLoading(false);
       }
     };
 
@@ -144,151 +242,98 @@ const throttledSave = throttle(async (currentQuestion) => {
     setViewingStudyDetails(false);
   };
 
-  const handleStudyUpdate = () => {
-    if (editStudyId) {
-      fetchStudyDetails(editStudyId);
-    }
-  };
+  const handleStudyUpdate = useCallback((updatedFields) => {
+    setStudy((prevStudy) => {
+      if (!prevStudy) return null;
+      const newStudyState = { ...prevStudy, ...updatedFields };
+      console.log("Optimistically updated study state:", newStudyState);
+      return newStudyState;
+    });
+
+    setSaveStatus("Study information updated!");
+    setTimeout(() => setSaveStatus(""), 3000);
+  }, []);
 
   const handleQuestionsChange = (updatedQuestions) => {
     setQuestions(updatedQuestions);
     updateQuestions(
-        study._id,
-        updatedQuestions,
-        (savedQuestions) => {
-            console.log("Questions saved successfully:", savedQuestions);
-        },
-        (error) => {
-            console.error("Failed to save questions:", error);
-        }
+      study._id,
+      updatedQuestions,
+      (savedQuestions) => {},
+      (error) => {
+        console.error("Failed to save questions:", error);
+      }
     );
   };
 
   const handleSaveQuestions = async () => {
-    if (selectedQuestionIndex === null || !questions[selectedQuestionIndex]) return;
+    if (
+      selectedQuestionIndex === null ||
+      !questions[selectedQuestionIndex]
+    )
+      return;
     const currentQuestion = questions[selectedQuestionIndex];
     throttledSave(currentQuestion);
   };
 
   const handleQuestionDataChange = useCallback(
-    (updatedData) => {
-      setQuestions((prev) =>
-        prev.map((q, index) =>
-          index === selectedQuestionIndex
-            ? {
-                ...q,
-                data: {
-                  ...q.data, // Preserve existing fields
-                  ...updatedData, // Merge updated fields
-                },
-              }
-            : q
-        )
-      );
+    (updatedDataFromChild) => {
+      if (selectedQuestionIndex === null) return;
 
-      // Save the updated question to the backend
-      const currentQuestion = questions[selectedQuestionIndex];
-      if (currentQuestion && study) {
-        const updatedQuestion = {
-          ...currentQuestion,
-          data: {
-            ...currentQuestion.data, // Preserve existing fields
-            ...updatedData, // Merge updated fields
-          },
-        };
+      const nextQuestions = questions.map((q, index) => {
+        if (index === selectedQuestionIndex) {
+          return {
+            ...q,
+            data: updatedDataFromChild,
+          };
+        }
+        return q;
+      });
 
-        debouncedSave(
-          study._id,
-          updatedQuestion._id, // Use the question's _id
-          { data: updatedQuestion.data }, // Wrap updatedData in a "data" key
-          (updatedStudy) => {
-            console.log("Question updated successfully:", updatedStudy);
-            setSaveStatus("Study saved successfully!"); // Update save status
-            setTimeout(() => setSaveStatus(""), 3000); // Clear the message after 3 seconds
-          },
-          (error) => {
-            console.error("Failed to update the question:", error);
-            alert("Failed to update the question. Please try again.");
-          }
-        );
+      if (
+        JSON.stringify(questions[selectedQuestionIndex]?.data) !==
+        JSON.stringify(updatedDataFromChild)
+      ) {
+        setQuestions(nextQuestions);
       }
-    },
-    [selectedQuestionIndex, study?._id] // Add a null-safe check for study._id
-  );
 
+      const questionToSave = questions[selectedQuestionIndex];
 
-  const handleCheckboxQuestionChange = useCallback(
-    (updatedData) => {
-      setQuestions((prev = []) =>
-        prev.map((q, index) =>
-          index === selectedQuestionIndex
-            ? { ...q, data: { ...q.data, ...updatedData } }
-            : q
-        )
-      );
-
-      const currentQuestion = questions[selectedQuestionIndex];
-      if (currentQuestion && study) {
-        const updatedQuestion = {
-          ...currentQuestion,
-          data: { ...currentQuestion.data, ...updatedData },
-        };
-
+      if (study?._id && questionToSave?._id) {
         debouncedSave(
           study._id,
-          updatedQuestion._id,
-          updatedQuestion.data,
-          (updatedStudy) => {
-            console.log("Checkbox question saved successfully:", updatedStudy);
+          questionToSave._id,
+          updatedDataFromChild,
+          (savedStudy) => {
+            setSaveStatus("Study saved successfully!");
+            setTimeout(() => setSaveStatus(""), 3000);
           },
           (error) => {
-            console.error("Failed to save the checkbox question:", error);
+            console.error(
+              "Failed to save question data via debouncedSave:",
+              error
+            );
           }
         );
       }
     },
     [selectedQuestionIndex, questions, study, debouncedSave]
   );
-  
-  const handleRatingScaleQuestionChange = useCallback(
-    (updatedData) => {
-      setQuestions((prev = []) =>
-        prev.map((q, index) =>
-          index === selectedQuestionIndex
-            ? { ...q, data: { ...q.data, ...updatedData } }
-            : q
-        )
-      );
 
-      const currentQuestion = questions[selectedQuestionIndex];
-      if (currentQuestion && study) {
-        const updatedQuestion = {
-          ...currentQuestion,
-          data: { ...currentQuestion.data, ...updatedData },
-        };
-
-        debouncedSave(
-          study._id,
-          updatedQuestion._id,
-          updatedQuestion.data,
-          (updatedStudy) => {
-          console.log("Rating scale question saved successfully:", updatedStudy);
-        },
-        (error) => {
-          console.error("Failed to save the rating scale question:", error);
-        }
-      );
-    }
-  },
-  [selectedQuestionIndex, questions, study, debouncedSave]
-);
-
-  if (!editStudyId) {
+  if (!editStudyId && !isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <p className="text-lg">
-          Please select a study to edit from the dashboard.
+          Please select a study to edit from the dashboard, or create a new one.
         </p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <p className="text-lg">Loading study details...</p>
       </div>
     );
   }
@@ -296,7 +341,7 @@ const throttledSave = throttle(async (currentQuestion) => {
   if (!study) {
     return (
       <div className="flex justify-center items-center h-full">
-        <p className="text-lg">Loading study details...</p>
+        <p className="text-lg">Study data not available or failed to load.</p>
       </div>
     );
   }
@@ -311,47 +356,64 @@ const throttledSave = throttle(async (currentQuestion) => {
           questions={questions}
           onQuestionSelect={handleQuestionSelect}
           onAddQuestion={async (type) => {
-            if (selectedQuestionIndex !== null && questions[selectedQuestionIndex]) {
+            if (
+              selectedQuestionIndex !== null &&
+              questions[selectedQuestionIndex]
+            ) {
               const currentQuestion = questions[selectedQuestionIndex];
-              if (currentQuestion && study) {
-                const updatedQuestion = {
-                  ...currentQuestion,
-                  data: { ...currentQuestion.data },
-                };
-          
+              if (
+                currentQuestion &&
+                study &&
+                currentQuestion._id &&
+                currentQuestion.data
+              ) {
                 await new Promise((resolve, reject) => {
                   debouncedSave(
                     study._id,
-                    updatedQuestion._id,
-                    updatedQuestion.data,
+                    currentQuestion._id,
+                    currentQuestion.data,
                     () => {
-                      console.log("Unsaved changes saved successfully.");
                       resolve();
                     },
                     (error) => {
-                      console.error("Failed to save unsaved changes:", error);
+                      console.error(
+                        "Failed to save unsaved changes for current question:",
+                        error
+                      );
                       reject(error);
                     }
                   );
                 });
               }
             }
-          
-            const newQuestion = {
-              id: Date.now(),
+
+            const newQuestionClientId = `${Date.now()}-q-${Math.random().toString(36).substring(2, 11)}`;
+
+            const newQuestionPayload = {
+              id: newQuestionClientId,
               type,
               data: defaultQuestionData[type] || {},
-              file: null,
             };
-
+            if (!study?._id) {
+              console.error("Cannot add question: study ID is missing.");
+              alert("Cannot add question: study information is missing. Please reload.");
+              return;
+            }
             addQuestion(
               study._id,
-              newQuestion,
+              newQuestionPayload,
               (updatedStudy) => {
-                console.log("New question added successfully:", updatedStudy.questions);
-                setQuestions(updatedStudy.questions);
-                setSelectedQuestionIndex(updatedStudy.questions.length - 1);
-                setSaveStatus("Study saved successfully!");
+                const newQuestionsFromServer = updatedStudy.questions.map((qFromServer) => {
+                  const anId = qFromServer.id || qFromServer._id || newQuestionClientId;
+                  return {
+                    ...qFromServer,
+                    id: anId,
+                    _id: anId,
+                  };
+                });
+                setQuestions(newQuestionsFromServer);
+                setSelectedQuestionIndex(newQuestionsFromServer.length - 1);
+                setSaveStatus("New question added!");
                 setTimeout(() => setSaveStatus(""), 3000);
               },
               (error) => {
@@ -364,110 +426,136 @@ const throttledSave = throttle(async (currentQuestion) => {
           onViewStudyDetails={handleViewStudyDetails}
           onChange={handleQuestionsChange}
           selectedQuestionIndex={selectedQuestionIndex}
-          deleteQuestion={deleteQuestion}
+          deleteQuestion={(questionId) => {
+            if (!study?._id) {
+              console.error("Cannot delete question: study ID is missing.");
+              return;
+            }
+            deleteQuestion(
+              study._id,
+              questionId,
+              (updatedStudy) => {
+                setQuestions(
+                  updatedStudy.questions.map((q) => ({
+                    ...q,
+                    _id: q._id || q.id,
+                  }))
+                );
+                setSelectedQuestionIndex(null);
+                setSaveStatus("Question deleted.");
+                setTimeout(() => setSaveStatus(""), 3000);
+              },
+              (error) => {
+                console.error("Failed to delete question:", error);
+                alert("Failed to delete question.");
+              }
+            );
+          }}
           saveStatus={saveStatus}
         />
         <div className="flex-1 p-4 overflow-auto max-h-[90vh]">
           {viewingStudyDetails ? (
-              <StudyDetails
-                studyId={study._id}
-                studyName={study.title}
-                studyDescription={study.description}
-                onStudyUpdated={handleStudyUpdate}
-              />
+            <StudyDetails
+              studyId={study._id}
+              studyName={study.title}
+              studyDescription={study.description}
+              studyTermsEnabled={study.termsEnabled}
+              studyTermsText={study.termsText}
+              onStudyUpdated={handleStudyUpdate}
+            />
           ) : (
             <div>
-              {selectedQuestionIndex !== null && questions?.[selectedQuestionIndex] && (
-                <div>
-                  {questions[selectedQuestionIndex].type === "text" && (
-                    <TextanswerQuestionBuilder
-                      question={questions[selectedQuestionIndex]}
-                      onQuestionDataChange={(id, data) =>
-                        setQuestions((prev) =>
-                          prev.map((q) => (q.id === id ? { ...q, data } : q))
-                        )
-                      }
-                    />
-                  )}
-                  {questions[selectedQuestionIndex].type === "multipleChoice" && (
-                    <MultipleChoiceQuestionBuilder
-                      question={questions[selectedQuestionIndex]}
-                      onQuestionDataChange={(id, data) =>
-                        setQuestions((prev) =>
-                          prev.map((q) => (q.id === id ? { ...q, data } : q))
-                        )
-                      }
-                    />
-                  )}
-                  {questions[selectedQuestionIndex].type === "checkbox" && (
-                    <CheckboxQuestionBuilder
-                      key={questions[selectedQuestionIndex]._id}
-                      questionData={questions[selectedQuestionIndex].data}
-                      onChange={handleCheckboxQuestionChange}
-                    />
-                  )}
-                  {questions[selectedQuestionIndex].type === "ratingScale" && (
-                    <RatingScaleQuestionBuilder
-                      key={questions[selectedQuestionIndex]._id}
-                      questionData={questions[selectedQuestionIndex].data}
-                      onChange={handleRatingScaleQuestionChange}
-                    />
-                  )}
+              {selectedQuestionIndex !== null &&
+                questions?.[selectedQuestionIndex] && (
+                  <div>
+                    {questions[selectedQuestionIndex].type === "text" && (
+                      <TextanswerQuestionBuilder
+                        key={
+                          questions[selectedQuestionIndex]._id ||
+                          `text-${selectedQuestionIndex}`
+                        }
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={handleQuestionDataChange}
+                      />
+                    )}
+                    {questions[selectedQuestionIndex].type ===
+                      "multipleChoice" && (
+                      <MultipleChoiceQuestionBuilder
+                        key={
+                          questions[selectedQuestionIndex]._id ||
+                          `mc-${selectedQuestionIndex}`
+                        }
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={handleQuestionDataChange}
+                      />
+                    )}
+                    {questions[selectedQuestionIndex].type === "checkbox" && (
+                      <CheckboxQuestionBuilder
+                        key={
+                          questions[selectedQuestionIndex]._id ||
+                          `checkbox-${selectedQuestionIndex}`
+                        }
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={handleQuestionDataChange}
+                      />
+                    )}
+                    {questions[selectedQuestionIndex].type ===
+                      "ratingScale" && (
+                      <RatingScaleQuestionBuilder
+                        key={
+                          questions[selectedQuestionIndex]._id ||
+                          `rating-${selectedQuestionIndex}`
+                        }
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={handleQuestionDataChange}
+                      />
+                    )}
                     {questions[selectedQuestionIndex].type === "dropdown" && (
                       <DropdownQuestionBuilder
-                        questionData={questions[selectedQuestionIndex].data}
-                        onChange={(updatedData) =>
-                          setQuestions((prev) =>
-                            prev.map((q) =>
-                              q.id === questions[selectedQuestionIndex].id
-                                ? { ...q, data: updatedData }
-                                : q
-                            )
-                          )
+                        key={
+                          questions[selectedQuestionIndex]._id ||
+                          `dropdown-${selectedQuestionIndex}`
                         }
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={handleQuestionDataChange}
                       />
                     )}
                     {questions[selectedQuestionIndex].type === "ranking" && (
                       <RankQuestionBuilder
-                        questionData={questions[selectedQuestionIndex].data}
-                        onChange={(updatedData) =>
-                          setQuestions((prev) =>
-                            prev.map((q) =>
-                              q.id === questions[selectedQuestionIndex].id
-                                ? { ...q, data: updatedData }
-                                : q
-                            )
-                          )
+                        key={
+                          questions[selectedQuestionIndex]._id ||
+                          `ranking-${selectedQuestionIndex}`
                         }
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={handleQuestionDataChange}
                       />
                     )}
                     {questions[selectedQuestionIndex].type === "matrix" && (
                       <MatrixQuestionBuilder
-                        questionData={questions[selectedQuestionIndex].data}
-                        onChange={(updatedData) =>
-                          setQuestions((prev) =>
-                            prev.map((q) =>
-                              q.id === questions[selectedQuestionIndex].id
-                                ? { ...q, data: updatedData }
-                                : q
-                            )
-                          )
+                        key={
+                          questions[selectedQuestionIndex]._id ||
+                          `matrix-${selectedQuestionIndex}`
                         }
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={handleQuestionDataChange}
                       />
                     )}
-                </div>
-              )}
+                  </div>
+                )}
               {selectedQuestionIndex === null && questions?.length > 0 && (
                 <p>
-                  Select a question from the sidebar to view and edit its details.
+                  Select a question from the sidebar to view and edit its
+                  details.
                 </p>
               )}
-              {selectedQuestionIndex === null && (!questions || questions.length === 0) && (
-                <p>
-                  Click "Add Item" in the sidebar to add your first question, or click
-                  "Study Information" to edit the Information about the study.
-                </p>
-              )}
+              {selectedQuestionIndex === null &&
+                (!questions || questions.length === 0) && (
+                  <p>
+                    Click "Add Item" in the sidebar to add your first question,
+                    or click "Study Information" to edit the Information about
+                    the study.
+                  </p>
+                )}
             </div>
           )}
         </div>
