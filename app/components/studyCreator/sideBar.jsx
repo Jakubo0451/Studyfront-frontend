@@ -84,12 +84,15 @@ const SideBar = ({
   onQuestionSelect,
   onAddQuestion,
   setQuestions,
-  selectedQuestionIndex, // Add this prop
+  selectedQuestionIndex,
   studyTitle,
   onViewStudyDetails,
   onChange,
 }) => {
   const params = useParams();
+
+  // eslint-disable-next-line no-unused-vars
+  const [studyId, setStudyId] = useState(null);
 
   useEffect(() => {
     if (params?.id) {
@@ -109,7 +112,10 @@ const SideBar = ({
     setShowAddQuestionMenu(false);
   };
 
-  const onDeleteQuestion = (index, id) => {
+  const onDeleteQuestion = (index, 
+    // eslint-disable-next-line no-unused-vars
+    id) => {
+    
     setQuestions((prevQuestions) =>
       prevQuestions.filter((_, i) => i !== index)
     );

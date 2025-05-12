@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import textanswerStyles from '../../styles/questionTypes/textanswer.module.css'
 import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact'
 import { FaPlus, FaTrash } from "react-icons/fa";

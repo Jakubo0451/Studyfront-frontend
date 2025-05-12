@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import commonStyles from '../../styles/questionTypes/common.module.css'
 import detailsStyles from '../../styles/questionTypes/studyDetails.module.css'
 import { IoIosInformationCircleOutline } from "react-icons/io";
