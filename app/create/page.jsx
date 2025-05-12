@@ -284,6 +284,7 @@ export default function CreateStudyPage() {
           study._id,
           questionToSave._id,
           updatedDataFromChild,
+          /* eslint-disable-next-line */
           (_updatedData) => {
             console.log("Question data saved successfully");
             setSaveStatus("Question saved!");
