@@ -221,6 +221,7 @@ function MatrixQuestionComponent({ questionData, onChange }) { // Renamed and ad
                     </div>
                   ))}
                   <button
+                    type="button"
                     className={commonStyles.addItemBtn + " mt-2"}
                     onClick={() => addVerticalItem(group.id)}
                   >
@@ -259,6 +260,7 @@ function MatrixQuestionComponent({ questionData, onChange }) { // Renamed and ad
                     </div>
                   ))}
                   <button
+                    type="button"
                     className={commonStyles.addItemBtn + " mt-2"}
                     onClick={() => addHorizontalItem(group.id)}
                   >
@@ -271,7 +273,7 @@ function MatrixQuestionComponent({ questionData, onChange }) { // Renamed and ad
         </div>
       ))}
 
-      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addMatrixGroup}>
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addMatrixGroup}>
         <FaPlus /> Add another matrix group
       </button>
     </div>

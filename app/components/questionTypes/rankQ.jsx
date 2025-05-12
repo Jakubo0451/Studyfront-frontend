@@ -175,6 +175,7 @@ function RankQuestionComponent({ questionData, onChange }) { // Renamed and adde
             </div>
 
             <button
+              type="button"
               className={commonStyles.addItemBtn + " mt-2"}
               onClick={() => addItem(group.id)}
             >
@@ -184,7 +185,7 @@ function RankQuestionComponent({ questionData, onChange }) { // Renamed and adde
         </div>
       ))}
 
-      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addRankGroup}>
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addRankGroup}>
         <FaPlus /> Add another ranking group
       </button>
     </div>

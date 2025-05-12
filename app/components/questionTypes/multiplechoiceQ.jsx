@@ -170,6 +170,7 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
             </div>
 
             <button
+              type="button"
               className={commonStyles.addItemBtn + " mt-2"}
               onClick={() => addOption(group.id)}
             >
@@ -179,7 +180,7 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
         </div>
       ))}
 
-      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addChoiceGroup}>
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addChoiceGroup}>
         <FaPlus /> Add another choice group
       </button>
     </div>

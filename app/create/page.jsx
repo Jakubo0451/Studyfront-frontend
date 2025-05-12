@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/header/Header.jsx";
@@ -14,7 +12,7 @@ import DropdownQuestionBuilder from "@/components/questionTypes/dropdownQ";
 import RankQuestionBuilder from "@/components/questionTypes/rankQ";
 import MatrixQuestionBuilder from "@/components/questionTypes/matrixQ";
 import StudyDetails from "@/components/questionTypes/studyDetails";
-import { fetchStudyDetails, updateQuestions, updateQuestion, addQuestion, deleteQuestion } from "@/utils/studyActions";
+import { updateQuestions, updateQuestion, addQuestion, deleteQuestion } from "@/utils/studyActions";
 import { debounce, throttle } from "lodash";
 
 const defaultQuestionData = {
@@ -101,6 +99,7 @@ export default function CreateStudyPage() {
     []
   );
 
+  /* eslint-disable-next-line */
   const throttledSave = throttle(async (currentQuestion) => {
     if (!study?._id || !currentQuestion) return;
 
@@ -124,10 +123,6 @@ export default function CreateStudyPage() {
           study._id,
           currentQuestion._id,
           currentQuestion.data,
-          (updatedStudy) => {
-            setSaveStatus("Study saved successfully!");
-            setTimeout(() => setSaveStatus(""), 3000);
-          },
           (error) => {
             console.error("Failed to update the current question:", error);
             alert("Failed to update the current question. Please try again.");
@@ -233,10 +228,6 @@ export default function CreateStudyPage() {
     setViewingStudyDetails(true);
   };
 
-  const handleBackToQuestions = () => {
-    setViewingStudyDetails(false);
-  };
-
   const handleQuestionSelect = (index) => {
     setSelectedQuestionIndex(index);
     setViewingStudyDetails(false);
@@ -259,21 +250,10 @@ export default function CreateStudyPage() {
     updateQuestions(
       study._id,
       updatedQuestions,
-      (savedQuestions) => {},
       (error) => {
         console.error("Failed to save questions:", error);
       }
     );
-  };
-
-  const handleSaveQuestions = async () => {
-    if (
-      selectedQuestionIndex === null ||
-      !questions[selectedQuestionIndex]
-    )
-      return;
-    const currentQuestion = questions[selectedQuestionIndex];
-    throttledSave(currentQuestion);
   };
 
   const handleQuestionDataChange = useCallback(
@@ -304,10 +284,6 @@ export default function CreateStudyPage() {
           study._id,
           questionToSave._id,
           updatedDataFromChild,
-          (savedStudy) => {
-            setSaveStatus("Study saved successfully!");
-            setTimeout(() => setSaveStatus(""), 3000);
-          },
           (error) => {
             console.error(
               "Failed to save question data via debouncedSave:",
@@ -459,8 +435,8 @@ export default function CreateStudyPage() {
               studyId={study._id}
               studyName={study.title}
               studyDescription={study.description}
-              studyTermsEnabled={study.termsEnabled}
-              studyTermsText={study.termsText}
+              studyTermsEnabled={study.hasTermsAndConditions}
+              studyTerms={study.termsAndConditions}
               onStudyUpdated={handleStudyUpdate}
             />
           ) : (

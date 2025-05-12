@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import commonStyles from '../../styles/questionTypes/common.module.css';
 import Artifact from './artifact';
 import { FaPlus, FaTrash } from "react-icons/fa";
@@ -85,7 +85,7 @@ function TextanswerQuestionComponent({ questionData, onChange }) {
           </div>
         </div>
       ))}
-      <button className={commonStyles.addItemBtn} onClick={addTextArea}>
+      <button type="button" className={commonStyles.addItemBtn} onClick={addTextArea}>
         <FaPlus /> Add another text area
       </button>
     </div>

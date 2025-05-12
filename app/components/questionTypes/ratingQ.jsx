@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import ratingStyles from '../../styles/questionTypes/ratingQ.module.css';
 import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact';
@@ -104,7 +104,7 @@ function RatingScaleQuestionComponent({ questionData, onChange }) {
           </div>
         </div>
       ))}
-      <button className={ratingStyles.addRanking} onClick={addRatingScale}>
+      <button type="button" className={ratingStyles.addRanking} onClick={addRatingScale}>
         <FaPlus /> Add another rating scale
       </button>
     </div>

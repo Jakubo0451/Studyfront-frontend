@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import checkboxStyles from '../../styles/questionTypes/checkboxQ.module.css';
 import commonStyles from '../../styles/questionTypes/common.module.css';
 import Artifact from './artifact';
@@ -170,6 +170,7 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
             </div>
 
             <button
+              type="button"
               className={commonStyles.addItemBtn + " mt-2"}
               onClick={() => addOption(group.id)}
             >
@@ -179,7 +180,7 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
         </div>
       ))}
 
-      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addCheckboxGroup}>
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addCheckboxGroup}>
         <FaPlus /> Add another checkbox group
       </button>
     </div>

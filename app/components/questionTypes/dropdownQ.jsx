@@ -74,7 +74,7 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
   const removeOption = (dropdownId, optionId) => {
     setDropdowns(dropdowns.map(dropdown => {
       if (dropdown.id === dropdownId) {
-        if (dropdown.options.length <= 2) return group; // Keep at least 2 options
+        if (dropdown.options.length <= 2) return dropdown;
         return {
           ...dropdown,
           options: dropdown.options.filter(option => option.id !== optionId),
@@ -170,6 +170,7 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
             </div>
 
             <button
+              type="button"
               className={commonStyles.addItemBtn + " mt-2"}
               onClick={() => addOption(dropdown.id)}
             >
@@ -179,7 +180,7 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
         </div>
       ))}
 
-      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addDropdown}>
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addDropdown}>
         <FaPlus /> Add another dropdown
       </button>
     </div>
