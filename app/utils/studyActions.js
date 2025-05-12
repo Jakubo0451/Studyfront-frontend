@@ -172,6 +172,7 @@ export const startStudy = async (study, onStudyUpdated, onError) => {
             if (onStudyUpdated) {
                 onStudyUpdated(updatedStudy);
             }
+
         } else {
             const errorText = await response.text();
             let errorMessage;
