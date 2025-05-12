@@ -318,3 +318,121 @@ export const updateQuestions = async (studyId, updatedQuestions, onSuccess, onEr
         if (onError) onError(error.message);
     }
 };
+
+export const addQuestion = async (studyId, newQuestion, onSuccess, onError) => {
+    if (!studyId) {
+        console.error("Study ID is missing for adding a question.");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("No token provided. Redirecting to login.");
+            return;
+        }
+
+        const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions`, {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newQuestion),
+        });
+
+        if (response.ok) {
+            const updatedStudy = await response.json();
+            console.log("New question added successfully:", updatedStudy);
+            if (onSuccess) {
+                onSuccess(updatedStudy);
+            }
+        } else {
+            const errorData = await response.json();
+            console.error("Error adding question:", errorData.error || "Failed to add question.");
+            if (onError) onError(errorData.error || "Failed to add question.");
+        }
+    } catch (error) {
+        console.error("Error adding question:", error);
+        if (onError) onError(error.message);
+    }
+};
+
+export const updateQuestion = async (studyId, questionId, payload, onSuccess, onError) => {
+    if (!studyId || !questionId) {
+        console.error("Study ID or Question ID is missing for updating the question.");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("No token provided. Redirecting to login.");
+            return;
+        }
+
+        console.log("Sending payload to update question:", payload);
+
+        const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions/${questionId}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload), // Send the wrapped payload
+        });
+
+        if (response.ok) {
+            const updatedStudy = await response.json();
+            console.log("Question updated successfully:", updatedStudy);
+            if (onSuccess) {
+                onSuccess(updatedStudy);
+            }
+        } else {
+            const errorData = await response.json();
+            console.error("Error updating question:", errorData.error || "Failed to update question.");
+            if (onError) onError(errorData.error || "Failed to update question.");
+        }
+    } catch (error) {
+        console.error("Error updating question:", error);
+        if (onError) onError(error.message);
+    }
+};
+
+export const deleteQuestion = async (studyId, questionId, onSuccess, onError) => {
+    if (!studyId || !questionId) {
+        console.error("Study ID or Question ID is missing for deleting the question.");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("No token provided. Redirecting to login.");
+            return;
+        }
+
+        const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions/${questionId}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.ok) {
+            const updatedStudy = await response.json();
+            console.log("Question deleted successfully:", updatedStudy);
+            if (onSuccess) {
+                onSuccess(updatedStudy);
+            }
+        } else {
+            const errorData = await response.json();
+            console.error("Error deleting question:", errorData.error || "Failed to delete question.");
+            if (onError) onError(errorData.error || "Failed to delete question.");
+        }
+    } catch (error) {
+        console.error("Error deleting question:", error);
+        if (onError) onError(error.message);
+    }
+};

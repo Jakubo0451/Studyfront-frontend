@@ -14,7 +14,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { FaPlus, FaRegTrashAlt, FaCheck  } from "react-icons/fa";
 import { MdDragIndicator } from "react-icons/md";
 import {
   restrictToVerticalAxis,
@@ -61,7 +61,6 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
     >
       <div className="flex items-center space-x-2">
         <FaRegTrashAlt onClick={handleDelete} className="cursor-pointer text-red-500" />{" "}
-        {/* Placeholder for delete functionality */}
         <div className="flex flex-col space-y-1">
           <MdDragIndicator
             {...attributes}
@@ -84,10 +83,13 @@ const SideBar = ({
   onQuestionSelect,
   onAddQuestion,
   setQuestions,
-  selectedQuestionIndex, // Add this prop
+  selectedQuestionIndex,
   studyTitle,
   onViewStudyDetails,
   onChange,
+  study,
+  deleteQuestion,
+  saveStatus,
 }) => {
   const params = useParams();
 
@@ -109,11 +111,31 @@ const SideBar = ({
     setShowAddQuestionMenu(false);
   };
 
-  const onDeleteQuestion = (index, id) => {
-    setQuestions((prevQuestions) =>
-      prevQuestions.filter((_, i) => i !== index)
+  const onDeleteQuestion = (index) => {
+    const questionToDelete = questions[index];
+
+    if (!questionToDelete._id) {
+      setQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== index));
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to delete this question? This action cannot be undone.")) {
+      return;
+    }
+
+    deleteQuestion(
+      study._id,
+      questionToDelete._id,
+      (updatedStudy) => {
+        console.log("Question deleted successfully.");
+        setQuestions(updatedStudy.questions);
+      },
+      (error) => {
+        console.error("Failed to delete the question:", error);
+        alert("Failed to delete the question. Please try again.");
+      }
     );
-  }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -139,11 +161,19 @@ const SideBar = ({
         );
       }
     }
-  };
+  }; 
 
   return (
     <div className="w-80 bg-sky-blue h-full p-4 flex flex-col">
       <h2 className="text-xl w-full mb-4 text-center">{studyTitle}</h2>
+      <div
+        className={`flex flex-row items-center justify-center text-green-500 mb-4 ${
+          saveStatus ? '' : 'invisible'
+      }`}
+      >
+        <FaCheck />
+        <p>Study saved</p>
+      </div>
       <button
         onClick={onViewStudyDetails}
         type="button"
@@ -158,38 +188,36 @@ const SideBar = ({
         modifiers={[restrictToVerticalAxis, restrictToParentElement]}
       >
         <SortableContext
-      items={questions.map((question) => `item-${question.id}`)}
+      items={questions?.map((question) => `item-${question.id}`) || []}
     >
       <div className="space-y-2 flex-grow border-b-2 border-t-2 border-dotted border-petrol-blue pb-4 pt-4 text-lg overflow-y-auto">
-        {questions && questions.length > 0 ? (
+        {questions?.length > 0 ? (
           questions.map((question, index) => (
             <SortableItem
               key={`${question.id}-${index}`}
               id={`item-${question.id}`}
               content={
-                    question.type === "text"
-                      ? `${index + 1}: Text Question`
-                      : question.type === "multipleChoice"
-                      ? `${index + 1}: Multiple Choice`
-                      : question.type === "checkbox"
-                      ? `${index + 1}: Checkbox Question`
-                      : question.type === "ratingScale"
-                      ? `${index + 1}: Rating Scale Question`
-                      : `Question ${index + 1}`
-                    }
-                    onQuestionSelect={onQuestionSelect}
-                    index={index}
-                    onDeleteQuestion={onDeleteQuestion}
-                    isSelected={index === selectedQuestionIndex} // Add this prop
-                  />
-                ))
-              ) : (
-              <p className="text-center text-gray-600">
-                No questions added yet.
-              </p>
-            )}
-          </div>
-        </SortableContext>
+                question.type === "text"
+                  ? `${index + 1}: Text Question`
+                  : question.type === "multipleChoice"
+                  ? `${index + 1}: Multiple Choice`
+                  : question.type === "checkbox"
+                  ? `${index + 1}: Checkbox Question`
+                  : question.type === "ratingScale"
+                  ? `${index + 1}: Rating Scale Question`
+                  : `Question ${index + 1}`
+              }
+              onQuestionSelect={onQuestionSelect}
+              index={index}
+              onDeleteQuestion={onDeleteQuestion}
+              isSelected={index === selectedQuestionIndex}
+            />
+          ))
+        ) : (
+          <p className="text-center text-gray-600">No questions added yet.</p>
+        )}
+      </div>
+      </SortableContext>
       </DndContext>
       <div className="relative">
         <button

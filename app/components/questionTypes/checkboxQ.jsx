@@ -1,15 +1,24 @@
-'use client'
-import { useState } from 'react' // Add useState import
-import checkboxStyles from '../../styles/questionTypes/checkboxQ.module.css'
-import commonStyles from '../../styles/questionTypes/common.module.css'
-import Artifact from './artifact'
-import { FaPlus, FaTrash } from "react-icons/fa"; // Added FaTrash import
+'use client';
+import { useState, useEffect, useCallback } from 'react';
+import checkboxStyles from '../../styles/questionTypes/checkboxQ.module.css';
+import commonStyles from '../../styles/questionTypes/common.module.css';
+import Artifact from './artifact';
+import { FaPlus, FaTrash } from 'react-icons/fa';
 
-export default function checkboxQ() {
-  // State to manage multiple checkbox questions
-  const [checkboxes, setCheckboxes] = useState([
-    { id: 1, question: '' }
-  ]);
+export default function CheckboxQuestionBuilder({ questionData, onChange }) {
+  const [title, setTitle] = useState(questionData?.title || '');
+  const [checkboxes, setCheckboxes] = useState(
+    questionData?.options || [{ id: 1, question: '' }]
+  );
+
+  // Notify parent component of changes
+  useEffect(() => {
+    console.log("CheckboxQuestionBuilder onChange triggered:", { title, options: checkboxes });
+    onChange({
+      title,
+      options: checkboxes,
+    });
+  }, [title, checkboxes]);
 
   // Function to add a new checkbox
   const addCheckbox = () => {
@@ -19,69 +28,74 @@ export default function checkboxQ() {
 
   // Function to remove a checkbox
   const removeCheckbox = (idToRemove) => {
-    // Don't remove if it's the last checkbox
-    if (checkboxes.length <= 1) {
-      return;
-    }
-    
-    // Remove the checkbox with the specified ID
-    const filteredCheckboxes = checkboxes.filter(checkbox => checkbox.id !== idToRemove);
-    
-    // Renumber the remaining checkboxes sequentially
-    const renumberedCheckboxes = filteredCheckboxes.map((checkbox, index) => ({
-      ...checkbox,
-      id: index + 1
-    }));
-    
-    setCheckboxes(renumberedCheckboxes);
+    if (checkboxes.length <= 1) return;
+
+    const filteredCheckboxes = checkboxes.filter(
+      (checkbox) => checkbox.id !== idToRemove
+    );
+
+    setCheckboxes(filteredCheckboxes);
   };
 
   // Function to handle input changes
   const handleCheckboxChange = (id, value) => {
-    setCheckboxes(checkboxes.map(checkbox => 
-      checkbox.id === id ? { ...checkbox, question: value } : checkbox
-    ));
+    setCheckboxes((prev) =>
+      prev.map((checkbox) =>
+        checkbox.id === id ? { ...checkbox, question: value } : checkbox
+      )
+    );
   };
 
   return (
-    <div className={commonStyles.questionType + " question-type"}>
-        <h2>Checkbox question</h2>
-        <div className={commonStyles.questionName}>
-          <label htmlFor="questionName">Question title:</label>
-          <input type="text" name="questionName" id="questionName" placeholder="Title" />
-        </div>
-        
-        {/* Use the Artifact component in standalone mode */}
-        <Artifact mode="standalone" allowMultiple={true} />
-        
-        {/* Map through checkboxes and render each one */}
-        {checkboxes.map((checkbox) => (
-          <div key={checkbox.id} className={commonStyles.itemBox}>
-              <div className={commonStyles.itemHeader}>
-                <label htmlFor={`checkbox${checkbox.id}`}>Checkbox {checkbox.id}:</label>
-                <button 
-                  type="button" 
-                  className={commonStyles.removeBtn}
-                  onClick={() => removeCheckbox(checkbox.id)}
-                  disabled={checkboxes.length <= 1}
-                >
-                  <FaTrash /> Remove
-                </button>
-              </div>
-              <div className={commonStyles.itemGroup}>
-                <label htmlFor={`checkbox${checkbox.id}`}>Checkbox name:</label>
-                <input 
-                  type="text" 
-                  name={`checkbox${checkbox.id}`} 
-                  id={`checkbox${checkbox.id}`} 
-                  placeholder="Name"
-                  value={checkbox.question}
-                  onChange={(e) => handleCheckboxChange(checkbox.id, e.target.value)} 
-                />
-              </div>
+    <div className={commonStyles.questionType + ' question-type'}>
+      <h2>Checkbox Question</h2>
+      <div className={commonStyles.questionName}>
+        <label htmlFor="questionName">Question Title:</label>
+        <input
+          type="text"
+          name="questionName"
+          id="questionName"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
+
+      <Artifact mode="standalone" allowMultiple={true} />
+
+      {checkboxes.map((checkbox) => (
+        <div key={checkbox.id} className={commonStyles.itemBox}>
+          <div className={commonStyles.itemHeader}>
+            <label htmlFor={`checkbox${checkbox.id}`}>
+              Checkbox {checkbox.id}:
+            </label>
+            <button
+              type="button"
+              className={commonStyles.removeBtn}
+              onClick={() => removeCheckbox(checkbox.id)}
+              disabled={checkboxes.length <= 1}
+            >
+              <FaTrash /> Remove
+            </button>
           </div>
-        ))}
-        <button className={commonStyles.addItemBtn} onClick={addCheckbox}><FaPlus /> Add another checkbox</button>
+          <div className={commonStyles.itemGroup}>
+            <label htmlFor={`checkbox${checkbox.id}`}>Checkbox Name:</label>
+            <input
+              type="text"
+              name={`checkbox${checkbox.id}`}
+              id={`checkbox${checkbox.id}`}
+              placeholder="Name"
+              value={checkbox.question}
+              onChange={(e) =>
+                handleCheckboxChange(checkbox.id, e.target.value)
+              }
+            />
+          </div>
+        </div>
+      ))}
+      <button className={commonStyles.addItemBtn} onClick={addCheckbox}>
+        <FaPlus /> Add another checkbox
+      </button>
     </div>
-  )
-};
+  );
+}
