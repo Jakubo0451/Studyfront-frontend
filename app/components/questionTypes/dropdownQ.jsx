@@ -1,104 +1,89 @@
-'use client'
-import { useState } from 'react'
-import dropdownStyles from '../../styles/questionTypes/dropdownQ.module.css'
-import commonStyles from '../../styles/questionTypes/common.module.css'
-import Artifact from './artifact'
+'use client';
+import React, { useState, useEffect } from 'react'; // Added useEffect
+import dropdownStyles from '../../styles/questionTypes/dropdownQ.module.css';
+import commonStyles from '../../styles/questionTypes/common.module.css';
+import Artifact from './artifact';
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-export default function dropdownQ() {
-  // State to manage multiple dropdown questions, each with their own options
-  const [dropdowns, setDropdowns] = useState([
-    {
-      id: 1,
-      label: '',
-      options: [
-        { id: 1, text: '' },
-        { id: 2, text: '' }
-      ]
-    }
-  ]);
-
-  // Function to add a new dropdown
-  const addDropdown = () => {
-    const newId = dropdowns.length + 1;
-    setDropdowns([...dropdowns, {
-      id: newId,
-      label: '',
-      options: [
-        { id: 1, text: '' },
-        { id: 2, text: '' }
-      ]
-    }]);
-  };
-
-  // Function to remove a dropdown
-  const removeDropdown = (dropdownId) => {
-    // Don't remove if it's the last dropdown
-    if (dropdowns.length <= 1) {
-      return;
-    }
-    
-    // Remove the dropdown with the specified ID
-    const filteredDropdowns = dropdowns.filter(dropdown => dropdown.id !== dropdownId);
-    
-    // Renumber the remaining dropdowns sequentially
-    const renumberedDropdowns = filteredDropdowns.map((dropdown, index) => ({
+function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and added props
+  const [title, setTitle] = useState(questionData?.title || '');
+  const [dropdowns, setDropdowns] = useState(
+    questionData?.dropdowns?.map((dropdown, dIndex) => ({
       ...dropdown,
-      id: index + 1
-    }));
-    
-    setDropdowns(renumberedDropdowns);
+      id: dropdown.id || `${Date.now()}-dd-${dIndex}`, // Ensure dropdown ID
+      options: dropdown.options?.map((opt, oIndex) => ({
+        ...opt,
+        id: opt.id || `${Date.now()}-ddo-${dIndex}-${oIndex}`, // Ensure option ID
+      })) || [{ id: `${Date.now()}-ddo-${dIndex}-0`, text: '' }],
+    })) || [{ 
+      id: `${Date.now()}-dd-0`, 
+      label: '', 
+      options: [{ id: `${Date.now()}-ddo-0-0`, text: '' }] 
+    }]
+  );
+
+  useEffect(() => {
+    if (onChange) {
+      onChange({
+        title,
+        dropdowns,
+      });
+    }
+  }, [title, dropdowns, onChange]);
+
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
   };
 
-  // Function to handle dropdown label changes
+  const addDropdown = () => {
+    const newDropdownId = `${Date.now()}-dd-${dropdowns.length}`;
+    setDropdowns([
+      ...dropdowns,
+      {
+        id: newDropdownId,
+        label: '',
+        options: [{ id: `${Date.now()}-ddo-${dropdowns.length}-0`, text: '' }, { id: `${Date.now()}-ddo-${dropdowns.length}-1`, text: '' }], // Start with 2 options
+      },
+    ]);
+  };
+
+  const removeDropdown = (dropdownId) => {
+    if (dropdowns.length <= 1) return;
+    setDropdowns(dropdowns.filter(dropdown => dropdown.id !== dropdownId));
+  };
+
   const handleDropdownLabelChange = (dropdownId, value) => {
-    setDropdowns(dropdowns.map(dropdown => 
+    setDropdowns(dropdowns.map(dropdown =>
       dropdown.id === dropdownId ? { ...dropdown, label: value } : dropdown
     ));
   };
 
-  // Function to add an option to a specific dropdown
   const addOption = (dropdownId) => {
     setDropdowns(dropdowns.map(dropdown => {
       if (dropdown.id === dropdownId) {
-        const newOptionId = dropdown.options.length + 1;
+        const newOptionId = `${Date.now()}-ddo-${dropdown.id}-${dropdown.options.length}`;
         return {
           ...dropdown,
-          options: [...dropdown.options, { id: newOptionId, text: '' }]
+          options: [...dropdown.options, { id: newOptionId, text: '' }],
         };
       }
       return dropdown;
     }));
   };
 
-  // Function to remove an option from a specific dropdown
   const removeOption = (dropdownId, optionId) => {
     setDropdowns(dropdowns.map(dropdown => {
       if (dropdown.id === dropdownId) {
-        // Don't remove if only 2 options remain
-        if (dropdown.options.length <= 2) {
-          return dropdown;
-        }
-        
-        // Remove the option with the specified ID
-        const filteredOptions = dropdown.options.filter(option => option.id !== optionId);
-        
-        // Renumber the remaining options sequentially
-        const renumberedOptions = filteredOptions.map((option, index) => ({
-          ...option,
-          id: index + 1
-        }));
-        
+        if (dropdown.options.length <= 2) return dropdown;
         return {
           ...dropdown,
-          options: renumberedOptions
+          options: dropdown.options.filter(option => option.id !== optionId),
         };
       }
       return dropdown;
     }));
   };
 
-  // Function to handle option text changes
   const handleOptionChange = (dropdownId, optionId, value) => {
     setDropdowns(dropdowns.map(dropdown => {
       if (dropdown.id === dropdownId) {
@@ -106,7 +91,7 @@ export default function dropdownQ() {
           ...dropdown,
           options: dropdown.options.map(option =>
             option.id === optionId ? { ...option, text: value } : option
-          )
+          ),
         };
       }
       return dropdown;
@@ -117,71 +102,76 @@ export default function dropdownQ() {
     <div className={commonStyles.questionType + " question-type"}>
       <h2>Dropdown question</h2>
       <div className={commonStyles.questionName}>
-        <label htmlFor="questionName">Question title:</label>
-        <input type="text" name="questionName" id="questionName" placeholder="Title" />
+        <label htmlFor="questionTitle_dd">Question title:</label>
+        <input
+          type="text"
+          name="questionTitle_dd"
+          id="questionTitle_dd"
+          placeholder="Title"
+          value={title}
+          onChange={handleTitleChange}
+        />
       </div>
-      
-      {/* Use the Artifact component in standalone mode */}
+
       <Artifact mode="standalone" allowMultiple={true} />
-      
-      {/* Map through each dropdown */}
-      {dropdowns.map((dropdown) => (
+
+      {dropdowns.map((dropdown, dropdownIndex) => (
         <div key={dropdown.id} className={commonStyles.itemBox + " mb-6"}>
           <div className={commonStyles.itemHeader}>
-            <label htmlFor={`dropdown${dropdown.id}`}>Dropdown {dropdown.id}:</label>
-            <button 
-              type="button" 
+            <label htmlFor={`dropdownLabel_${dropdown.id}`}>Dropdown {dropdownIndex + 1}:</label>
+            <button
+              type="button"
               className={commonStyles.removeBtn}
               onClick={() => removeDropdown(dropdown.id)}
               disabled={dropdowns.length <= 1}
             >
-              <FaTrash /> Remove
+              <FaTrash /> Remove Dropdown
             </button>
           </div>
-          
+
           <div className={commonStyles.itemGroup}>
-            <label htmlFor={`dropdownLabel${dropdown.id}`}>Dropdown label:</label>
-            <input 
-              type="text" 
-              name={`dropdownLabel${dropdown.id}`} 
-              id={`dropdownLabel${dropdown.id}`} 
-              placeholder="Dropdown label"
+            <label htmlFor={`ddLabel_${dropdown.id}`}>Dropdown label:</label>
+            <input
+              type="text"
+              name={`ddLabel_${dropdown.id}`}
+              id={`ddLabel_${dropdown.id}`}
+              placeholder="Dropdown label (e.g., Select your country)"
               value={dropdown.label}
-              onChange={(e) => handleDropdownLabelChange(dropdown.id, e.target.value)} 
+              onChange={(e) => handleDropdownLabelChange(dropdown.id, e.target.value)}
             />
-          
-          <h4>Dropdown options:</h4>
-          <div className={dropdownStyles.optionsContainer}>
-            
-            {/* Map through options for this dropdown */}
-            {dropdown.options.map((option) => (
-              <div key={option.id} className={dropdownStyles.singleOptionBox}>
-                <div className={commonStyles.itemHeader}>
-                  <label htmlFor={`dropdown${dropdown.id}Option${option.id}`}>Option {option.id}:</label>
-                  <button 
-                    type="button" 
-                    className={commonStyles.removeBtn}
-                    onClick={() => removeOption(dropdown.id, option.id)}
-                    disabled={dropdown.options.length <= 2}
-                  >
-                    <FaTrash /> Remove
-                  </button>
+
+            <h4>Dropdown options:</h4>
+            <div className={dropdownStyles.optionsContainer}>
+              {dropdown.options.map((option, optionIndex) => (
+                <div key={option.id} className={dropdownStyles.singleOptionBox}> {/* Use dropdownStyles if specific */}
+                  <div className={commonStyles.itemHeader}>
+                    <label htmlFor={`optionText_${option.id}`}>Option {optionIndex + 1}:</label>
+                    <button
+                      type="button"
+                      className={commonStyles.removeBtn}
+                      onClick={() => removeOption(dropdown.id, option.id)}
+                      disabled={dropdown.options.length <= 2}
+                    >
+                      <FaTrash /> Remove Option
+                    </button>
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      name={`optionText_${option.id}`}
+                      id={`optionText_${option.id}`}
+                      placeholder="Option name"
+                      value={option.text}
+                      onChange={(e) => handleOptionChange(dropdown.id, option.id, e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <input 
-                    type="text" 
-                    name={`dropdown${dropdown.id}Option${option.id}`} 
-                    id={`dropdown${dropdown.id}Option${option.id}`} 
-                    placeholder="Option name"
-                    value={option.text}
-                    onChange={(e) => handleOptionChange(dropdown.id, option.id, e.target.value)} 
-                  />
-                </div>
-              </div>
-            ))}</div>
-            
-            <button 
-              className={commonStyles.addItemBtn + " mt-2"} 
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className={commonStyles.addItemBtn + " mt-2"}
               onClick={() => addOption(dropdown.id)}
             >
               <FaPlus /> Add dropdown option
@@ -189,10 +179,13 @@ export default function dropdownQ() {
           </div>
         </div>
       ))}
-      
-      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addDropdown}>
+
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addDropdown}>
         <FaPlus /> Add another dropdown
       </button>
     </div>
-  )
-};
+  );
+}
+
+const DropdownQuestionBuilder = React.memo(DropdownQuestionComponent);
+export default DropdownQuestionBuilder;

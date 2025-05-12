@@ -1,113 +1,98 @@
-'use client'
-import { useState } from 'react'
-import commonStyles from '../../styles/questionTypes/common.module.css'
-import rankStyles from '../../styles/questionTypes/rankQ.module.css'
-import Artifact from './artifact'
+'use client';
+import React, { useState, useEffect } from 'react'; // Added useEffect
+import commonStyles from '../../styles/questionTypes/common.module.css';
+import rankStyles from '../../styles/questionTypes/rankQ.module.css';
+import Artifact from './artifact';
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 
-export default function RankQuestionBuilder() {
-  // State to manage multiple ranking groups, each with their own options
-  const [rankGroups, setRankGroups] = useState([
-    {
-      id: 1,
-      label: '',
-      options: [
-        { id: 1, text: '' },
-        { id: 2, text: '' }
-      ]
-    }
-  ]);
-
-  // Function to add a new ranking group
-  const addRankGroup = () => {
-    const newId = rankGroups.length + 1;
-    setRankGroups([...rankGroups, {
-      id: newId,
-      label: '',
-      options: [
-        { id: 1, text: '' },
-        { id: 2, text: '' }
-      ]
-    }]);
-  };
-
-  // Function to remove a ranking group
-  const removeRankGroup = (groupId) => {
-    // Don't remove if it's the last ranking group
-    if (rankGroups.length <= 1) {
-      return;
-    }
-    
-    // Remove the ranking group with the specified ID
-    const filteredGroups = rankGroups.filter(group => group.id !== groupId);
-    
-    // Renumber the remaining ranking groups sequentially
-    const renumberedGroups = filteredGroups.map((group, index) => ({
+function RankQuestionComponent({ questionData, onChange }) { // Renamed and added props
+  const [title, setTitle] = useState(questionData?.title || '');
+  const [rankGroups, setRankGroups] = useState(
+    questionData?.rankGroups?.map((group, gIndex) => ({
       ...group,
-      id: index + 1
-    }));
-    
-    setRankGroups(renumberedGroups);
+      id: group.id || `${Date.now()}-rg-${gIndex}`, // Ensure group ID
+      options: group.options?.map((opt, oIndex) => ({
+        ...opt,
+        id: opt.id || `${Date.now()}-ro-${gIndex}-${oIndex}`, // Ensure option ID
+      })) || [{ id: `${Date.now()}-ro-${gIndex}-0`, text: '' }],
+    })) || [{ 
+      id: `${Date.now()}-rg-0`, 
+      label: '', 
+      options: [{ id: `${Date.now()}-ro-0-0`, text: '' }] 
+    }]
+  );
+
+  useEffect(() => {
+    if (onChange) {
+      onChange({
+        title,
+        rankGroups,
+      });
+    }
+  }, [title, rankGroups, onChange]);
+
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
   };
 
-  // Function to handle ranking group label changes
+  const addRankGroup = () => {
+    const newGroupId = `${Date.now()}-rg-${rankGroups.length}`;
+    setRankGroups([
+      ...rankGroups,
+      {
+        id: newGroupId,
+        label: '',
+        options: [{ id: `${Date.now()}-ro-${rankGroups.length}-0`, text: '' }, { id: `${Date.now()}-ro-${rankGroups.length}-1`, text: '' }], // Start with 2 items
+      },
+    ]);
+  };
+
+  const removeRankGroup = (groupId) => {
+    if (rankGroups.length <= 1) return;
+    setRankGroups(rankGroups.filter(group => group.id !== groupId));
+  };
+
   const handleRankGroupLabelChange = (groupId, value) => {
-    setRankGroups(rankGroups.map(group => 
+    setRankGroups(rankGroups.map(group =>
       group.id === groupId ? { ...group, label: value } : group
     ));
   };
 
-  // Function to add an item to a specific ranking group
-  const addItem = (groupId) => {
+  const addItem = (groupId) => { // Renamed from addOption for clarity
     setRankGroups(rankGroups.map(group => {
       if (group.id === groupId) {
-        const newItemId = group.options.length + 1;
+        const newItemId = `${Date.now()}-ro-${group.id}-${group.options.length}`;
         return {
           ...group,
-          options: [...group.options, { id: newItemId, text: '' }]
+          options: [...group.options, { id: newItemId, text: '' }],
         };
       }
       return group;
     }));
   };
 
-  // Function to remove an item from a specific ranking group
-  const removeItem = (groupId, itemId) => {
+  const removeItem = (groupId, itemId) => { // Renamed from removeOption
     setRankGroups(rankGroups.map(group => {
       if (group.id === groupId) {
-        // Don't remove if only 2 items remain
-        if (group.options.length <= 2) {
-          return group;
-        }
-        
-        // Remove the item with the specified ID
-        const filteredItems = group.options.filter(item => item.id !== itemId);
-        
-        // Renumber the remaining items sequentially
-        const renumberedItems = filteredItems.map((item, index) => ({
-          ...item,
-          id: index + 1
-        }));
-        
+        if (group.options.length <= 2) return group; // Keep at least 2 items
         return {
           ...group,
-          options: renumberedItems
+          options: group.options.filter(item => item.id !== itemId),
         };
       }
       return group;
     }));
   };
 
-  // Function to handle item text changes
-  const handleItemChange = (groupId, itemId, value) => {
+  const handleItemChange = (groupId, itemId, value) => { // Renamed from handleOptionChange
     setRankGroups(rankGroups.map(group => {
       if (group.id === groupId) {
         return {
           ...group,
           options: group.options.map(item =>
             item.id === itemId ? { ...item, text: value } : item
-          )
+          ),
         };
       }
       return group;
@@ -118,75 +103,80 @@ export default function RankQuestionBuilder() {
     <div className={commonStyles.questionType + " question-type"}>
       <h2>Ranking question</h2>
       <div className={commonStyles.questionName}>
-        <label htmlFor="questionName">Question title:</label>
-        <input type="text" name="questionName" id="questionName" placeholder="Title" />
+        <label htmlFor="questionTitle_rank">Question title:</label>
+        <input
+          type="text"
+          name="questionTitle_rank"
+          id="questionTitle_rank"
+          placeholder="Title"
+          value={title}
+          onChange={handleTitleChange}
+        />
       </div>
-      
-      {/* Use the Artifact component in standalone mode */}
+
       <Artifact mode="standalone" allowMultiple={true} />
-      
+
       <p className={commonStyles.infoBox}>
         <IoIosInformationCircleOutline /> Participants will be able to drag and reorder items to create their ranked list. The item number in the question creator will decide the initial order of the items.
       </p>
-      
-      {/* Map through each ranking group */}
-      {rankGroups.map((group) => (
+
+      {rankGroups.map((group, groupIndex) => (
         <div key={group.id} className={commonStyles.itemBox}>
           <div className={commonStyles.itemHeader}>
-            <label htmlFor={`rankGroup${group.id}`}>Ranking Group {group.id}:</label>
-            <button 
-              type="button" 
+            <label htmlFor={`rankGroupLabel_${group.id}`}>Ranking Group {groupIndex + 1}:</label>
+            <button
+              type="button"
               className={commonStyles.removeBtn}
               onClick={() => removeRankGroup(group.id)}
               disabled={rankGroups.length <= 1}
             >
-              <FaTrash /> Remove
+              <FaTrash /> Remove Group
             </button>
           </div>
-          
+
           <div className={commonStyles.itemGroup}>
-            <label htmlFor={`rankLabel${group.id}`}>Ranking group label:</label>
-            <input 
-              type="text" 
-              name={`rankLabel${group.id}`} 
-              id={`rankLabel${group.id}`} 
+            <label htmlFor={`rgLabel_${group.id}`}>Ranking group label:</label>
+            <input
+              type="text"
+              name={`rgLabel_${group.id}`}
+              id={`rgLabel_${group.id}`}
               placeholder="Rank these items from highest to lowest..."
               value={group.label}
-              onChange={(e) => handleRankGroupLabelChange(group.id, e.target.value)} 
+              onChange={(e) => handleRankGroupLabelChange(group.id, e.target.value)}
             />
-          
-          <h4>Items to rank:</h4>
-          <div className={rankStyles.optionsContainer || commonStyles.optionsContainer}>
-            
-            {/* Map through items for this ranking group */}
-            {group.options.map((item) => (
-              <div key={item.id} className={commonStyles.singleOptionBox}>
-                <div className={commonStyles.itemHeader}>
-                  <label htmlFor={`group${group.id}Item${item.id}`}>Item {item.id}:</label>
-                  <button 
-                    type="button" 
-                    className={commonStyles.removeBtn}
-                    onClick={() => removeItem(group.id, item.id)}
-                    disabled={group.options.length <= 2}
-                  >
-                    <FaTrash /> Remove
-                  </button>
+
+            <h4>Items to rank:</h4>
+            <div className={rankStyles.optionsContainer || commonStyles.optionsContainer}>
+              {group.options.map((item, itemIndex) => (
+                <div key={item.id} className={commonStyles.singleOptionBox}>
+                  <div className={commonStyles.itemHeader}>
+                    <label htmlFor={`itemText_${item.id}`}>Item {itemIndex + 1}:</label>
+                    <button
+                      type="button"
+                      className={commonStyles.removeBtn}
+                      onClick={() => removeItem(group.id, item.id)}
+                      disabled={group.options.length <= 2}
+                    >
+                      <FaTrash /> Remove Item
+                    </button>
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      name={`itemText_${item.id}`}
+                      id={`itemText_${item.id}`}
+                      placeholder="Item to rank"
+                      value={item.text}
+                      onChange={(e) => handleItemChange(group.id, item.id, e.target.value)}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <input 
-                    type="text" 
-                    name={`group${group.id}Item${item.id}`} 
-                    id={`group${group.id}Item${item.id}`} 
-                    placeholder="Item to rank"
-                    value={item.text}
-                    onChange={(e) => handleItemChange(group.id, item.id, e.target.value)} 
-                  />
-                </div>
-              </div>
-            ))}</div>
-            
-            <button 
-              className={commonStyles.addItemBtn} 
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className={commonStyles.addItemBtn + " mt-2"}
               onClick={() => addItem(group.id)}
             >
               <FaPlus /> Add item to rank
@@ -194,10 +184,13 @@ export default function RankQuestionBuilder() {
           </div>
         </div>
       ))}
-      
-      <button className={commonStyles.addItemBtn} onClick={addRankGroup}>
+
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addRankGroup}>
         <FaPlus /> Add another ranking group
       </button>
     </div>
-  )
-};
+  );
+}
+
+const TextanswerQuestionBuilder = React.memo(RankQuestionComponent);
+export default TextanswerQuestionBuilder;

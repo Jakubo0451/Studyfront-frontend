@@ -12,7 +12,6 @@ const downloadFile = (content, fileName, contentType) => {
 
 // Fetch study results from the backend
 const fetchStudyResults = async (studyId) => {
-    console.log("Fetching study results for ID:", studyId);
     try {
         const response = await fetch(`${backendUrl}/api/results/${studyId}`); // Updated endpoint
         if (!response.ok) {

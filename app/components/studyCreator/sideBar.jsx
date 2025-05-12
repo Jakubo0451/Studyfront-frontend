@@ -14,7 +14,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { FaPlus, FaRegTrashAlt } from "react-icons/fa";
+import { FaPlus, FaRegTrashAlt, FaCheck  } from "react-icons/fa";
 import { MdDragIndicator } from "react-icons/md";
 import {
   restrictToVerticalAxis,
@@ -47,8 +47,6 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
 
   const handleDelete = (e) => {
     e.stopPropagation();
-    console.log(`Delete question at index: ${index}`);
-    console.log(`Delete question with id: ${id}`);
     onDeleteQuestion(index);
   }
 
@@ -61,7 +59,6 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
     >
       <div className="flex items-center space-x-2">
         <FaRegTrashAlt onClick={handleDelete} className="cursor-pointer text-red-500" />{" "}
-        {/* Placeholder for delete functionality */}
         <div className="flex flex-col space-y-1">
           <MdDragIndicator
             {...attributes}
@@ -88,6 +85,9 @@ const SideBar = ({
   studyTitle,
   onViewStudyDetails,
   onChange,
+  study,
+  deleteQuestion,
+  saveStatus,
 }) => {
   const params = useParams();
 
@@ -112,14 +112,30 @@ const SideBar = ({
     setShowAddQuestionMenu(false);
   };
 
-  const onDeleteQuestion = (index, 
-    // eslint-disable-next-line no-unused-vars
-    id) => {
-    
-    setQuestions((prevQuestions) =>
-      prevQuestions.filter((_, i) => i !== index)
+  const onDeleteQuestion = (index) => {
+    const questionToDelete = questions[index];
+
+    if (!questionToDelete._id) {
+      setQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== index));
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to delete this question? This action cannot be undone.")) {
+      return;
+    }
+
+    deleteQuestion(
+      study._id,
+      questionToDelete._id,
+      (updatedStudy) => {
+        setQuestions(updatedStudy.questions);
+      },
+      (error) => {
+        console.error("Failed to delete the question:", error);
+        alert("Failed to delete the question. Please try again.");
+      }
     );
-  }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -145,11 +161,19 @@ const SideBar = ({
         );
       }
     }
-  };
+  }; 
 
   return (
     <div className="w-80 bg-sky-blue h-full p-4 flex flex-col">
       <h2 className="text-xl w-full mb-4 text-center">{studyTitle}</h2>
+      <div
+        className={`flex flex-row items-center justify-center text-green-500 mb-4 ${
+          saveStatus ? '' : 'invisible'
+      }`}
+      >
+        <FaCheck />
+        <p>Study saved</p>
+      </div>
       <button
         onClick={onViewStudyDetails}
         type="button"
@@ -164,10 +188,10 @@ const SideBar = ({
         modifiers={[restrictToVerticalAxis, restrictToParentElement]}
       >
         <SortableContext
-      items={questions.map((question) => `item-${question.id}`)}
+      items={questions?.map((question) => `item-${question.id}`) || []}
     >
       <div className="space-y-2 flex-grow border-b-2 border-t-2 border-dotted border-petrol-blue pb-4 pt-4 text-lg overflow-y-auto">
-        {questions && questions.length > 0 ? (
+        {questions?.length > 0 ? (
           questions.map((question, index) => (
             <SortableItem
               key={`${question.id}-${index}`}
