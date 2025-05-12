@@ -61,7 +61,7 @@ export default function ratingQ() {
     <div className={ratingStyles.ratingQ + " question-type"}>
         <h2>Rating question</h2>
         <div className={commonStyles.questionName}>
-          <label htmlFor="questionName">Qustion title:</label>
+          <label htmlFor="questionName">Question title:</label>
           <input type="text" name="questionName" id="questionName" placeholder="Title" />
         </div>
         
