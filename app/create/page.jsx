@@ -284,12 +284,12 @@ export default function CreateStudyPage() {
           study._id,
           questionToSave._id,
           updatedDataFromChild,
-          (_updatedData) => {  // onSuccess handler
+          (_updatedData) => {
             console.log("Question data saved successfully");
             setSaveStatus("Question saved!");
             setTimeout(() => setSaveStatus(""), 3000);
           },
-          (error) => {  // onError handler
+          (error) => {
             console.error(
               "Failed to save question data via debouncedSave:",
               error
