@@ -230,3 +230,81 @@ export const editStudy = (study, router) => {
     }
     router.push(`/create?studyId=${study._id}`);
 };
+
+export const updateStudy = async (studyId, updatedFields, onSuccess, onError) => {
+    if (!studyId) {
+        console.error("Study ID is missing for updating the study.");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("No token provided. Redirecting to login.");
+            return;
+        }
+
+        const response = await fetch(`${backendUrl}/api/studies/${studyId}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updatedFields),
+        });
+
+        if (response.ok) {
+            const updatedStudy = await response.json();
+            console.log(`Study "${updatedStudy.title}" updated successfully.`);
+            if (onSuccess) {
+                onSuccess(updatedStudy);
+            }
+        } else {
+            const errorData = await response.json();
+            console.error("Error updating study:", errorData.error || "Failed to update study.");
+            if (onError) onError(errorData.error || "Failed to update study.");
+        }
+    } catch (error) {
+        console.error("Error updating study:", error);
+        if (onError) onError(error.message);
+    }
+};
+
+export const updateQuestions = async (studyId, updatedQuestions, onSuccess, onError) => {
+    if (!studyId) {
+        console.error("Study ID is missing for updating questions.");
+        return;
+    }
+
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.error("No token provided. Redirecting to login.");
+            return;
+        }
+
+        const response = await fetch(`${backendUrl}/api/studies/${studyId}`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ questions: updatedQuestions }),
+        });
+
+        if (response.ok) {
+            const updatedStudy = await response.json();
+            console.log("Questions updated successfully:", updatedStudy.questions);
+            if (onSuccess) {
+                onSuccess(updatedStudy.questions);
+            }
+        } else {
+            const errorData = await response.json();
+            console.error("Error updating questions:", errorData.error || "Failed to update questions.");
+            if (onError) onError(errorData.error || "Failed to update questions.");
+        }
+    } catch (error) {
+        console.error("Error updating questions:", error);
+        if (onError) onError(error.message);
+    }
+};

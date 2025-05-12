@@ -1,13 +1,13 @@
 'use client'
 import { useState } from 'react'
-import checkboxStyles from '../../styles/questionTypes/checkboxQ.module.css'
+import multiplechoiceStyles from '../../styles/questionTypes/multiplechoiceQ.module.css'
 import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact'
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-export default function checkboxQ() {
-  // State to manage multiple checkbox groups, each with their own options
-  const [checkboxGroups, setCheckboxGroups] = useState([
+export default function multiplechoiceQ() {
+  // State to manage multiple choice groups, each with their own options
+  const [choiceGroups, setChoiceGroups] = useState([
     {
       id: 1,
       label: '',
@@ -18,10 +18,10 @@ export default function checkboxQ() {
     }
   ]);
 
-  // Function to add a new checkbox group
-  const addCheckboxGroup = () => {
-    const newId = checkboxGroups.length + 1;
-    setCheckboxGroups([...checkboxGroups, {
+  // Function to add a new choice group
+  const addChoiceGroup = () => {
+    const newId = choiceGroups.length + 1;
+    setChoiceGroups([...choiceGroups, {
       id: newId,
       label: '',
       options: [
@@ -31,35 +31,35 @@ export default function checkboxQ() {
     }]);
   };
 
-  // Function to remove a checkbox group
-  const removeCheckboxGroup = (groupId) => {
-    // Don't remove if it's the last checkbox group
-    if (checkboxGroups.length <= 1) {
+  // Function to remove a choice group
+  const removeChoiceGroup = (groupId) => {
+    // Don't remove if it's the last choice group
+    if (choiceGroups.length <= 1) {
       return;
     }
     
-    // Remove the checkbox group with the specified ID
-    const filteredGroups = checkboxGroups.filter(group => group.id !== groupId);
+    // Remove the choice group with the specified ID
+    const filteredGroups = choiceGroups.filter(group => group.id !== groupId);
     
-    // Renumber the remaining checkbox groups sequentially
+    // Renumber the remaining choice groups sequentially
     const renumberedGroups = filteredGroups.map((group, index) => ({
       ...group,
       id: index + 1
     }));
     
-    setCheckboxGroups(renumberedGroups);
+    setChoiceGroups(renumberedGroups);
   };
 
-  // Function to handle checkbox group label changes
+  // Function to handle choice group label changes
   const handleGroupLabelChange = (groupId, value) => {
-    setCheckboxGroups(checkboxGroups.map(group => 
+    setChoiceGroups(choiceGroups.map(group => 
       group.id === groupId ? { ...group, label: value } : group
     ));
   };
 
-  // Function to add an option to a specific checkbox group
+  // Function to add an option to a specific choice group
   const addOption = (groupId) => {
-    setCheckboxGroups(checkboxGroups.map(group => {
+    setChoiceGroups(choiceGroups.map(group => {
       if (group.id === groupId) {
         const newOptionId = group.options.length + 1;
         return {
@@ -71,12 +71,12 @@ export default function checkboxQ() {
     }));
   };
 
-  // Function to remove an option from a specific checkbox group
+  // Function to remove an option from a specific choice group
   const removeOption = (groupId, optionId) => {
-    setCheckboxGroups(checkboxGroups.map(group => {
+    setChoiceGroups(choiceGroups.map(group => {
       if (group.id === groupId) {
-        // Don't remove if only 1 option remains (checkbox can have just 1 option)
-        if (group.options.length <= 1) {
+        // Don't remove if only 2 options remain (minimum required for multiple choice)
+        if (group.options.length <= 2) {
           return group;
         }
         
@@ -100,7 +100,7 @@ export default function checkboxQ() {
 
   // Function to handle option text changes
   const handleOptionChange = (groupId, optionId, value) => {
-    setCheckboxGroups(checkboxGroups.map(group => {
+    setChoiceGroups(choiceGroups.map(group => {
       if (group.id === groupId) {
         return {
           ...group,
@@ -115,7 +115,7 @@ export default function checkboxQ() {
 
   return (
     <div className={commonStyles.questionType + " question-type"}>
-      <h2>Checkbox question</h2>
+      <h2>Multiple choice question</h2>
       <div className={commonStyles.questionName}>
         <label htmlFor="questionName">Question title:</label>
         <input type="text" name="questionName" id="questionName" placeholder="Title" />
@@ -124,16 +124,16 @@ export default function checkboxQ() {
       {/* Use the Artifact component in standalone mode */}
       <Artifact mode="standalone" allowMultiple={true} />
       
-      {/* Map through each checkbox group */}
-      {checkboxGroups.map((group) => (
+      {/* Map through each choice group */}
+      {choiceGroups.map((group) => (
         <div key={group.id} className={commonStyles.itemBox + " mb-6"}>
           <div className={commonStyles.itemHeader}>
-            <label htmlFor={`checkboxGroup${group.id}`}>Checkbox Group {group.id}:</label>
+            <label htmlFor={`choiceGroup${group.id}`}>Choice Group {group.id}:</label>
             <button 
               type="button" 
               className={commonStyles.removeBtn}
-              onClick={() => removeCheckboxGroup(group.id)}
-              disabled={checkboxGroups.length <= 1}
+              onClick={() => removeChoiceGroup(group.id)}
+              disabled={choiceGroups.length <= 1}
             >
               <FaTrash /> Remove
             </button>
@@ -150,19 +150,19 @@ export default function checkboxQ() {
               onChange={(e) => handleGroupLabelChange(group.id, e.target.value)} 
             />
           
-          <h4>Checkbox options:</h4>
-          <div className={checkboxStyles.optionsContainer}>
+          <h4>Options (select one):</h4>
+          <div className={multiplechoiceStyles.optionsContainer}>
             
-            {/* Map through options for this checkbox group */}
+            {/* Map through options for this choice group */}
             {group.options.map((option) => (
-              <div key={option.id} className={commonStyles.singleOptionBox || 'border-l-3 border-petrol-blue pl-2 py-2'}>
+              <div key={option.id} className={commonStyles.singleOptionBox}>
                 <div className={commonStyles.itemHeader}>
                   <label htmlFor={`group${group.id}Option${option.id}`}>Option {option.id}:</label>
                   <button 
                     type="button" 
                     className={commonStyles.removeBtn}
                     onClick={() => removeOption(group.id, option.id)}
-                    disabled={group.options.length <= 1}
+                    disabled={group.options.length <= 2}
                   >
                     <FaTrash /> Remove
                   </button>
@@ -184,14 +184,14 @@ export default function checkboxQ() {
               className={commonStyles.addItemBtn + " mt-2"} 
               onClick={() => addOption(group.id)}
             >
-              <FaPlus /> Add checkbox option
+              <FaPlus /> Add option
             </button>
           </div>
         </div>
       ))}
       
-      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addCheckboxGroup}>
-        <FaPlus /> Add another checkbox group
+      <button className={commonStyles.addItemBtn + " mt-4"} onClick={addChoiceGroup}>
+        <FaPlus /> Add another choice group
       </button>
     </div>
   )

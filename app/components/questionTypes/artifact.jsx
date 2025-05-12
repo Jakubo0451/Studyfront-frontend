@@ -9,25 +9,49 @@ import { IoIosInformationCircleOutline } from "react-icons/io";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
 // Single artifact component with its own isolated state
-const SingleArtifact = ({ artifactId, onArtifactSelect }) => {
-  const [selectedArtifactName, setSelectedArtifactName] = useState("No artifact selected");
+const SingleArtifact = ({ 
+  artifactId, 
+  initialName, 
+  initialImage, 
+  initialTitle = "", // Add prop for initial title
+  onArtifactSelect,
+  onTitleChange  // Add callback for title changes
+}) => {
+  const [selectedArtifactName, setSelectedArtifactName] = useState(initialName || "No artifact selected");
   const [selectedArtifactId, setSelectedArtifactId] = useState(artifactId || null);
+  const [selectedArtifactImage, setSelectedArtifactImage] = useState(initialImage || null);
+  const [artifactTitle, setArtifactTitle] = useState(initialTitle); // Initialize with prop
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileNames, setFileNames] = useState([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState([]);
   const popupRef = useRef(null);
   const fileInputRef = useRef(null);
-  
+
   useEffect(() => {
-    if (artifactId) {
-      setSelectedArtifactName(`Artifact ${artifactId}`);
-      setSelectedArtifactId(artifactId);
-    }
+    // Set name regardless of value (will use default if null)
+    setSelectedArtifactName(initialName || "No artifact selected");
     
+    // Set ID regardless of value
+    setSelectedArtifactId(artifactId || null);
+    
+    // Always update the image, even when it's null
+    // This ensures the image is cleared when no artifact is selected
+    setSelectedArtifactImage(initialImage || null);
+  }, [artifactId, initialName, initialImage]);
+  
+  // This effect is causing the problem - removing it
+  useEffect(() => {
+    // Only clean up URLs, don't override the artifact name
     return () => {
       filePreviewUrls.forEach(url => URL.revokeObjectURL(url));
     };
-  }, [artifactId, filePreviewUrls]);
+  }, [filePreviewUrls]);
+
+  useEffect(() => {
+    return () => {
+      filePreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [filePreviewUrls]);
   
   const openArtifactMenu = () => {
     if (popupRef.current) {
@@ -41,19 +65,22 @@ const SingleArtifact = ({ artifactId, onArtifactSelect }) => {
     }
   };
   
-  const selectArtifact = (artifactId, artifactName) => {
+  const selectArtifact = (artifactId, artifactName, artifactImage) => {
     return () => {
       setSelectedArtifactName(artifactName);
       setSelectedArtifactId(artifactId);
+      setSelectedArtifactImage(artifactImage);
       
       // Call the callback if provided
       if (onArtifactSelect) {
-        onArtifactSelect(artifactId, artifactName);
+        onArtifactSelect(artifactId, artifactName, artifactImage);
       }
       
       closePopup();
     };
   };
+
+  
   
   const clearFiles = () => {
     filePreviewUrls.forEach(url => URL.revokeObjectURL(url));
@@ -85,6 +112,20 @@ const SingleArtifact = ({ artifactId, onArtifactSelect }) => {
     const updatedNames = [...fileNames];
     updatedNames[index] = newName;
     setFileNames(updatedNames);
+  };
+
+  useEffect(() => {
+    setArtifactTitle(initialTitle);
+  }, [initialTitle]);
+
+  const handleTitleChange = (e) => {
+    const newTitle = e.target.value;
+    setArtifactTitle(newTitle);
+    
+    // Call the callback to update parent state
+    if (onTitleChange) {
+      onTitleChange(newTitle);
+    }
   };
   
   // Render popup for this specific artifact
@@ -136,17 +177,25 @@ const SingleArtifact = ({ artifactId, onArtifactSelect }) => {
               <div className={styles.artifactsList}>
                 <p><IoIosInformationCircleOutline /> Select <span> one </span> artifact</p>
                 <div className={styles.artifactItems}>
-                  <div className={styles.artifactItem} onClick={selectArtifact(1, "Artifact 1")} title="Artifact 1">
+                  <div className={styles.artifactItem} onClick={selectArtifact(1, "Artifact 1", "https://picsum.photos/100/200")} title="Artifact 1">
                     <img src="https://picsum.photos/100/200" alt="Artifact" />
                     <p>Artifact 1</p>
                   </div>
-                  <div className={styles.artifactItem} onClick={selectArtifact(2, "Artifact 2")} title="Artifact 2">
+                  <div className={styles.artifactItem} onClick={selectArtifact(2, "Artifact 2", "https://picsum.photos/200/200")} title="Artifact 2">
                     <img src="https://picsum.photos/200/200" alt="Artifact" />
                     <p>Artifact 2</p>
                   </div>
-                  <div className={styles.artifactItem} onClick={selectArtifact(3, "Artifact 3 has a really long name apparently")} title="Artifact 3 has a really long name apparently">
+                  <div className={styles.artifactItem} onClick={selectArtifact(3, "Artifact 3 has a really long name apparently", "https://picsum.photos/200/300")} title="Artifact 3 has a really long name apparently">
                     <img src="https://picsum.photos/200/300" alt="Artifact" />
                     <p>Artifact 3 has a really long name apparently</p>
+                  </div>
+                  <div className={styles.artifactItem} onClick={selectArtifact(4, "Artifact 4 is an audio file", "/audio.png")} title="Artifact 4 is an audio file">
+                    <img src="/audio.png" alt="Artifact" />
+                    <p>Artifact 4 is an audio file</p>
+                  </div>
+                  <div className={styles.artifactItem} onClick={selectArtifact(5, "Artifact 5 is a video file", "/video.png")} title="Artifact 5 is a video file">
+                    <img src="/video.png" alt="Artifact" />
+                    <p>Artifact 5 is a video file</p>
                   </div>
                 </div>
               </div>
@@ -163,11 +212,26 @@ const SingleArtifact = ({ artifactId, onArtifactSelect }) => {
   return (
     <div className={styles.artifact}>
       <div className={styles.selectArtifact}>
+      {selectedArtifactImage ? (
+        <img 
+          src={selectedArtifactImage} 
+          alt={selectedArtifactName} 
+          className={styles.artifactPreview} 
+        />
+      ) : null}
         <div>
-          <button onClick={openArtifactMenu}>Select artifact</button>
-          <p>{selectedArtifactName}</p>
+          <div>
+            <button onClick={openArtifactMenu}>Select artifact</button>
+            <p>{selectedArtifactName}</p>
+          </div>
+          <input 
+            type="text" 
+            placeholder="Artifact label" 
+            className={styles.artifactTitleInput}
+            value={artifactTitle}
+            onChange={handleTitleChange}
+          />
         </div>
-        <input type="text" placeholder="Artifact name" />
       </div>
       {renderPopup()}
     </div>
@@ -181,17 +245,71 @@ export default function Artifact({
   allowMultiple = false,
   mode = 'normal'
 }) {
-  // For standalone mode only
-  const [artifacts, setArtifacts] = useState(mode === 'standalone' ? [{ id: 1 }] : []);
+  // For standalone mode only - track both id and selected artifact info
+  const [artifacts, setArtifacts] = useState(mode === 'standalone' ? [{
+    id: 1,
+    selectedArtifactId: null,
+    selectedArtifactName: "No artifact selected",
+    selectedArtifactImage: null,
+    artifactTitle: ""  // Add title to the state
+  }] : []);
 
   // Functions for standalone mode
   const addArtifact = () => {
     const newId = artifacts.length > 0 ? Math.max(...artifacts.map(a => a.id)) + 1 : 1;
-    setArtifacts([...artifacts, { id: newId }]);
+    setArtifacts([...artifacts, { 
+      id: newId,
+      selectedArtifactId: null,
+      selectedArtifactName: "No artifact selected",
+      selectedArtifactImage: null,
+      artifactTitle: ""  // Initialize title
+    }]);
   };
   
   const removeArtifact = (idToRemove) => {
-    setArtifacts(artifacts.filter(artifact => artifact.id !== idToRemove));
+    // Remove the artifact with the specified ID
+    const filteredArtifacts = artifacts.filter(artifact => artifact.id !== idToRemove);
+    
+    // If we end up with no artifacts and allowMultiple is false, don't remove the last one
+    if (filteredArtifacts.length === 0 && !allowMultiple) {
+      return;
+    }
+    
+    // Renumber the remaining artifacts sequentially but keep their selection data
+    const renumberedArtifacts = filteredArtifacts.map((artifact, index) => ({
+      ...artifact, // Keep all existing properties (including selectedArtifactName)
+      id: index + 1
+    }));
+    
+    setArtifacts(renumberedArtifacts);
+  };
+
+  // Update the title for a specific artifact
+  const handleTitleChange = (artifactPositionId, newTitle) => {
+    setArtifacts(artifacts.map(artifact => 
+      artifact.id === artifactPositionId 
+        ? { ...artifact, artifactTitle: newTitle }
+        : artifact
+    ));
+  };
+
+  // Update the selected artifact for a specific position
+  const handleArtifactSelection = (artifactPositionId, artifactId, artifactName, artifactImage) => {
+    setArtifacts(artifacts.map(artifact => 
+      artifact.id === artifactPositionId 
+        ? { 
+            ...artifact, 
+            selectedArtifactId: artifactId, 
+            selectedArtifactName: artifactName, 
+            selectedArtifactImage: artifactImage 
+          }
+        : artifact
+    ));
+    
+    // Call the parent callback if provided
+    if (onArtifactSelect) {
+      onArtifactSelect(artifactId, artifactName, artifactImage);  // Pass image data to parent callback
+    }
   };
 
   // Render different based on mode
@@ -212,10 +330,18 @@ export default function Artifact({
                   <FaTrash /> Remove
                 </button>
               </div>
-              {/* Each artifact has its own independent component instance */}
+              {/* Pass the selected artifact data and title to each instance */}
               <SingleArtifact 
-                artifactId={initialArtifactId} 
-                onArtifactSelect={onArtifactSelect}
+                artifactId={artifact.selectedArtifactId} 
+                initialName={artifact.selectedArtifactName}
+                initialImage={artifact.selectedArtifactImage}
+                initialTitle={artifact.artifactTitle}  // Pass the title
+                onArtifactSelect={(id, name, image) => 
+                  handleArtifactSelection(artifact.id, id, name, image)
+                }
+                onTitleChange={(newTitle) => 
+                  handleTitleChange(artifact.id, newTitle)
+                }  // Pass title change handler
               />
             </div>
           ))}
