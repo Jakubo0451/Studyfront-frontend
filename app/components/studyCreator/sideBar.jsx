@@ -177,7 +177,7 @@ const SideBar = ({
       <button
         onClick={onViewStudyDetails}
         type="button"
-        className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center"
+        className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center hover:bg-oxford-blue transition duration-300 cursor-pointer"
       >
         Study Information
       </button>
@@ -197,27 +197,35 @@ const SideBar = ({
               key={`${question.id}-${index}`}
               id={`item-${question.id}`}
               content={
-                question.type === "text"
-                  ? `${index + 1}: Text Question`
-                  : question.type === "multipleChoice"
-                  ? `${index + 1}: Multiple Choice`
-                  : question.type === "checkbox"
-                  ? `${index + 1}: Checkbox Question`
-                  : question.type === "ratingScale"
-                  ? `${index + 1}: Rating Scale Question`
-                  : `Question ${index + 1}`
-              }
-              onQuestionSelect={onQuestionSelect}
-              index={index}
-              onDeleteQuestion={onDeleteQuestion}
-              isSelected={index === selectedQuestionIndex}
-            />
-          ))
-        ) : (
-          <p className="text-center text-gray-600">No questions added yet.</p>
-        )}
-      </div>
-      </SortableContext>
+                    question.type === "text"
+                      ? `${index + 1}: Text Question`
+                      : question.type === "multipleChoice"
+                      ? `${index + 1}: Multiple Choice Question`
+                      : question.type === "checkbox"
+                      ? `${index + 1}: Checkbox Question`
+                      : question.type === "ratingScale"
+                      ? `${index + 1}: Rating Scale Question`
+                      : question.type === "dropdown"
+                      ? `${index + 1}: Dropdown Question`
+                      : question.type === "ranking"
+                      ? `${index + 1}: Ranking Question`
+                      : question.type === "matrix"
+                      ? `${index + 1}: Matrix Question`
+                      : `Question ${index + 1}`
+                    }
+                    onQuestionSelect={onQuestionSelect}
+                    index={index}
+                    onDeleteQuestion={onDeleteQuestion}
+                    isSelected={index === selectedQuestionIndex} // Add this prop
+                  />
+                ))
+              ) : (
+              <p className="text-center text-gray-600">
+                No questions added yet.
+              </p>
+            )}
+          </div>
+        </SortableContext>
       </DndContext>
       <div className="relative">
         <button
@@ -246,8 +254,43 @@ const SideBar = ({
                     type="button"
                     onClick={() => handleAddQuestionType("checkbox")}
                   >
-                    <img src="/questionTypes/checkboxQ.svg" alt="Rating scale" />
+                    <img src="/questionTypes/checkboxQ.svg" alt="Checkbox" />
                     Checkbox
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("text")}
+                  >
+                    <img src="/questionTypes/textanswerQ.svg" alt="Text" />
+                    Text Answer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("multipleChoice")}
+                  >
+                    <img src="/questionTypes/multiplechoiceQ.svg" alt="Multiple choice" />
+                    Multiple Choice
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("dropdown")}
+                  >
+                    <img src="/questionTypes/dropdownQ.svg" alt="Dropdown" />
+                    Dropdown
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("ranking")}
+                  >
+                    <img src="/questionTypes/rankQ.svg" alt="Ranking" />
+                    Ranking
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddQuestionType("matrix")}
+                  >
+                    <img src="/questionTypes/matrixQ.svg" alt="Matrix" />
+                    Matrix
                   </button>
                 </div>
               </div>

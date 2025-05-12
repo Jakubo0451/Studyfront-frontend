@@ -1,0 +1,27 @@
+.termsInfo {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.termsCheckbox {
+    background-color: var(--color-sky-blue);
+    border-radius: .25rem;
+    padding: .5rem;
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.termsCheckbox input {
+    margin: .25rem;
+    cursor: pointer;
+    width: 1rem;
+    height: 1rem;
+    border-radius: .25rem;
+    border: 1px solid var(--color-sky-blue);
+    background-color: var(--color-white);
+}
+
+.termsCheckbox label {
+    cursor: pointer;
+}

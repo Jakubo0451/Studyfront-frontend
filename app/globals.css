@@ -15,6 +15,7 @@
 @layer base {
   a, button {
     font-family: var(--font-readex);
+    cursor: pointer;
   }
 }
 .detailsPopup {

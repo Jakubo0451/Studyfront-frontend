@@ -8,6 +8,11 @@ import CheckboxQuestionBuilder from "@/components/questionTypes/checkboxQ";
 import { useSearchParams, useRouter } from "next/navigation";
 import backendUrl from "environment";
 import RatingScaleQuestionBuilder from "@/components/questionTypes/ratingQ";
+import TextanswerQuestionBuilder from "@/components/questionTypes/textanswerQ";
+import MultipleChoiceQuestionBuilder from "@/components/questionTypes/multiplechoiceQ";
+import DropdownQuestionBuilder from "@/components/questionTypes/dropdownQ";
+import RankQuestionBuilder from "@/components/questionTypes/rankQ";
+import MatrixQuestionBuilder from "@/components/questionTypes/matrixQ";
 import StudyDetails from "@/components/questionTypes/studyDetails";
 import { fetchStudyDetails, updateQuestions, updateQuestion, addQuestion, deleteQuestion } from "@/utils/studyActions";
 import { debounce, throttle } from "lodash";
@@ -375,7 +380,7 @@ const throttledSave = throttle(async (currentQuestion) => {
               {selectedQuestionIndex !== null && questions?.[selectedQuestionIndex] && (
                 <div>
                   {questions[selectedQuestionIndex].type === "text" && (
-                    <TextQuestionDisplay
+                    <TextanswerQuestionBuilder
                       question={questions[selectedQuestionIndex]}
                       onQuestionDataChange={(id, data) =>
                         setQuestions((prev) =>
@@ -385,7 +390,7 @@ const throttledSave = throttle(async (currentQuestion) => {
                     />
                   )}
                   {questions[selectedQuestionIndex].type === "multipleChoice" && (
-                    <MultipleChoiceQuestionDisplay
+                    <MultipleChoiceQuestionBuilder
                       question={questions[selectedQuestionIndex]}
                       onQuestionDataChange={(id, data) =>
                         setQuestions((prev) =>
@@ -408,6 +413,48 @@ const throttledSave = throttle(async (currentQuestion) => {
                       onChange={handleRatingScaleQuestionChange}
                     />
                   )}
+                    {questions[selectedQuestionIndex].type === "dropdown" && (
+                      <DropdownQuestionBuilder
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={(updatedData) =>
+                          setQuestions((prev) =>
+                            prev.map((q) =>
+                              q.id === questions[selectedQuestionIndex].id
+                                ? { ...q, data: updatedData }
+                                : q
+                            )
+                          )
+                        }
+                      />
+                    )}
+                    {questions[selectedQuestionIndex].type === "ranking" && (
+                      <RankQuestionBuilder
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={(updatedData) =>
+                          setQuestions((prev) =>
+                            prev.map((q) =>
+                              q.id === questions[selectedQuestionIndex].id
+                                ? { ...q, data: updatedData }
+                                : q
+                            )
+                          )
+                        }
+                      />
+                    )}
+                    {questions[selectedQuestionIndex].type === "matrix" && (
+                      <MatrixQuestionBuilder
+                        questionData={questions[selectedQuestionIndex].data}
+                        onChange={(updatedData) =>
+                          setQuestions((prev) =>
+                            prev.map((q) =>
+                              q.id === questions[selectedQuestionIndex].id
+                                ? { ...q, data: updatedData }
+                                : q
+                            )
+                          )
+                        }
+                      />
+                    )}
                 </div>
               )}
               {selectedQuestionIndex === null && questions?.length > 0 && (

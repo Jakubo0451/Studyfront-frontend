@@ -78,6 +78,10 @@
     width: fit-content;
 }
 
+.ratingScale input:focus {
+    outline: solid 3px var(--color-petrol-blue);
+}
+
 .ratingScaleInput span {
     padding: 0 .5rem;
 }

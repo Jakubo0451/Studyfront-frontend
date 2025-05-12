@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import styles from '../../styles/questionTypes/ratingQ.module.css';
+import ratingStyles from '../../styles/questionTypes/ratingQ.module.css';
+import commonStyles from '../../styles/questionTypes/common.module.css'
 import Artifact from './artifact';
 import { FaPlus, FaTrash } from "react-icons/fa";
 
@@ -39,9 +40,9 @@ export default function RatingScaleQuestionBuilder({ questionData, onChange }) {
   };
 
   return (
-    <div className={styles.ratingQ + ' question-type'}>
+    <div className={ratingStyles.ratingQ + ' question-type'}>
       <h2>Rating Question</h2>
-      <div className={styles.questionName}>
+      <div className={commonStyles.questionName}>
         <label htmlFor="questionName">Question Title:</label>
         <input
           type="text"
@@ -56,19 +57,19 @@ export default function RatingScaleQuestionBuilder({ questionData, onChange }) {
       <Artifact mode="standalone" allowMultiple={true} />
 
       {ratingScales.map((scale, index) => (
-        <div key={scale.id} className={styles.ratingScale}>
-          <div className={styles.ratingHeader}>
+        <div key={scale.id} className={ratingStyles.ratingScale}>
+          <div className={ratingStyles.ratingHeader}>
             <label htmlFor={`rating${scale.id}`}>Rating Factor {index + 1}:</label>
             <button
               type="button"
-              className={styles.removeBtn}
+              className={ratingStyles.removeBtn}
               onClick={() => removeRatingScale(scale.id)}
               disabled={ratingScales.length <= 1}
             >
               <FaTrash /> Remove
             </button>
           </div>
-          <div className={styles.ratingScaleInput}>
+          <div className={ratingStyles.ratingScaleInput}>
             <label htmlFor={`rf${scale.id}_name`}>Rating Name:</label>
             <input
               type="text"
@@ -80,7 +81,7 @@ export default function RatingScaleQuestionBuilder({ questionData, onChange }) {
             />
             <div>
               <label htmlFor={`rf${scale.id}_from`}>Range:</label>
-              <div className={styles.rangeInputs}>
+              <div className={ratingStyles.rangeInputs}>
                 <input
                   type="number"
                   name={`rf${scale.id}_from`}
@@ -103,7 +104,7 @@ export default function RatingScaleQuestionBuilder({ questionData, onChange }) {
           </div>
         </div>
       ))}
-      <button className={styles.addRanking} onClick={addRatingScale}>
+      <button className={ratingStyles.addRanking} onClick={addRatingScale}>
         <FaPlus /> Add another rating scale
       </button>
     </div>
