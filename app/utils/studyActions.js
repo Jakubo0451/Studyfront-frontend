@@ -25,7 +25,7 @@ export const fetchStudies = async (router, setStudies, onError) => {
         console.error("Error fetching studies:", error);
         if (onError) onError(error.message);
     }
-};
+}
 
 export const createStudy = async (router, onError) => {
     try {
@@ -152,7 +152,6 @@ export const deleteStudy = async (study, router, onClose, onStudyDeleted, onErro
             console.error("Error deleting study:", error.message);
             if (onError) onError(error.message);
         }
-    }
 };
 
 export const startStudy = async (study, onStudyUpdated, onError) => {
