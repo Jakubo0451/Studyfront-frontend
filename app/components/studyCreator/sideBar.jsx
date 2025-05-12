@@ -147,7 +147,7 @@ const SideBar = ({
       <button
         onClick={onViewStudyDetails}
         type="button"
-        className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center"
+        className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center hover:bg-oxford-blue transition duration-300 cursor-pointer"
       >
         Study Information
       </button>
