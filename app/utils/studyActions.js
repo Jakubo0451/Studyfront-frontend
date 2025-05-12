@@ -136,9 +136,6 @@ export const deleteStudy = async (study, router, onClose, onStudyDeleted, onErro
                 "Content-Type": "application/json",
             },
         });
-
-        const data = await response.json();
-
             if (response.ok) {
                 onClose();
                 if (onStudyDeleted) {
