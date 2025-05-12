@@ -91,6 +91,9 @@ const SideBar = ({
 }) => {
   const params = useParams();
 
+  // eslint-disable-next-line no-unused-vars
+  const [studyId, setStudyId] = useState(null);
+
   useEffect(() => {
     if (params?.id) {
       setStudyId(params.id);
