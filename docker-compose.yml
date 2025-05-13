@@ -17,6 +17,3 @@ services:
       - NODE_ENV=production
       - API_URL=http://studyfront-backend:5000
     command: npm run start
-
-volumes:
-  mongo-data:
