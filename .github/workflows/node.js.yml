@@ -32,7 +32,7 @@ jobs:
     - name: Run ESLint
       run: npx eslint
 
-    - name: Build project (if applicable)
+    - name: Build project
       run: npm run build --if-present
 
     - name: Start project
