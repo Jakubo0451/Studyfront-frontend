@@ -255,6 +255,19 @@ export default function CreateStudyPage() {
       }
     );
   };
+
+  const handleQuestionDataChange = useCallback(
+    (updatedDataFromChild) => {
+      if (selectedQuestionIndex === null) return;
+
+      const nextQuestions = questions.map((q, index) => {
+        if (index === selectedQuestionIndex) {
+          return {
+            ...q,
+            data: updatedDataFromChild,
+          };
+        }
+        return q;
       });
 
       if (
@@ -263,6 +276,33 @@ export default function CreateStudyPage() {
       ) {
         setQuestions(nextQuestions);
       }
+
+      const questionToSave = questions[selectedQuestionIndex];
+
+      if (study?._id && questionToSave?._id) {
+        debouncedSave(
+          study._id,
+          questionToSave._id,
+          updatedDataFromChild,
+          /* eslint-disable-next-line */
+          (_updatedData) => {
+            setSaveStatus("Question saved!");
+            setTimeout(() => setSaveStatus(""), 3000);
+          },
+          (error) => {
+            console.error(
+              "Failed to save question data via debouncedSave:",
+              error
+            );
+            setSaveStatus("Failed to save question");
+            setTimeout(() => setSaveStatus(""), 3000);
+          }
+        );
+      }
+    },
+    [selectedQuestionIndex, questions, study, debouncedSave]
+  );
+
   if (!editStudyId && !isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -287,7 +327,7 @@ export default function CreateStudyPage() {
         <p className="text-lg">Study data not available or failed to load.</p>
       </div>
     );
-  };
+  }
 
   return (
     <div className="flex flex-col h-screen">
