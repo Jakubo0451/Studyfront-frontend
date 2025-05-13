@@ -59,9 +59,21 @@ const StudiesList = ({ refreshTrigger }) => {
         fetchStudies();
     }, [fetchStudies, refreshTrigger]);
 
-    const openShare = () => {
-        document.querySelector('.sharePopup').style.display = 'flex';
+    const openShare = (studyId) => {
+    // Get the popup and make it visible
+    const sharePopup = document.querySelector('.sharePopup');
+    sharePopup.style.display = 'flex';
+    
+    // Find the study select dropdown in the popup and set its value
+    const selectElement = sharePopup.querySelector('#study-select');
+    if (selectElement && studyId) {
+        selectElement.value = studyId;
+        
+        // Trigger change event to update the displayed study
+        const event = new Event('change', { bubbles: true });
+        selectElement.dispatchEvent(event);
     }
+}
 
     const openDetails = async (studyId) => {
         setShowDetailsPopup(true);

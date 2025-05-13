@@ -11,6 +11,7 @@ export default function SharePopup({ study, onStudyChange }) {
   const router = useRouter();
   const [studies, setStudies] = useState([]);
   const [currentStudy, setCurrentStudy] = useState(study);
+  /* eslint-disable-next-line */
   const [studyDetails, setStudyDetails] = useState(null);
 
   useEffect(() => {
@@ -133,11 +134,7 @@ export default function SharePopup({ study, onStudyChange }) {
             ))}
           </select>
 
-          {studyDetails && (
-            <div className="study-info mt-4 mb-4">
-              <h2 className="text-lg font-semibold">{studyDetails.title}</h2>
-            </div>
-          )}
+          
 
           <label htmlFor="share-link">Sharable link</label>
           <div className="share-link">
