@@ -1,111 +1,262 @@
 /* eslint-disable */
 
-'use client';
-import React, { useState, useRef, useEffect } from 'react';
-import styles from '../../styles/questionTypes/artifact.module.css';
+"use client";
+import React, { useState, useRef, useEffect } from "react";
+import styles from "../../styles/questionTypes/artifact.module.css";
 import { IoIosClose } from "react-icons/io";
 import { MdOutlineNoteAdd } from "react-icons/md";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import backendUrl from "environment";
 
 // Single artifact component with its own isolated state
-const SingleArtifact = ({ 
-  artifactId, 
-  initialName, 
-  initialImage, 
+const SingleArtifact = ({
+  studyId,
+  artifactId,
+  initialName,
+  initialImage,
   initialTitle = "", // Add prop for initial title
   onArtifactSelect,
-  onTitleChange  // Add callback for title changes
+  onTitleChange, // Add callback for title changes
 }) => {
-  const [selectedArtifactName, setSelectedArtifactName] = useState(initialName || "No artifact selected");
-  const [selectedArtifactId, setSelectedArtifactId] = useState(artifactId || null);
-  const [selectedArtifactImage, setSelectedArtifactImage] = useState(initialImage || null);
+  const [selectedArtifactName, setSelectedArtifactName] = useState(
+    initialName || "No artifact selected"
+  );
+  const [selectedArtifactId, setSelectedArtifactId] = useState(
+    artifactId || null
+  );
+  const [selectedArtifactImage, setSelectedArtifactImage] = useState(
+    initialImage || null
+  );
   const [artifactTitle, setArtifactTitle] = useState(initialTitle); // Initialize with prop
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [fileNames, setFileNames] = useState([]);
   const [filePreviewUrls, setFilePreviewUrls] = useState([]);
+  const [artifactsList, setArtifactsList] = useState([]);
   const popupRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    const fetchArtifacts = async () => {
+      if (!studyId) {
+        console.error("studyId is not defined.");
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to view artifacts.");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${backendUrl}/api/studies/${studyId}/files`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch artifacts");
+        }
+
+        const artifacts = await response.json();
+
+        const artifactsWithUrls = artifacts.map(artifact => {
+          let imageUrl = `${backendUrl}/api/upload/${artifact._id}`;
+
+          if (artifact.contentType && artifact.contentType.startsWith("audio/")) {
+            imageUrl = "/audio.png";
+          }
+          else if (artifact.contentType && artifact.contentType.startsWith("video/")) {
+            imageUrl = "/video.png";
+          }
+
+          return {
+            ...artifact,
+            id: artifact._id,
+            imageUrl: imageUrl
+          };
+        });
+
+        setArtifactsList(artifactsWithUrls);
+      } catch (error) {
+        console.error("Error fetching artifacts:", error);
+      }
+    };
+
+    fetchArtifacts();
+  }, [studyId]);
 
   useEffect(() => {
     // Set name regardless of value (will use default if null)
     setSelectedArtifactName(initialName || "No artifact selected");
-    
+
     // Set ID regardless of value
     setSelectedArtifactId(artifactId || null);
-    
+
     // Always update the image, even when it's null
     // This ensures the image is cleared when no artifact is selected
     setSelectedArtifactImage(initialImage || null);
   }, [artifactId, initialName, initialImage]);
-  
+
   // This effect is causing the problem - removing it
   useEffect(() => {
     // Only clean up URLs, don't override the artifact name
     return () => {
-      filePreviewUrls.forEach(url => URL.revokeObjectURL(url));
+      filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [filePreviewUrls]);
 
   useEffect(() => {
     return () => {
-      filePreviewUrls.forEach(url => URL.revokeObjectURL(url));
+      filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [filePreviewUrls]);
-  
+
   const openArtifactMenu = () => {
     if (popupRef.current) {
-      popupRef.current.style.display = 'flex';
+      popupRef.current.style.display = "flex";
     }
   };
-  
+
   const closePopup = () => {
     if (popupRef.current) {
-      popupRef.current.style.display = 'none';
+      popupRef.current.style.display = "none";
     }
   };
-  
-  const selectArtifact = (artifactId, artifactName, artifactImage) => {
+
+  const selectArtifact = (artifactId, artifactName, artifactImage, contentType) => {
     return () => {
       setSelectedArtifactName(artifactName);
       setSelectedArtifactId(artifactId);
-      setSelectedArtifactImage(artifactImage);
-      
+
+      let displayImage = artifactImage;
+      if (contentType && contentType.startsWith("audio/")) {
+        displayImage = "/audio.png";
+      }
+      else if (contentType && contentType.startsWith("video/")) {
+        displayImage = "/video.png";
+      }
+
+      setSelectedArtifactImage(displayImage);
+
       // Call the callback if provided
       if (onArtifactSelect) {
         onArtifactSelect(artifactId, artifactName, artifactImage);
       }
-      
+
       closePopup();
     };
   };
 
-  
-  
   const clearFiles = () => {
-    filePreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    filePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
     setSelectedFiles([]);
     setFileNames([]);
     setFilePreviewUrls([]);
-    
+
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
-  }; 
-  
+  };
+
+  const handleUploadArtifacts = async () => {
+    if (!selectedFiles.length) return;
+
+    setIsUploading(true);
+    const successfulUploads = [];
+    const failedUploads = [];
+
+    try {
+      for (const file of selectedFiles) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append(
+          "displayName",
+          fileNames[selectedFiles.indexOf(file)] || file.name
+        );
+        formData.append("studyId", studyId);
+
+        const contentType = file.type;
+
+        try {
+          const response = await fetch(
+            `${backendUrl}/api/studies/${studyId}/files`,
+            {
+              method: "POST",
+              body: formData,
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`Failed to upload file: ${file.name}`);
+          }
+
+          const data = await response.json();
+
+          let displayUrl;
+          if (contentType.startsWith("audio/")) {
+            displayUrl = "/audio.png";
+          } else if (contentType.startsWith("video/")) {
+            displayUrl = "/video.png";
+          } else {
+            displayUrl = `${backendUrl}/api/upload/${data.file._id}`;
+          }
+
+          successfulUploads.push({
+            id: data.file._id,
+            displayName: data.file.displayName,
+            imageUrl: displayUrl,
+            contentType: contentType
+          });
+        } catch (error) {
+          console.error("Error uploading file:", error);
+          failedUploads.push(file.name);
+        }
+      }
+
+      // Add successfully uploaded files to the artifacts list
+      if (successfulUploads.length > 0) {
+        setArtifactsList((prev) => [...prev, ...successfulUploads]);
+      }
+
+      // Clear the file selection
+      clearFiles();
+    } catch (error) {
+      console.error("Error uploading files:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setSelectedFiles(files);
-    
-    const previewUrls = files.map(file => {
-      if (file.type.startsWith('image/')) {
+
+    const previewUrls = files.map((file) => {
+      if (file.type.startsWith("image/")) {
         return URL.createObjectURL(file);
       }
-      return '';
+      else if (file.type.startsWith("audio/")) {
+        return "/audio.png";
+      }
+      else if (file.type.startsWith("video/")) {
+        return "/video.png";
+      }
+      return "";
     });
-    
+
     setFilePreviewUrls(previewUrls);
-    setFileNames(files.map(file => file.name));
+    setFileNames(files.map((file) => file.name));
   };
 
   const handleNameChange = (index, newName) => {
@@ -121,13 +272,13 @@ const SingleArtifact = ({
   const handleTitleChange = (e) => {
     const newTitle = e.target.value;
     setArtifactTitle(newTitle);
-    
+
     // Call the callback to update parent state
     if (onTitleChange) {
       onTitleChange(newTitle);
     }
   };
-  
+
   // Render popup for this specific artifact
   const renderPopup = () => (
     <div className={styles.selectArtifactPopup} ref={popupRef}>
@@ -138,95 +289,110 @@ const SingleArtifact = ({
           <div>
             <div className={styles.uploadArtifact}>
               <label>Upload new artifact(s):</label>
-              <input 
-                type="file" 
+              <input
+                type="file"
                 className={styles.fileUpload}
-                accept="image/apng, image/avif, image/gifs, image/jpeg, image/png, image/webp, video/mp4, audio/mp4, audio/mp3, audio/m4a, audio/mpeg, audio/ogg" 
-                multiple 
+                accept="image/apng, image/avif, image/gifs, image/jpeg, image/png, image/webp, video/mp4, audio/mp4, audio/mp3, audio/m4a, audio/mpeg, audio/ogg, audio/ogv"
+                multiple
                 onChange={handleFileChange}
                 ref={fileInputRef}
               />
               {selectedFiles.length > 0 && (
                 <div className={styles.fileList}>
-                  <button onClick={clearFiles} className={styles.clearFiles}><IoIosClose /> Clear files</button>
+                  <button onClick={clearFiles} className={styles.clearFiles}>
+                    <IoIosClose /> Clear files
+                  </button>
                   <h3>Change artifact name(s):</h3>
                   {selectedFiles.map((file, index) => (
                     <div key={index} className={styles.fileItem}>
                       {filePreviewUrls[index] ? (
-                        <img 
-                          src={filePreviewUrls[index]} 
-                          alt={`Preview of ${fileNames[index]}`} 
+                        <img
+                          src={filePreviewUrls[index]}
+                          alt={`Preview of ${fileNames[index]}`}
                           className={styles.filePreview}
                         />
                       ) : (
                         <div className={styles.noPreview}>
-                          {file.type.split('/')[0]}
+                          {file.type.split("/")[0]}
                         </div>
                       )}
-                      <input 
-                        type="text" 
-                        value={fileNames[index]} 
-                        onChange={(e) => handleNameChange(index, e.target.value)}
+                      <input
+                        type="text"
+                        value={fileNames[index]}
+                        onChange={(e) =>
+                          handleNameChange(index, e.target.value)
+                        }
                       />
                     </div>
                   ))}
-                  <button className={styles.uploadArtifactsBtn}><MdOutlineNoteAdd /> Upload selected artifacts</button>
+                  <button
+                    className={styles.uploadArtifactsBtn}
+                    onClick={handleUploadArtifacts}
+                  >
+                    <MdOutlineNoteAdd /> Upload selected artifacts
+                  </button>
                 </div>
               )}
               <label>Already uploaded artifact(s):</label>
               <div className={styles.artifactsList}>
-                <p><IoIosInformationCircleOutline /> Select <span> one </span> artifact</p>
+                <p>
+                  <IoIosInformationCircleOutline /> Select <span> one </span>{" "}
+                  artifact
+                </p>
                 <div className={styles.artifactItems}>
-                  <div className={styles.artifactItem} onClick={selectArtifact(1, "Artifact 1", "https://picsum.photos/100/200")} title="Artifact 1">
-                    <img src="https://picsum.photos/100/200" alt="Artifact" />
-                    <p>Artifact 1</p>
-                  </div>
-                  <div className={styles.artifactItem} onClick={selectArtifact(2, "Artifact 2", "https://picsum.photos/200/200")} title="Artifact 2">
-                    <img src="https://picsum.photos/200/200" alt="Artifact" />
-                    <p>Artifact 2</p>
-                  </div>
-                  <div className={styles.artifactItem} onClick={selectArtifact(3, "Artifact 3 has a really long name apparently", "https://picsum.photos/200/300")} title="Artifact 3 has a really long name apparently">
-                    <img src="https://picsum.photos/200/300" alt="Artifact" />
-                    <p>Artifact 3 has a really long name apparently</p>
-                  </div>
-                  <div className={styles.artifactItem} onClick={selectArtifact(4, "Artifact 4 is an audio file", "/audio.png")} title="Artifact 4 is an audio file">
-                    <img src="/audio.png" alt="Artifact" />
-                    <p>Artifact 4 is an audio file</p>
-                  </div>
-                  <div className={styles.artifactItem} onClick={selectArtifact(5, "Artifact 5 is a video file", "/video.png")} title="Artifact 5 is a video file">
-                    <img src="/video.png" alt="Artifact" />
-                    <p>Artifact 5 is a video file</p>
-                  </div>
+                  {artifactsList.map((artifact) => (
+                    <div
+                      key={artifact.id}
+                      className={styles.artifactItem}
+                      onClick={selectArtifact(
+                        artifact.id,
+                        artifact.displayName,
+                        artifact.imageUrl,
+                        artifact.contentType
+                      )}
+                      title={artifact.displayName}
+                    >
+                      <img src={artifact.imageUrl} alt={artifact.displayName} />
+                      <p>{artifact.displayName}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div onClick={closePopup}>
-          <button type="button" className="closeBtn" title="Close menu" onClick={closePopup}><IoIosClose /></button>
+          <button
+            type="button"
+            className="closeBtn"
+            title="Close menu"
+            onClick={closePopup}
+          >
+            <IoIosClose />
+          </button>
         </div>
       </div>
     </div>
   );
-  
+
   return (
     <div className={styles.artifact}>
       <div className={styles.selectArtifact}>
-      {selectedArtifactImage ? (
-        <img 
-          src={selectedArtifactImage} 
-          alt={selectedArtifactName} 
-          className={styles.artifactPreview} 
-        />
-      ) : null}
+        {selectedArtifactImage ? (
+          <img
+            src={selectedArtifactImage}
+            alt={selectedArtifactName}
+            className={styles.artifactPreview}
+          />
+        ) : null}
         <div>
           <div>
             <button onClick={openArtifactMenu}>Select artifact</button>
             <p>{selectedArtifactName}</p>
           </div>
-          <input 
-            type="text" 
-            placeholder="Artifact label" 
+          <input
+            type="text"
+            placeholder="Artifact label"
             className={styles.artifactTitleInput}
             value={artifactTitle}
             onChange={handleTitleChange}
@@ -239,90 +405,112 @@ const SingleArtifact = ({
 };
 
 // Main Artifact component
-export default function Artifact({ 
+export default function Artifact({
+  studyId,
   initialArtifactId,
   onArtifactSelect,
   allowMultiple = false,
-  mode = 'normal'
+  mode = "normal",
 }) {
   // For standalone mode only - track both id and selected artifact info
-  const [artifacts, setArtifacts] = useState(mode === 'standalone' ? [{
-    id: 1,
-    selectedArtifactId: null,
-    selectedArtifactName: "No artifact selected",
-    selectedArtifactImage: null,
-    artifactTitle: ""  // Add title to the state
-  }] : []);
+  const [artifacts, setArtifacts] = useState(
+    mode === "standalone"
+      ? [
+          {
+            id: 1,
+            selectedArtifactId: null,
+            selectedArtifactName: "No artifact selected",
+            selectedArtifactImage: null,
+            artifactTitle: "", // Add title to the state
+          },
+        ]
+      : []
+  );
 
   // Functions for standalone mode
   const addArtifact = () => {
-    const newId = artifacts.length > 0 ? Math.max(...artifacts.map(a => a.id)) + 1 : 1;
-    setArtifacts([...artifacts, { 
-      id: newId,
-      selectedArtifactId: null,
-      selectedArtifactName: "No artifact selected",
-      selectedArtifactImage: null,
-      artifactTitle: ""  // Initialize title
-    }]);
+    const newId =
+      artifacts.length > 0 ? Math.max(...artifacts.map((a) => a.id)) + 1 : 1;
+    setArtifacts([
+      ...artifacts,
+      {
+        id: newId,
+        selectedArtifactId: null,
+        selectedArtifactName: "No artifact selected",
+        selectedArtifactImage: null,
+        artifactTitle: "", // Initialize title
+      },
+    ]);
   };
-  
+
   const removeArtifact = (idToRemove) => {
     // Remove the artifact with the specified ID
-    const filteredArtifacts = artifacts.filter(artifact => artifact.id !== idToRemove);
-    
+    const filteredArtifacts = artifacts.filter(
+      (artifact) => artifact.id !== idToRemove
+    );
+
     // If we end up with no artifacts and allowMultiple is false, don't remove the last one
     if (filteredArtifacts.length === 0 && !allowMultiple) {
       return;
     }
-    
+
     // Renumber the remaining artifacts sequentially but keep their selection data
     const renumberedArtifacts = filteredArtifacts.map((artifact, index) => ({
       ...artifact, // Keep all existing properties (including selectedArtifactName)
-      id: index + 1
+      id: index + 1,
     }));
-    
+
     setArtifacts(renumberedArtifacts);
   };
 
   // Update the title for a specific artifact
   const handleTitleChange = (artifactPositionId, newTitle) => {
-    setArtifacts(artifacts.map(artifact => 
-      artifact.id === artifactPositionId 
-        ? { ...artifact, artifactTitle: newTitle }
-        : artifact
-    ));
+    setArtifacts(
+      artifacts.map((artifact) =>
+        artifact.id === artifactPositionId
+          ? { ...artifact, artifactTitle: newTitle }
+          : artifact
+      )
+    );
   };
 
   // Update the selected artifact for a specific position
-  const handleArtifactSelection = (artifactPositionId, artifactId, artifactName, artifactImage) => {
-    setArtifacts(artifacts.map(artifact => 
-      artifact.id === artifactPositionId 
-        ? { 
-            ...artifact, 
-            selectedArtifactId: artifactId, 
-            selectedArtifactName: artifactName, 
-            selectedArtifactImage: artifactImage 
-          }
-        : artifact
-    ));
-    
+  const handleArtifactSelection = (
+    artifactPositionId,
+    artifactId,
+    artifactName,
+    artifactImage
+  ) => {
+    setArtifacts(
+      artifacts.map((artifact) =>
+        artifact.id === artifactPositionId
+          ? {
+              ...artifact,
+              selectedArtifactId: artifactId,
+              selectedArtifactName: artifactName,
+              selectedArtifactImage: artifactImage,
+            }
+          : artifact
+      )
+    );
+
     // Call the parent callback if provided
     if (onArtifactSelect) {
-      onArtifactSelect(artifactId, artifactName, artifactImage);  // Pass image data to parent callback
+      onArtifactSelect(artifactId, artifactName, artifactImage); // Pass image data to parent callback
     }
   };
 
   // Render different based on mode
-  if (mode === 'standalone') {
+  if (mode === "standalone") {
     return (
       <div className={styles.artifactsContainer}>
         <div className={styles.artifacts}>
-          {artifacts.map(artifact => (
+          {artifacts.map((artifact) => (
             <div key={artifact.id} className={styles.artifactContainer}>
               <div className={styles.artifactHeader}>
                 <label>Artifact {artifact.id}:</label>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={styles.removeBtn}
                   onClick={() => removeArtifact(artifact.id)}
                   disabled={artifacts.length <= 1 && !allowMultiple}
@@ -331,36 +519,41 @@ export default function Artifact({
                 </button>
               </div>
               {/* Pass the selected artifact data and title to each instance */}
-              <SingleArtifact 
-                artifactId={artifact.selectedArtifactId} 
+              <SingleArtifact
+                studyId={studyId}
+                artifactId={artifact.selectedArtifactId}
                 initialName={artifact.selectedArtifactName}
                 initialImage={artifact.selectedArtifactImage}
-                initialTitle={artifact.artifactTitle}  // Pass the title
-                onArtifactSelect={(id, name, image) => 
+                initialTitle={artifact.artifactTitle} // Pass the title
+                onArtifactSelect={(id, name, image) =>
                   handleArtifactSelection(artifact.id, id, name, image)
                 }
-                onTitleChange={(newTitle) => 
+                onTitleChange={(newTitle) =>
                   handleTitleChange(artifact.id, newTitle)
-                }  // Pass title change handler
+                } // Pass title change handler
               />
             </div>
           ))}
         </div>
-        <button 
-          className={styles.addArtifactBtn} 
-          onClick={addArtifact}
-        >
-          <FaPlus /> {artifacts.length === 0 ? "Add artifact" : "Add another artifact"}
+        <button className={styles.addArtifactBtn} onClick={addArtifact}>
+          <FaPlus />{" "}
+          {artifacts.length === 0 ? "Add artifact" : "Add another artifact"}
         </button>
       </div>
     );
   }
-  
+
   // Normal mode - just a single artifact selector
   return (
-    <SingleArtifact 
-      artifactId={initialArtifactId} 
-      onArtifactSelect={onArtifactSelect}
+    <SingleArtifact
+      studyId={studyId}
+      artifactId={artifact.selectedArtifactId}
+      initialName={artifact.selectedArtifactName}
+      initialImage={artifact.selectedArtifactImage}
+      initialTitle={artifact.artifactTitle}
+      onArtifactSelect={(id, name, image) =>
+        handleArtifactSelection(artifact.id, id, name, image)
+      }
     />
   );
 }

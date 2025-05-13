@@ -25,7 +25,7 @@ export default function Dashboard() {
     return (
         <div>
             <SharePopup study={createdStudy} onStudyChange={handleStudyChange} />
-            <Header/>
+            <Header onCreateStudy={handleCreateStudy} />
             <div className="flex flex-col items-center h-full">
                 <h1 className="text-6xl mb-10 mt-10">Your studies</h1>
                 <div className="w-full flex justify-center mb-10">

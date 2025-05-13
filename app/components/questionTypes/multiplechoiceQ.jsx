@@ -1,12 +1,13 @@
-'use client';
-import React, { useState, useEffect } from 'react'; // Added useEffect
-import multiplechoiceStyles from '../../styles/questionTypes/multiplechoiceQ.module.css';
-import commonStyles from '../../styles/questionTypes/common.module.css';
-import Artifact from './artifact';
+"use client";
+import React, { useState, useEffect } from "react"; // Added useEffect
+import multiplechoiceStyles from "../../styles/questionTypes/multiplechoiceQ.module.css";
+import commonStyles from "../../styles/questionTypes/common.module.css";
+import Artifact from "./artifact";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Renamed and added props
-  const [title, setTitle] = useState(questionData?.title || '');
+function MultipleChoiceQuestionComponent({ questionData, onChange, study }) {
+  // Renamed and added props
+  const [title, setTitle] = useState(questionData?.title || "");
   const [choiceGroups, setChoiceGroups] = useState(
     questionData?.choiceGroups?.map((group, gIndex) => ({
       ...group,
@@ -14,12 +15,14 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
       options: group.options?.map((opt, oIndex) => ({
         ...opt,
         id: opt.id || `${Date.now()}-mco-${gIndex}-${oIndex}`, // Ensure option ID
-      })) || [{ id: `${Date.now()}-mco-${gIndex}-0`, text: '' }],
-    })) || [{ 
-      id: `${Date.now()}-mcg-0`, 
-      label: '', 
-      options: [{ id: `${Date.now()}-mco-0-0`, text: '' }] 
-    }]
+      })) || [{ id: `${Date.now()}-mco-${gIndex}-0`, text: "" }],
+    })) || [
+      {
+        id: `${Date.now()}-mcg-0`,
+        label: "",
+        options: [{ id: `${Date.now()}-mco-0-0`, text: "" }],
+      },
+    ]
   );
 
   useEffect(() => {
@@ -41,61 +44,74 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
       ...choiceGroups,
       {
         id: newGroupId,
-        label: '',
-        options: [{ id: `${Date.now()}-mco-${choiceGroups.length}-0`, text: '' }, { id: `${Date.now()}-mco-${choiceGroups.length}-1`, text: '' }], // Start with 2 options
+        label: "",
+        options: [
+          { id: `${Date.now()}-mco-${choiceGroups.length}-0`, text: "" },
+          { id: `${Date.now()}-mco-${choiceGroups.length}-1`, text: "" },
+        ], // Start with 2 options
       },
     ]);
   };
 
   const removeChoiceGroup = (groupId) => {
     if (choiceGroups.length <= 1) return;
-    setChoiceGroups(choiceGroups.filter(group => group.id !== groupId));
+    setChoiceGroups(choiceGroups.filter((group) => group.id !== groupId));
   };
 
   const handleGroupLabelChange = (groupId, value) => {
-    setChoiceGroups(choiceGroups.map(group =>
-      group.id === groupId ? { ...group, label: value } : group
-    ));
+    setChoiceGroups(
+      choiceGroups.map((group) =>
+        group.id === groupId ? { ...group, label: value } : group
+      )
+    );
   };
 
   const addOption = (groupId) => {
-    setChoiceGroups(choiceGroups.map(group => {
-      if (group.id === groupId) {
-        const newOptionId = `${Date.now()}-mco-${group.id}-${group.options.length}`;
-        return {
-          ...group,
-          options: [...group.options, { id: newOptionId, text: '' }],
-        };
-      }
-      return group;
-    }));
+    setChoiceGroups(
+      choiceGroups.map((group) => {
+        if (group.id === groupId) {
+          const newOptionId = `${Date.now()}-mco-${group.id}-${
+            group.options.length
+          }`;
+          return {
+            ...group,
+            options: [...group.options, { id: newOptionId, text: "" }],
+          };
+        }
+        return group;
+      })
+    );
   };
 
   const removeOption = (groupId, optionId) => {
-    setChoiceGroups(choiceGroups.map(group => {
-      if (group.id === groupId) {
-        if (group.options.length <= 2) return group; // Keep at least 2 options
-        return {
-          ...group,
-          options: group.options.filter(option => option.id !== optionId),
-        };
-      }
-      return group;
-    }));
+    setChoiceGroups(
+      choiceGroups.map((group) => {
+        if (group.id === groupId) {
+          if (group.options.length <= 2) return group; // Keep at least 2 options
+          return {
+            ...group,
+            options: group.options.filter((option) => option.id !== optionId),
+          };
+        }
+        return group;
+      })
+    );
   };
 
   const handleOptionChange = (groupId, optionId, value) => {
-    setChoiceGroups(choiceGroups.map(group => {
-      if (group.id === groupId) {
-        return {
-          ...group,
-          options: group.options.map(option =>
-            option.id === optionId ? { ...option, text: value } : option
-          ),
-        };
-      }
-      return group;
-    }));
+    setChoiceGroups(
+      choiceGroups.map((group) => {
+        if (group.id === groupId) {
+          return {
+            ...group,
+            options: group.options.map((option) =>
+              option.id === optionId ? { ...option, text: value } : option
+            ),
+          };
+        }
+        return group;
+      })
+    );
   };
 
   return (
@@ -113,12 +129,27 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
         />
       </div>
 
-      <Artifact mode="standalone" allowMultiple={true} />
+      <Artifact
+        mode="standalone"
+        allowMultiple={true}
+        studyId={study?._id}
+        initialArtifactId={null}
+        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
+          console.log(
+            "Selected artifact:",
+            artifactId,
+            artifactName,
+            artifactImage
+          );
+        }}
+      />
 
       {choiceGroups.map((group, groupIndex) => (
         <div key={group.id} className={commonStyles.itemBox + " mb-6"}>
           <div className={commonStyles.itemHeader}>
-            <label htmlFor={`choiceGroupLabel_${group.id}`}>Choice Group {groupIndex + 1}:</label>
+            <label htmlFor={`choiceGroupLabel_${group.id}`}>
+              Choice Group {groupIndex + 1}:
+            </label>
             <button
               type="button"
               className={commonStyles.removeBtn}
@@ -145,7 +176,9 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
               {group.options.map((option, optionIndex) => (
                 <div key={option.id} className={commonStyles.singleOptionBox}>
                   <div className={commonStyles.itemHeader}>
-                    <label htmlFor={`optionText_${option.id}`}>Option {optionIndex + 1}:</label>
+                    <label htmlFor={`optionText_${option.id}`}>
+                      Option {optionIndex + 1}:
+                    </label>
                     <button
                       type="button"
                       className={commonStyles.removeBtn}
@@ -162,7 +195,9 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
                       id={`optionText_${option.id}`}
                       placeholder="Option text"
                       value={option.text}
-                      onChange={(e) => handleOptionChange(group.id, option.id, e.target.value)}
+                      onChange={(e) =>
+                        handleOptionChange(group.id, option.id, e.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -180,12 +215,18 @@ function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Rename
         </div>
       ))}
 
-      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addChoiceGroup}>
+      <button
+        type="button"
+        className={commonStyles.addItemBtn + " mt-4"}
+        onClick={addChoiceGroup}
+      >
         <FaPlus /> Add another choice group
       </button>
     </div>
   );
 }
 
-const MultipleChoiceQuestionBuilder = React.memo(MultipleChoiceQuestionComponent);
+const MultipleChoiceQuestionBuilder = React.memo(
+  MultipleChoiceQuestionComponent
+);
 export default MultipleChoiceQuestionBuilder;
