@@ -47,7 +47,11 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
 
   const handleDelete = (e) => {
     e.stopPropagation();
-    onDeleteQuestion(index);
+    e.preventDefault(); 
+    
+    setTimeout(() => {
+      onDeleteQuestion(index);
+    }, 0);
   }
 
   return (
@@ -58,7 +62,9 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
       onClick={() => onQuestionSelect(index)}
     >
       <div className="flex items-center space-x-2">
-        <FaRegTrashAlt onClick={handleDelete} className="cursor-pointer text-red-500" />{" "}
+        <div onClick={handleDelete} className="p-1">
+          <FaRegTrashAlt className="cursor-pointer text-red-500" />
+        </div>
         <div className="flex flex-col space-y-1">
           <MdDragIndicator
             {...attributes}
@@ -85,7 +91,7 @@ const SideBar = ({
   studyTitle,
   onViewStudyDetails,
   //onChange,
-  study,
+  //study,
   deleteQuestion,
   saveStatus,
 }) => {
@@ -126,26 +132,19 @@ const SideBar = ({
   const onDeleteQuestion = (index) => {
     const questionToDelete = questions[index];
 
-    if (!questionToDelete._id) {
+    if (!questionToDelete || !questionToDelete._id) {
+      // For questions not yet saved to database, just remove from local state
       setQuestions((prevQuestions) => prevQuestions.filter((_, i) => i !== index));
       return;
     }
 
+    // For saved questions, show confirmation dialog
     if (!window.confirm("Are you sure you want to delete this question? This action cannot be undone.")) {
       return;
     }
 
-    deleteQuestion(
-      study._id,
-      questionToDelete._id,
-      (updatedStudy) => {
-        setQuestions(updatedStudy.questions);
-      },
-      (error) => {
-        console.error("Failed to delete the question:", error);
-        alert("Failed to delete the question. Please try again.");
-      }
-    );
+    // Call the parent component's deleteQuestion function with the question ID
+    deleteQuestion(questionToDelete._id); // Just pass the ID, the parent component handles the rest
   };
 
   const sensors = useSensors(
