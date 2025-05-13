@@ -5,11 +5,11 @@ on:
     workflows: ["Node.js CI"]
     types:
       - completed
-    branches: [ "main" ]
 
 jobs:
 
   build:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: Docker
     runs-on: ubuntu-latest
 
