@@ -255,7 +255,7 @@ export default function CreateStudyPage() {
         <p className="text-lg">Loading study details...</p>
       </div>
     );
-  }
+  };
 
   return (
     <div className="flex flex-col h-screen">
