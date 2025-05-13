@@ -4,6 +4,7 @@ import { BsPerson, BsGear } from 'react-icons/bs';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import backendUrl from 'environment';
+import validator from 'validator';
 
 export default function Profile() {
   const router = useRouter();
@@ -54,6 +55,13 @@ export default function Profile() {
 
   const handleEmailUpdate = async (e) => {
     e.preventDefault();
+    
+    // Email validation
+    if (!validator.isEmail(newEmail)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+    
     try {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
@@ -91,12 +99,24 @@ export default function Profile() {
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
-    try {
-      if (passwords.new !== passwords.confirm) {
-        setError('Passwords do not match');
-        return;
-      }
+    
+    // Password validation
+    if (!validator.isLength(passwords.new, { min: 8 })) {
+      setError('Password must be at least 8 characters long.');
+      return;
+    }
+    
+    if (!/\d/.test(passwords.new)) {
+      setError('Password must include at least one number.');
+      return;
+    }
+    
+    if (passwords.new !== passwords.confirm) {
+      setError('Passwords do not match');
+      return;
+    }
 
+    try {
       const token = localStorage.getItem('token');
       const userId = localStorage.getItem('userId');
       
@@ -157,11 +177,16 @@ export default function Profile() {
     }
   };
 
+  // Reset error when opening/closing prompts
+  useEffect(() => {
+    setError('');
+  }, [showEmailPrompt, showPasswordPrompt]);
+
   return (
     <main className="min-h-screen">
       <Header/>
       <div className="px-4 sm:px-8 py-8 max-w-7xl mx-auto">
-        <section className="text-center mb-16 bg-ice-blue p-8 sm:p-12 rounded">
+        <section className="text-center bg-ice-blue p-8 sm:p-12 rounded">
           <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-petrol-blue flex items-center justify-center">
             <span className="text-5xl text-white">
               {user?.name?.[0] || 'U'}
@@ -191,21 +216,21 @@ export default function Profile() {
               <button
                 type="button"
                 onClick={() => setShowEmailPrompt(true)}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-all"
+                className="bg-sky-blue text-black px-4 py-2 rounded hover:bg-ice-blue transition-all duration-300"
               >
                 Change Email
               </button>
               <button 
                 type="button"
                 onClick={() => setShowPasswordPrompt(true)}
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition-all"
+                className="bg-sky-blue text-black px-4 py-2 rounded hover:bg-ice-blue transition-all duration-300"
               >
                 Change Password
               </button>
               <button 
                 type="button"
                 onClick={() => setShowDeletePrompt(true)}
-                className="bg-gray-200 text-red-700 px-4 py-2 rounded hover:bg-gray-300 transition-all"
+                className="bg-sky-blue text-red-500 px-4 py-2 rounded hover:bg-ice-blue transition-all duration-300"
               >
                 DELETE ACCOUNT
               </button>
@@ -216,29 +241,33 @@ export default function Profile() {
 
       {showEmailPrompt && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-xl mb-4">Change Email</h3>
+          <div className="fixed h-full w-full backdrop-brightness-50" onClick={() => setShowEmailPrompt(false)}></div>
+          <div className="bg-sky-blue p-6 rounded-lg max-w-md w-full z-2">
+            <h3 className="text-xl mb-4 text-center">Change Email</h3>
             <form onSubmit={handleEmailUpdate}>
               {error && <p className="text-red-500 mb-2">{error}</p>}
+              <label htmlFor="new-email">New email:</label>
               <input
                 type="email"
                 value={newEmail}
+                id="new-email"
+                name="new-email"
                 onChange={(e) => setNewEmail(e.target.value)}
-                className="w-full p-2 border rounded mb-4"
+                className="w-full p-2 rounded mb-4 bg-white focus:outline-3 focus:outline-petrol-blue"
                 placeholder="New Email"
                 required
               />
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => setShowEmailPrompt(false)}
-                  className="px-4 py-2 bg-gray-200 rounded"
+                  className="px-4 py-2 bg-ice-blue rounded hover:bg-white transition-all duration-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-petrol-blue text-white rounded"
+                  className="px-4 py-2 bg-petrol-blue text-white rounded hover:bg-oxford-blue transition-all duration-300"
                 >
                   Update
                 </button>
@@ -250,44 +279,55 @@ export default function Profile() {
 
       {showPasswordPrompt && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
+          <div className="fixed h-full w-full backdrop-brightness-50" onClick={() => setShowPasswordPrompt(false)}></div>
+          <div className="bg-sky-blue p-6 rounded-lg max-w-md w-full z-2">
+            <h3 className="text-xl mb-4 text-center">Change Password</h3>
             <form onSubmit={handlePasswordUpdate}>
               {error && <p className="text-red-500 mb-2">{error}</p>}
+              <label htmlFor="current-password">Current password:</label>
               <input
                 type="password"
+                id="current-password"
+                name="current-password"
                 value={passwords.current}
                 onChange={(e) => setPasswords({...passwords, current: e.target.value})}
-                className="w-full p-2 border rounded mb-4"
+                className="w-full p-2 rounded mb-2 bg-white focus:outline-3 focus:outline-petrol-blue"
                 placeholder="Current Password"
                 required
               />
+              <label htmlFor="new-password">New password:</label>
               <input
                 type="password"
                 value={passwords.new}
+                id="new-password"
+                name="new-password"
                 onChange={(e) => setPasswords({...passwords, new: e.target.value})}
-                className="w-full p-2 border rounded mb-4"
+                className="w-full p-2 rounded mb-2 bg-white focus:outline-3 focus:outline-petrol-blue"
                 placeholder="New Password"
                 required
               />
+              <label htmlFor="confirm-password">Confirm new password:</label>
               <input
                 type="password"
                 value={passwords.confirm}
+                id="confirm-password"
+                name="confirm-password"
                 onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
-                className="w-full p-2 border rounded mb-4"
+                className="w-full p-2 rounded mb-4 bg-white focus:outline-3 focus:outline-petrol-blue"
                 placeholder="Confirm New Password"
                 required
               />
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-center gap-2">
                 <button
                   type="button"
                   onClick={() => setShowPasswordPrompt(false)}
-                  className="px-4 py-2 bg-gray-200 rounded"
+                  className="px-4 py-2 bg-ice-blue rounded hover:bg-white transition-all duration-300"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-petrol-blue text-white rounded"
+                  className="px-4 py-2 bg-petrol-blue text-white rounded hover:bg-oxford-blue transition-all duration-300"
                 >
                   Update
                 </button>
@@ -299,21 +339,22 @@ export default function Profile() {
 
       {showDeletePrompt && (
         <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full">
-            <h3 className="text-xl mb-4 text-red-600">Delete Account</h3>
+          <div className="fixed h-full w-full backdrop-brightness-50" onClick={() => setShowDeletePrompt(false)}></div>
+          <div className="bg-sky-blue p-6 rounded-lg max-w-md w-full z-2">
+            <h3 className="text-xl mb-4 text-red-600 text-center">Delete Account</h3>
             <p className="mb-4">Are you sure you want to delete your account? This action cannot be undone.</p>
             <div className="flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setShowDeletePrompt(false)}
-                className="px-4 py-2 bg-gray-200 rounded"
+                className="px-4 py-2 bg-ice-blue rounded hover:bg-white transition-all duration-300"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleDeleteAccount}
-                className="px-4 py-2 bg-red-600 text-white rounded"
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-800 transition-all duration-300"
               >
                 Delete Account
               </button>
