@@ -76,6 +76,9 @@ const SingleArtifact = ({
           else if (artifact.contentType && artifact.contentType.startsWith("video/")) {
             imageUrl = "/video.png";
           }
+          else if (artifact.contentType === "application/pdf") {
+            imageUrl = "/pdf.png";
+          }
 
           return {
             ...artifact,
@@ -143,6 +146,9 @@ const SingleArtifact = ({
       else if (contentType && contentType.startsWith("video/")) {
         displayImage = "/video.png";
       }
+      else if (contentType === "application/pdf") {
+        displayImage = "/pdf.png";
+      }
 
       setSelectedArtifactImage(displayImage);
 
@@ -208,6 +214,8 @@ const SingleArtifact = ({
             displayUrl = "/audio.png";
           } else if (contentType.startsWith("video/")) {
             displayUrl = "/video.png";
+          } else if (contentType === "application/pdf") {
+            displayUrl = "/pdf.png";
           } else {
             displayUrl = `${backendUrl}/api/upload/${data.file._id}`;
           }
@@ -252,6 +260,9 @@ const SingleArtifact = ({
       else if (file.type.startsWith("video/")) {
         return "/video.png";
       }
+      else if (file.type === "application/pdf") {
+        return "/pdf.png";
+      }
       return "";
     });
 
@@ -292,7 +303,7 @@ const SingleArtifact = ({
               <input
                 type="file"
                 className={styles.fileUpload}
-                accept="image/apng, image/avif, image/gifs, image/jpeg, image/png, image/webp, video/mp4, audio/mp4, audio/mp3, audio/m4a, audio/mpeg, audio/ogg, audio/ogv"
+                accept="image/apng, image/avif, image/gifs, image/jpeg, image/png, image/webp, video/mp4, audio/mp4, audio/mp3, audio/m4a, audio/mpeg, audio/ogg, audio/ogv, application/pdf"
                 multiple
                 onChange={handleFileChange}
                 ref={fileInputRef}
