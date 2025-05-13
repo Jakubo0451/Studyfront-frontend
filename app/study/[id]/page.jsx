@@ -109,7 +109,7 @@ export default function TakeStudyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-sky-blue p-8">
+    <div className="min-h-screen bg-ice-blue p-8 flex justify-center">
       <StudyTakeComponent study={study} />
     </div>
   );

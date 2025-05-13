@@ -152,20 +152,21 @@ export default function StudyTakeComponent({ study }) {
   // Render the welcome screen with study information
   const renderWelcomeScreen = () => {
     return (
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h1 className="text-3xl font-bold mb-6 text-petrol-blue">{study.title}</h1>
+      <div className="mt-[2rem] w-[60%]">
+        <h1 className="text-4xl text-center font-bold mb-[3rem] text-petrol-blue">{study.title}</h1>
         
         {/* Description */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">About this study</h2>
-          <p className="text-gray-700 whitespace-pre-line">{study.description}</p>
+        <div className="bg-sky-blue/20 p-4 rounded-md max-h-60 overflow-y-auto mb-4 border border-sky-blue">
+          <h2 className="text-xl text-oxford-blue font-semibold mb-2">About this study</h2>
+          <p className="text-oxford-blue whitespace-pre-line">{study.description}</p>
         </div>
         
         {/* Terms and Conditions */}
         {study.hasTermsAndConditions && (
           <div className="mb-8">
-            <h2 className="text-xl font-semibold mb-2">Terms and Conditions</h2>
+            <p className="mt-[1.5rem] mb-[1rem] text-oxford-blue">This study requires you to accept Terms and Conditions before starting.</p>
             <div className="bg-sky-blue/20 p-4 rounded-md max-h-60 overflow-y-auto mb-4 border border-sky-blue">
+              <h2 className="text-xl font-semibold mb-2">Terms and Conditions</h2>
               <p className="text-gray-700 whitespace-pre-line">{study.termsAndConditions}</p>
             </div>
             
@@ -188,7 +189,7 @@ export default function StudyTakeComponent({ study }) {
           type="button"
           onClick={handleStartStudy}
           disabled={study.hasTermsAndConditions && !termsAccepted}
-          className={`px-6 py-3 rounded-md text-white font-medium text-lg transition-colors duration-300 ${
+          className={`mx-auto block px-6 py-3 rounded-md text-white font-medium text-lg transition-colors duration-300 ${
             study.hasTermsAndConditions && !termsAccepted
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-petrol-blue hover:bg-oxford-blue"

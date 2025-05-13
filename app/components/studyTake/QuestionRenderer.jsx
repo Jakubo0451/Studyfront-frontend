@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import commonStyles from '../../styles/questionRenderer/common.module.css';
 
 export default function QuestionRenderer({ question, onResponse, currentResponse }) {
   const [localResponse, setLocalResponse] = useState(currentResponse);
@@ -34,7 +35,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   };
 
   const renderTextQuestion = () => (
-    <div className="mb-6">
+    <div className={commonStyles.questionContainer}>
       <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
       <textarea
         className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
