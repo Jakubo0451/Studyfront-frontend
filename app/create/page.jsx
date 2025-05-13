@@ -93,8 +93,7 @@ export default function CreateStudyPage() {
 
   const debouncedSave = useCallback(
     debounce((studyId, questionId, dataToSave, onSuccess, onError) => {
-      const payload = { data: dataToSave };
-      updateQuestion(studyId, questionId, payload, onSuccess, onError);
+      updateQuestion(studyId, questionId, dataToSave, onSuccess, onError);
     }, 1000),
     []
   );
@@ -246,62 +245,76 @@ export default function CreateStudyPage() {
   }, []);
 
   const handleQuestionsChange = (updatedQuestions) => {
+    if (!Array.isArray(updatedQuestions)) {
+        console.error("Expected questions to be an array but got:", typeof updatedQuestions);
+        return;
+    }
+    
     setQuestions(updatedQuestions);
+    
     updateQuestions(
-      study._id,
-      updatedQuestions,
-      (error) => {
-        console.error("Failed to save questions:", error);
-      }
+        study._id,
+        updatedQuestions,
+        () => {
+            console.log("Questions saved successfully");
+            setSaveStatus("Questions saved successfully!");
+            setTimeout(() => setSaveStatus(""), 3000);
+        },
+        (error) => {
+            console.error("Failed to save questions:", error);
+            setSaveStatus("Failed to save questions!");
+            setTimeout(() => setSaveStatus(""), 3000);
+        }
     );
-  };
+};
 
   const handleQuestionDataChange = useCallback(
-    (updatedDataFromChild) => {
-      if (selectedQuestionIndex === null) return;
+  (updatedDataFromChild) => {
+    if (selectedQuestionIndex === null) return;
+    
+    console.log("Data from child component:", updatedDataFromChild);
+    
+    const nextQuestions = questions.map((q, index) => {
+      if (index === selectedQuestionIndex) {
+        return {
+          ...q,
+          data: updatedDataFromChild,
+        };
+      }
+      return q;
+    });
 
-      const nextQuestions = questions.map((q, index) => {
-        if (index === selectedQuestionIndex) {
-          return {
-            ...q,
-            data: updatedDataFromChild,
-          };
+    // Only update if data has changed
+    const currentQuestionData = questions[selectedQuestionIndex]?.data || {};
+    if (JSON.stringify(currentQuestionData) !== JSON.stringify(updatedDataFromChild)) {
+      setQuestions(nextQuestions);
+    }
+
+    const questionToSave = nextQuestions[selectedQuestionIndex];
+
+    if (study?._id && questionToSave?._id) {
+      console.log("Saving question with ID:", questionToSave._id, "Data:", updatedDataFromChild);
+      
+      // Send the data properly formatted for the backend
+      debouncedSave(
+        study._id,
+        questionToSave._id,
+        { data: updatedDataFromChild },
+        (updatedData) => {
+          console.log("Question saved successfully:", updatedData);
+          setSaveStatus("Question saved!");
+          setTimeout(() => setSaveStatus(""), 3000);
+        },
+        (error) => {
+          console.error("Failed to save question data:", error);
+          setSaveStatus("Failed to save question");
+          setTimeout(() => setSaveStatus(""), 3000);
         }
-        return q;
-      });
-
-      if (
-        JSON.stringify(questions[selectedQuestionIndex]?.data) !==
-        JSON.stringify(updatedDataFromChild)
-      ) {
-        setQuestions(nextQuestions);
-      }
-
-      const questionToSave = questions[selectedQuestionIndex];
-
-      if (study?._id && questionToSave?._id) {
-        debouncedSave(
-          study._id,
-          questionToSave._id,
-          updatedDataFromChild,
-          /* eslint-disable-next-line */
-          (_updatedData) => {
-            setSaveStatus("Question saved!");
-            setTimeout(() => setSaveStatus(""), 3000);
-          },
-          (error) => {
-            console.error(
-              "Failed to save question data via debouncedSave:",
-              error
-            );
-            setSaveStatus("Failed to save question");
-            setTimeout(() => setSaveStatus(""), 3000);
-          }
-        );
-      }
-    },
-    [selectedQuestionIndex, questions, study, debouncedSave]
-  );
+      );
+    }
+  },
+  [selectedQuestionIndex, questions, study, debouncedSave]
+);
 
   if (!editStudyId && !isLoading) {
     return (

@@ -287,24 +287,39 @@ export const updateQuestions = async (studyId, updatedQuestions, onSuccess, onEr
             return;
         }
 
-        const response = await fetch(`${backendUrl}/api/studies/${studyId}`, {
+        // Ensure updatedQuestions is an array, otherwise wrap it
+        const questionsArray = Array.isArray(updatedQuestions) 
+            ? updatedQuestions 
+            : [updatedQuestions].filter(q => q !== null && q !== undefined);
+            
+        console.log("Sending to backend:", questionsArray);
+        
+        // The key fix: wrap in {questions: [...]} object as the backend expects
+        const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ questions: updatedQuestions }),
+            body: JSON.stringify({ questions: questionsArray }),
         });
 
         if (response.ok) {
             const updatedStudy = await response.json();
             if (onSuccess) {
-                onSuccess(updatedStudy.questions);
+                onSuccess(updatedStudy.questions || updatedStudy);
             }
         } else {
-            const errorData = await response.json();
-            console.error("Error updating questions:", errorData.error || "Failed to update questions.");
-            if (onError) onError(errorData.error || "Failed to update questions.");
+            const errorText = await response.text();
+            let errorData;
+            try {
+                errorData = JSON.parse(errorText);
+                console.error("Error details:", errorData);
+            } catch (e) {
+                console.error("Raw error response:", errorText, e);
+            }
+            
+            if (onError) onError(errorData?.error || "Failed to update questions");
         }
     } catch (error) {
         console.error("Error updating questions:", error);
@@ -363,19 +378,34 @@ export const updateQuestion = async (studyId, questionId, payload, onSuccess, on
             return;
         }
 
+        // Log the data we're sending to help debug
+        console.log("Sending question update:", {
+            studyId,
+            questionId,
+            payload
+        });
+
+        // Make sure we have a valid payload object
+        if (!payload || typeof payload !== 'object') {
+            console.error("Invalid payload format for question update");
+            if (onError) onError("Invalid payload format");
+            return;
+        }
+
+        // Send the payload directly as is - no additional wrapping
         const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions/${questionId}`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(payload), // Send the wrapped payload
+            body: JSON.stringify(payload),
         });
 
         if (response.ok) {
-            const updatedStudy = await response.json();
+            const updatedData = await response.json();
             if (onSuccess) {
-                onSuccess(updatedStudy);
+                onSuccess(updatedData);
             }
         } else {
             const errorData = await response.json();

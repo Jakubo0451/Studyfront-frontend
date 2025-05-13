@@ -3,9 +3,9 @@ const backendUrl = (() => {
         case 'development':
             return 'http://localhost:5000';
         case 'production':
-            return 'https://studyfront.com';
+            return 'https://group5-api.sustainability.it.ntnu.no';
         default:
-            return 'http://localhost:5000';
+            return 'https://group5-api.sustainability.it.ntnu.no';
     }
 })();
 

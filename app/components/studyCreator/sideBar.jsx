@@ -84,7 +84,7 @@ const SideBar = ({
   selectedQuestionIndex,
   studyTitle,
   onViewStudyDetails,
-  onChange,
+  //onChange,
   study,
   deleteQuestion,
   saveStatus,
@@ -95,10 +95,19 @@ const SideBar = ({
   const [studyId, setStudyId] = useState(null);
 
   useEffect(() => {
-    if (params?.id) {
-      setStudyId(params.id);
+    const newStudyId = params?.id;
+    if (newStudyId && newStudyId !== studyId) {
+      // Use a local variable first to avoid direct state update in useEffect
+      const updatedStudyId = newStudyId;
+      // Only update if needed
+      const timeoutId = setTimeout(() => {
+        setStudyId(updatedStudyId);
+      }, 0);
+      
+      // Cleanup function to clear the timeout when component unmounts or when dependencies change
+      return () => clearTimeout(timeoutId);
     }
-  }, [params]);
+  }, [params, studyId]);
 
   const [showAddQuestionMenu, setShowAddQuestionMenu] = useState(false);
 
@@ -107,9 +116,11 @@ const SideBar = ({
   };
 
   const handleAddQuestionType = (type) => {
-    onChange()
-    onAddQuestion(type);
-    setShowAddQuestionMenu(false);
+    // Don't call onChange here - this should directly call onAddQuestion
+    if (onAddQuestion) {
+      onAddQuestion(type);
+      setShowAddQuestionMenu(false);
+    }
   };
 
   const onDeleteQuestion = (index) => {
@@ -260,6 +271,7 @@ const SideBar = ({
                   <button
                     type="button"
                     onClick={() => handleAddQuestionType("text")}
+                    className={styles.menuButton}
                   >
                     <img src="/questionTypes/textanswerQ.svg" alt="Text" />
                     Text Answer
