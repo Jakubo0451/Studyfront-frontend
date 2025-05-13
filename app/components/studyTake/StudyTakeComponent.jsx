@@ -37,10 +37,22 @@ export default function StudyTakeComponent({ study }) {
   };
 
   const handleResponse = (questionId, response) => {
-    if (!validateResponse(response)) return;
+    // Ensure type consistency based on question type
+    const question = questions.find(q => q._id === questionId);
+    if (!question) return;
+
+    let formattedResponse = response;
+
+    // Ensure checkbox responses are always arrays
+    if (question.type?.toLowerCase() === 'checkbox' && !Array.isArray(response)) {
+      formattedResponse = response ? [response] : [];
+    }
+
+    if (!validateResponse(formattedResponse)) return;
+    
     setResponses(prev => ({
       ...prev,
-      [questionId]: response
+      [questionId]: formattedResponse
     }));
   };
 
@@ -167,11 +179,18 @@ export default function StudyTakeComponent({ study }) {
       </div>
 
       {currentQuestion && (
-        <QuestionRenderer
-          question={currentQuestion}
-          onResponse={(response) => handleResponse(currentQuestion._id, response)}
-          currentResponse={responses[currentQuestion._id]}
-        />
+        <div>
+          <h3 className="text-xl font-medium mb-4">
+            {currentQuestion.data?.title || `Question ${currentQuestionIndex + 1}`}
+          </h3>
+          <div className="question-container">
+            <QuestionRenderer
+              question={currentQuestion}
+              onResponse={(response) => handleResponse(currentQuestion._id, response)}
+              currentResponse={responses[currentQuestion._id]}
+            />
+          </div>
+        </div>
       )}
 
       <div className="flex justify-between mt-8">
