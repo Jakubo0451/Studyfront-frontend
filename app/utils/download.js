@@ -12,9 +12,7 @@ const downloadFile = (content, fileName, contentType) => {
 
 // Fetch study results from the backend
 const fetchStudyResults = async (studyId) => {
-    console.log("Fetching study results for ID:", studyId);
-    const token = localStorage.getItem('token');
-    
+  const token = localStorage.getItem('token');
     try {
         const response = await fetch(`${backendUrl}/api/studies/results/${studyId}`, {
             method: 'GET',

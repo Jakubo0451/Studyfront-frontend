@@ -68,7 +68,6 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-      console.log('Dashboard data:', data);
       return data;
     } catch (error) {
       console.error('Error fetching dashboard:', error);

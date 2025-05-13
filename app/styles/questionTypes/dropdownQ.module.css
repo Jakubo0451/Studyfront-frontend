@@ -1,0 +1,14 @@
+.singleOptionBox {
+    background-color: var(--color-sky-blue);
+    padding: .5rem;
+    border-left: solid 3px var(--color-petrol-blue);
+    margin: .5rem 0;
+}
+
+.singleOptionBox input:focus {
+    outline: solid 3px var(--color-petrol-blue);
+}
+
+.singleOptionBox label {
+    margin-bottom: 0;
+}

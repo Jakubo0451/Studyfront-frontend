@@ -1,24 +1,24 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import checkboxStyles from '../../styles/questionTypes/checkboxQ.module.css';
+import React, { useState, useEffect } from 'react'; // Added useEffect
+import multiplechoiceStyles from '../../styles/questionTypes/multiplechoiceQ.module.css';
 import commonStyles from '../../styles/questionTypes/common.module.css';
 import Artifact from './artifact';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTrash } from "react-icons/fa";
 
-function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
+function MultipleChoiceQuestionComponent({ questionData, onChange }) { // Renamed and added props
   const [title, setTitle] = useState(questionData?.title || '');
-  const [checkboxGroups, setCheckboxGroups] = useState(
-    questionData?.checkboxGroups?.map((group, gIndex) => ({
+  const [choiceGroups, setChoiceGroups] = useState(
+    questionData?.choiceGroups?.map((group, gIndex) => ({
       ...group,
-      id: group.id || `${Date.now()}-cg-${gIndex}`,
+      id: group.id || `${Date.now()}-mcg-${gIndex}`, // Ensure group ID
       options: group.options?.map((opt, oIndex) => ({
         ...opt,
-        id: opt.id || `${Date.now()}-opt-${gIndex}-${oIndex}`,
-      })) || [{ id: `${Date.now()}-opt-${gIndex}-0`, text: '' }],
+        id: opt.id || `${Date.now()}-mco-${gIndex}-${oIndex}`, // Ensure option ID
+      })) || [{ id: `${Date.now()}-mco-${gIndex}-0`, text: '' }],
     })) || [{ 
-      id: `${Date.now()}-cg-0`, 
+      id: `${Date.now()}-mcg-0`, 
       label: '', 
-      options: [{ id: `${Date.now()}-opt-0-0`, text: '' }] 
+      options: [{ id: `${Date.now()}-mco-0-0`, text: '' }] 
     }]
   );
 
@@ -26,42 +26,42 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
     if (onChange) {
       onChange({
         title,
-        checkboxGroups,
+        choiceGroups,
       });
     }
-  }, [title, checkboxGroups, onChange]);
+  }, [title, choiceGroups, onChange]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
   };
 
-  const addCheckboxGroup = () => {
-    const newGroupId = `${Date.now()}-cg-${checkboxGroups.length}`;
-    setCheckboxGroups([
-      ...checkboxGroups,
+  const addChoiceGroup = () => {
+    const newGroupId = `${Date.now()}-mcg-${choiceGroups.length}`;
+    setChoiceGroups([
+      ...choiceGroups,
       {
         id: newGroupId,
         label: '',
-        options: [{ id: `${Date.now()}-opt-${checkboxGroups.length}-0`, text: '' }],
+        options: [{ id: `${Date.now()}-mco-${choiceGroups.length}-0`, text: '' }, { id: `${Date.now()}-mco-${choiceGroups.length}-1`, text: '' }], // Start with 2 options
       },
     ]);
   };
 
-  const removeCheckboxGroup = (groupId) => {
-    if (checkboxGroups.length <= 1) return;
-    setCheckboxGroups(checkboxGroups.filter(group => group.id !== groupId));
+  const removeChoiceGroup = (groupId) => {
+    if (choiceGroups.length <= 1) return;
+    setChoiceGroups(choiceGroups.filter(group => group.id !== groupId));
   };
 
   const handleGroupLabelChange = (groupId, value) => {
-    setCheckboxGroups(checkboxGroups.map(group =>
+    setChoiceGroups(choiceGroups.map(group =>
       group.id === groupId ? { ...group, label: value } : group
     ));
   };
 
   const addOption = (groupId) => {
-    setCheckboxGroups(checkboxGroups.map(group => {
+    setChoiceGroups(choiceGroups.map(group => {
       if (group.id === groupId) {
-        const newOptionId = `${Date.now()}-opt-${group.id}-${group.options.length}`;
+        const newOptionId = `${Date.now()}-mco-${group.id}-${group.options.length}`;
         return {
           ...group,
           options: [...group.options, { id: newOptionId, text: '' }],
@@ -72,9 +72,9 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
   };
 
   const removeOption = (groupId, optionId) => {
-    setCheckboxGroups(checkboxGroups.map(group => {
+    setChoiceGroups(choiceGroups.map(group => {
       if (group.id === groupId) {
-        if (group.options.length <= 1) return group;
+        if (group.options.length <= 2) return group; // Keep at least 2 options
         return {
           ...group,
           options: group.options.filter(option => option.id !== optionId),
@@ -85,7 +85,7 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
   };
 
   const handleOptionChange = (groupId, optionId, value) => {
-    setCheckboxGroups(checkboxGroups.map(group => {
+    setChoiceGroups(choiceGroups.map(group => {
       if (group.id === groupId) {
         return {
           ...group,
@@ -100,13 +100,13 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
 
   return (
     <div className={commonStyles.questionType + " question-type"}>
-      <h2>Checkbox question</h2>
+      <h2>Multiple choice question</h2>
       <div className={commonStyles.questionName}>
-        <label htmlFor="questionTitle_checkbox">Question title:</label>
+        <label htmlFor="questionTitle_mc">Question title:</label>
         <input
           type="text"
-          name="questionTitle_checkbox"
-          id="questionTitle_checkbox"
+          name="questionTitle_mc"
+          id="questionTitle_mc"
           placeholder="Title"
           value={title}
           onChange={handleTitleChange}
@@ -115,15 +115,15 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
 
       <Artifact mode="standalone" allowMultiple={true} />
 
-      {checkboxGroups.map((group, groupIndex) => (
+      {choiceGroups.map((group, groupIndex) => (
         <div key={group.id} className={commonStyles.itemBox + " mb-6"}>
           <div className={commonStyles.itemHeader}>
-            <label htmlFor={`checkboxGroupLabel_${group.id}`}>Checkbox Group {groupIndex + 1}:</label>
+            <label htmlFor={`choiceGroupLabel_${group.id}`}>Choice Group {groupIndex + 1}:</label>
             <button
               type="button"
               className={commonStyles.removeBtn}
-              onClick={() => removeCheckboxGroup(group.id)}
-              disabled={checkboxGroups.length <= 1}
+              onClick={() => removeChoiceGroup(group.id)}
+              disabled={choiceGroups.length <= 1}
             >
               <FaTrash /> Remove Group
             </button>
@@ -140,8 +140,8 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
               onChange={(e) => handleGroupLabelChange(group.id, e.target.value)}
             />
 
-            <h4>Checkbox options:</h4>
-            <div className={checkboxStyles.optionsContainer}>
+            <h4>Options (select one):</h4>
+            <div className={multiplechoiceStyles.optionsContainer}>
               {group.options.map((option, optionIndex) => (
                 <div key={option.id} className={commonStyles.singleOptionBox}>
                   <div className={commonStyles.itemHeader}>
@@ -150,7 +150,7 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
                       type="button"
                       className={commonStyles.removeBtn}
                       onClick={() => removeOption(group.id, option.id)}
-                      disabled={group.options.length <= 1}
+                      disabled={group.options.length <= 2}
                     >
                       <FaTrash /> Remove Option
                     </button>
@@ -174,18 +174,18 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange }) {
               className={commonStyles.addItemBtn + " mt-2"}
               onClick={() => addOption(group.id)}
             >
-              <FaPlus /> Add checkbox option
+              <FaPlus /> Add option
             </button>
           </div>
         </div>
       ))}
 
-      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addCheckboxGroup}>
-        <FaPlus /> Add another checkbox group
+      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addChoiceGroup}>
+        <FaPlus /> Add another choice group
       </button>
     </div>
   );
 }
 
-const CheckboxQuestionBuilder = React.memo(CheckboxQuestionBuilderComponent);
-export default CheckboxQuestionBuilder;
+const MultipleChoiceQuestionBuilder = React.memo(MultipleChoiceQuestionComponent);
+export default MultipleChoiceQuestionBuilder;

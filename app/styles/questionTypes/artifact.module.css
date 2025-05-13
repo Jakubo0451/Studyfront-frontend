@@ -31,7 +31,24 @@
     margin-top: .25rem;
 }
 
+.selectArtifact {
+    display: flex;
+    align-items: center;
+}
+
 .selectArtifact>div {
+    width: 100%;
+}
+
+.selectArtifact>img {
+    height: 80px;
+    width: 80px;
+    object-fit: cover;
+    border-radius: .25rem;
+    margin-right: .25rem;
+}
+
+.selectArtifact>div>div {
     display: flex;
 }
 
@@ -274,6 +291,7 @@
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.8rem;
+    transition: background-color .3s ease;
   }
   
   .removeBtn:hover {
@@ -281,8 +299,7 @@
   }
   
   .removeBtn:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+    display: none;
   }
   
   .addArtifactBtn {
@@ -301,4 +318,8 @@
   
   .addArtifactBtn:hover {
     background-color: var(--color-oxford-blue);
+  }
+
+  .artifactTitleInput:focus {
+    outline: solid 3px var(--color-petrol-blue);
   }
