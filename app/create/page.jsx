@@ -145,7 +145,7 @@ export default function CreateStudyPage() {
             return;
           }
 
-          const response = await fetch(
+          let response = await fetch(
             `${backendUrl}/api/studies/${editStudyId}`,
             {
               headers: {
@@ -452,14 +452,15 @@ export default function CreateStudyPage() {
                 questions?.[selectedQuestionIndex] && (
                   <div>
                     {questions[selectedQuestionIndex].type === "text" && (
-                      <TextanswerQuestionBuilder
-                        key={
-                          questions[selectedQuestionIndex]._id ||
-                          `text-${selectedQuestionIndex}`
-                        }
-                        questionData={questions[selectedQuestionIndex].data}
-                        onChange={handleQuestionDataChange}
-                      />
+                        <TextanswerQuestionBuilder
+                          key={
+                            questions[selectedQuestionIndex]._id ||
+                            `text-${selectedQuestionIndex}`
+                          }
+                          questionData={questions[selectedQuestionIndex].data}
+                          onChange={handleQuestionDataChange}
+                          study={study}
+                        />
                     )}
                     {questions[selectedQuestionIndex].type ===
                       "multipleChoice" && (
@@ -470,6 +471,7 @@ export default function CreateStudyPage() {
                         }
                         questionData={questions[selectedQuestionIndex].data}
                         onChange={handleQuestionDataChange}
+                        study={study}
                       />
                     )}
                     {questions[selectedQuestionIndex].type === "checkbox" && (
@@ -480,6 +482,7 @@ export default function CreateStudyPage() {
                         }
                         questionData={questions[selectedQuestionIndex].data}
                         onChange={handleQuestionDataChange}
+                        study={study}
                       />
                     )}
                     {questions[selectedQuestionIndex].type ===
@@ -491,6 +494,7 @@ export default function CreateStudyPage() {
                         }
                         questionData={questions[selectedQuestionIndex].data}
                         onChange={handleQuestionDataChange}
+                        study={study}
                       />
                     )}
                     {questions[selectedQuestionIndex].type === "dropdown" && (
@@ -501,6 +505,7 @@ export default function CreateStudyPage() {
                         }
                         questionData={questions[selectedQuestionIndex].data}
                         onChange={handleQuestionDataChange}
+                        study={study}
                       />
                     )}
                     {questions[selectedQuestionIndex].type === "ranking" && (
@@ -511,6 +516,7 @@ export default function CreateStudyPage() {
                         }
                         questionData={questions[selectedQuestionIndex].data}
                         onChange={handleQuestionDataChange}
+                        study={study}
                       />
                     )}
                     {questions[selectedQuestionIndex].type === "matrix" && (
@@ -521,6 +527,7 @@ export default function CreateStudyPage() {
                         }
                         questionData={questions[selectedQuestionIndex].data}
                         onChange={handleQuestionDataChange}
+                        study={study}
                       />
                     )}
                   </div>

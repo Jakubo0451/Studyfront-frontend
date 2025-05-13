@@ -1,12 +1,13 @@
-'use client';
-import React, { useState, useEffect } from 'react'; // Added useEffect
-import dropdownStyles from '../../styles/questionTypes/dropdownQ.module.css';
-import commonStyles from '../../styles/questionTypes/common.module.css';
-import Artifact from './artifact';
+"use client";
+import React, { useState, useEffect } from "react"; // Added useEffect
+import dropdownStyles from "../../styles/questionTypes/dropdownQ.module.css";
+import commonStyles from "../../styles/questionTypes/common.module.css";
+import Artifact from "./artifact";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and added props
-  const [title, setTitle] = useState(questionData?.title || '');
+function DropdownQuestionComponent({ questionData, onChange, study }) {
+  // Renamed and added props
+  const [title, setTitle] = useState(questionData?.title || "");
   const [dropdowns, setDropdowns] = useState(
     questionData?.dropdowns?.map((dropdown, dIndex) => ({
       ...dropdown,
@@ -14,12 +15,14 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
       options: dropdown.options?.map((opt, oIndex) => ({
         ...opt,
         id: opt.id || `${Date.now()}-ddo-${dIndex}-${oIndex}`, // Ensure option ID
-      })) || [{ id: `${Date.now()}-ddo-${dIndex}-0`, text: '' }],
-    })) || [{ 
-      id: `${Date.now()}-dd-0`, 
-      label: '', 
-      options: [{ id: `${Date.now()}-ddo-0-0`, text: '' }] 
-    }]
+      })) || [{ id: `${Date.now()}-ddo-${dIndex}-0`, text: "" }],
+    })) || [
+      {
+        id: `${Date.now()}-dd-0`,
+        label: "",
+        options: [{ id: `${Date.now()}-ddo-0-0`, text: "" }],
+      },
+    ]
   );
 
   useEffect(() => {
@@ -41,61 +44,76 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
       ...dropdowns,
       {
         id: newDropdownId,
-        label: '',
-        options: [{ id: `${Date.now()}-ddo-${dropdowns.length}-0`, text: '' }, { id: `${Date.now()}-ddo-${dropdowns.length}-1`, text: '' }], // Start with 2 options
+        label: "",
+        options: [
+          { id: `${Date.now()}-ddo-${dropdowns.length}-0`, text: "" },
+          { id: `${Date.now()}-ddo-${dropdowns.length}-1`, text: "" },
+        ], // Start with 2 options
       },
     ]);
   };
 
   const removeDropdown = (dropdownId) => {
     if (dropdowns.length <= 1) return;
-    setDropdowns(dropdowns.filter(dropdown => dropdown.id !== dropdownId));
+    setDropdowns(dropdowns.filter((dropdown) => dropdown.id !== dropdownId));
   };
 
   const handleDropdownLabelChange = (dropdownId, value) => {
-    setDropdowns(dropdowns.map(dropdown =>
-      dropdown.id === dropdownId ? { ...dropdown, label: value } : dropdown
-    ));
+    setDropdowns(
+      dropdowns.map((dropdown) =>
+        dropdown.id === dropdownId ? { ...dropdown, label: value } : dropdown
+      )
+    );
   };
 
   const addOption = (dropdownId) => {
-    setDropdowns(dropdowns.map(dropdown => {
-      if (dropdown.id === dropdownId) {
-        const newOptionId = `${Date.now()}-ddo-${dropdown.id}-${dropdown.options.length}`;
-        return {
-          ...dropdown,
-          options: [...dropdown.options, { id: newOptionId, text: '' }],
-        };
-      }
-      return dropdown;
-    }));
+    setDropdowns(
+      dropdowns.map((dropdown) => {
+        if (dropdown.id === dropdownId) {
+          const newOptionId = `${Date.now()}-ddo-${dropdown.id}-${
+            dropdown.options.length
+          }`;
+          return {
+            ...dropdown,
+            options: [...dropdown.options, { id: newOptionId, text: "" }],
+          };
+        }
+        return dropdown;
+      })
+    );
   };
 
   const removeOption = (dropdownId, optionId) => {
-    setDropdowns(dropdowns.map(dropdown => {
-      if (dropdown.id === dropdownId) {
-        if (dropdown.options.length <= 2) return dropdown;
-        return {
-          ...dropdown,
-          options: dropdown.options.filter(option => option.id !== optionId),
-        };
-      }
-      return dropdown;
-    }));
+    setDropdowns(
+      dropdowns.map((dropdown) => {
+        if (dropdown.id === dropdownId) {
+          if (dropdown.options.length <= 2) return dropdown;
+          return {
+            ...dropdown,
+            options: dropdown.options.filter(
+              (option) => option.id !== optionId
+            ),
+          };
+        }
+        return dropdown;
+      })
+    );
   };
 
   const handleOptionChange = (dropdownId, optionId, value) => {
-    setDropdowns(dropdowns.map(dropdown => {
-      if (dropdown.id === dropdownId) {
-        return {
-          ...dropdown,
-          options: dropdown.options.map(option =>
-            option.id === optionId ? { ...option, text: value } : option
-          ),
-        };
-      }
-      return dropdown;
-    }));
+    setDropdowns(
+      dropdowns.map((dropdown) => {
+        if (dropdown.id === dropdownId) {
+          return {
+            ...dropdown,
+            options: dropdown.options.map((option) =>
+              option.id === optionId ? { ...option, text: value } : option
+            ),
+          };
+        }
+        return dropdown;
+      })
+    );
   };
 
   return (
@@ -113,12 +131,27 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
         />
       </div>
 
-      <Artifact mode="standalone" allowMultiple={true} />
+      <Artifact
+        mode="standalone"
+        allowMultiple={true}
+        studyId={study?._id}
+        initialArtifactId={null}
+        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
+          console.log(
+            "Selected artifact:",
+            artifactId,
+            artifactName,
+            artifactImage
+          );
+        }}
+      />
 
       {dropdowns.map((dropdown, dropdownIndex) => (
         <div key={dropdown.id} className={commonStyles.itemBox + " mb-6"}>
           <div className={commonStyles.itemHeader}>
-            <label htmlFor={`dropdownLabel_${dropdown.id}`}>Dropdown {dropdownIndex + 1}:</label>
+            <label htmlFor={`dropdownLabel_${dropdown.id}`}>
+              Dropdown {dropdownIndex + 1}:
+            </label>
             <button
               type="button"
               className={commonStyles.removeBtn}
@@ -137,15 +170,21 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
               id={`ddLabel_${dropdown.id}`}
               placeholder="Dropdown label (e.g., Select your country)"
               value={dropdown.label}
-              onChange={(e) => handleDropdownLabelChange(dropdown.id, e.target.value)}
+              onChange={(e) =>
+                handleDropdownLabelChange(dropdown.id, e.target.value)
+              }
             />
 
             <h4>Dropdown options:</h4>
             <div className={dropdownStyles.optionsContainer}>
               {dropdown.options.map((option, optionIndex) => (
-                <div key={option.id} className={dropdownStyles.singleOptionBox}> {/* Use dropdownStyles if specific */}
+                <div key={option.id} className={dropdownStyles.singleOptionBox}>
+                  {" "}
+                  {/* Use dropdownStyles if specific */}
                   <div className={commonStyles.itemHeader}>
-                    <label htmlFor={`optionText_${option.id}`}>Option {optionIndex + 1}:</label>
+                    <label htmlFor={`optionText_${option.id}`}>
+                      Option {optionIndex + 1}:
+                    </label>
                     <button
                       type="button"
                       className={commonStyles.removeBtn}
@@ -162,7 +201,13 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
                       id={`optionText_${option.id}`}
                       placeholder="Option name"
                       value={option.text}
-                      onChange={(e) => handleOptionChange(dropdown.id, option.id, e.target.value)}
+                      onChange={(e) =>
+                        handleOptionChange(
+                          dropdown.id,
+                          option.id,
+                          e.target.value
+                        )
+                      }
                     />
                   </div>
                 </div>
@@ -180,7 +225,11 @@ function DropdownQuestionComponent({ questionData, onChange }) { // Renamed and 
         </div>
       ))}
 
-      <button type="button" className={commonStyles.addItemBtn + " mt-4"} onClick={addDropdown}>
+      <button
+        type="button"
+        className={commonStyles.addItemBtn + " mt-4"}
+        onClick={addDropdown}
+      >
         <FaPlus /> Add another dropdown
       </button>
     </div>
