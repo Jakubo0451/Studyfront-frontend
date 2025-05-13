@@ -31,6 +31,9 @@ jobs:
 
     - name: Run ESLint
       run: npx eslint
+    
+    - name: Run tests
+      run: npm test
 
     - name: Build project (if applicable)
       run: npm run build --if-present
