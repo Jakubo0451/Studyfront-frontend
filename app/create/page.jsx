@@ -534,7 +534,7 @@ export default function CreateStudyPage() {
               {selectedQuestionIndex === null &&
                 (!questions || questions.length === 0) && (
                   <p>
-                    Click "Add Item" in the sidebar to add your first question,
+                    Click "Add Question" in the sidebar to add your first question,
                     or click "Study Information" to edit the Information about
                     the study.
                   </p>
