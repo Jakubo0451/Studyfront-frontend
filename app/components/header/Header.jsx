@@ -7,7 +7,7 @@ import { VscAccount } from "react-icons/vsc";
 import { FaRegQuestionCircle } from "react-icons/fa";
 
 
-export default function Header() {
+export default function Header({ onCreateStudy }) {
     return (
         <header className="bg-sky-blue shadow-md p-4">
             <ul className="flex justify-between items-center">
@@ -31,12 +31,14 @@ export default function Header() {
                         </Link>
                     </div>
                     <div className="flex items-center space-x-4">
-                        <Link href="/create" passHref>
-                            <div className="flex items-center space-x-2">
-                                <FaPlus />
-                                <span className="text-gray-700 hover:text-gray-900 hover:border-b">Create a study</span>
-                            </div>
-                        </Link>
+                        <button
+                            type="button"
+                            onClick={onCreateStudy}
+                            className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 hover:border-b"
+                        >
+                            <FaPlus />
+                            <span>Create a study</span>
+                        </button>
                     </div>
                     <div className="flex items-center space-x-4">
                         <Link href="/about" passHref>
