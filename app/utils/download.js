@@ -12,10 +12,19 @@ const downloadFile = (content, fileName, contentType) => {
 
 // Fetch study results from the backend
 const fetchStudyResults = async (studyId) => {
+  const token = localStorage.getItem('token');
     try {
-        const response = await fetch(`${backendUrl}/api/results/${studyId}`); // Updated endpoint
+        const response = await fetch(`${backendUrl}/api/studies/results/${studyId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            }
+        });
+        
         if (!response.ok) {
-            throw new Error(`Failed to fetch results for study ID: ${studyId}`);
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Failed to fetch results for study ID: ${studyId}`);
         }
         return await response.json();
     } catch (error) {

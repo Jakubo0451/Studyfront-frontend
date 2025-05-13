@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import axios from 'axios';
 import backendUrl from 'environment';
 import StudyTakeComponent from 'app/components/studyTake/StudyTakeComponent';
 
@@ -12,40 +11,30 @@ export default function TakeStudyPage() {
   const [study, setStudy] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [redirectCountdown, setRedirectCountdown] = useState(30);
 
   useEffect(() => {
     const fetchStudy = async () => {
       try {
-        setLoading(true);
-        
-        // Validate study ID format (24 character hex string)
-        const isValidId = /^[0-9a-fA-F]{24}$/.test(params.id);
-        if (!isValidId) {
-          setError('Invalid study ID format');
-          setLoading(false);
-          return;
+        const response = await fetch(`${backendUrl}/api/studies/${params.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch study');
         }
 
-        const response = await axios.get(`${backendUrl}/api/studies/public/${params.id}`);
-        
-        if (response.data) {
-          if (!response.data.questions || response.data.questions.length === 0) {
-            setError('This study has no questions');
-            return;
-          }
-          setStudy(response.data);
-        }
-      } catch (err) {
-        console.error('Error fetching study:', err.response?.data || err);
-        
-        if (err.response?.status === 404) {
-          setError('Study not found: ' + (err.response?.data?.message || 'This study does not exist'));
-        } else if (err.response?.status === 400) {
-          setError('Invalid study: ' + (err.response?.data?.message || 'Invalid study ID format'));
-        } else {
-          setError('Error: ' + (err.response?.data?.message || 'Unable to load study'));
-        }
-      } finally {
+        const data = await response.json();
+        console.log('Fetched study data:', data);
+        console.log('Study active status:', data.active);
+        setStudy(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching study:', error);
+        setError('Failed to load study');
         setLoading(false);
       }
     };
@@ -53,24 +42,75 @@ export default function TakeStudyPage() {
     fetchStudy();
   }, [params.id]);
 
-  if (loading) {
-    return <div className="p-8">Loading study...</div>;
-  }
+  useEffect(() => {
+    if (study && !study.active) {
+      const timer = setInterval(() => {
+        setRedirectCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            router.push('/');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-  if (error) {
+      return () => clearInterval(timer);
+    }
+  }, [study, router]);
+
+  if (loading) {
     return (
-      <div className="p-8">
-        <div className="text-red-500">{error}</div>
-        <button 
-          type="button"
-          onClick={() => router.push('/')}
-          className="mt-4 text-blue-500 hover:underline"
-        >
-          Return to Home
-        </button>
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="text-xl text-petrol-blue">Loading study...</div>
       </div>
     );
   }
 
-  return <StudyTakeComponent study={study} />;
+  if (error) {
+    return (
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full text-center">
+          <div className="text-red-500 text-lg mb-4">{error}</div>
+          <button 
+            type="button"
+            onClick={() => router.push('/')}
+            className="px-4 py-2 bg-petrol-blue text-white rounded hover:bg-oxford-blue transition-colors duration-300"
+          >
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!study?.active) {
+    return (
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full text-center">
+          <h2 className="text-2xl font-bold text-petrol-blue mb-4">Study Has Ended</h2>
+          <p className="mb-6 text-gray-600">
+            Thank you for your interest, but this study is no longer accepting responses.
+          </p>
+          <div className="my-8">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+              <div 
+                className="bg-petrol-blue h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${(redirectCountdown / 30) * 100}%` }}
+              ></div>
+            </div>
+            <p className="text-gray-600">
+              Redirecting in {redirectCountdown} seconds...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-sky-blue p-8">
+      <StudyTakeComponent study={study} />
+    </div>
+  );
 }

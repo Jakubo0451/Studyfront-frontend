@@ -204,7 +204,7 @@ const StudiesList = ({ refreshTrigger }) => {
 
                                                 {item.completed ? (
                                                     <div className="flex items-center justify-center bg-green-500 rounded-sm mb-2">
-                                                        <p className="text-white">Compleated</p>
+                                                        <p className="text-white">Completed</p>
                                                     </div>
                                                 ) : (
                                                     <div>

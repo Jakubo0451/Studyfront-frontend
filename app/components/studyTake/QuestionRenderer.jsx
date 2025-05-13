@@ -9,10 +9,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   };
 
   const renderTextQuestion = () => (
-    <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+    <div className="mb-6">
+      <label className="block text-lg text-petrol-blue mb-3">{question.data.prompt || question.data.questionText}</label>
       <textarea
-        className="w-full p-2 border rounded-md"
+        className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
         rows="4"
         value={localResponse || ''}
         onChange={(e) => handleChange(e.target.value)}
@@ -22,11 +22,11 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   );
 
   const renderNumberQuestion = () => (
-    <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+    <div className="mb-6">
+      <label className="block text-lg text-petrol-blue mb-3">{question.data.prompt || question.data.questionText}</label>
       <input
         type="number"
-        className="w-full p-2 border rounded-md"
+        className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
         value={localResponse || ''}
         onChange={(e) => handleChange(Number(e.target.value))}
         placeholder="Enter a number"
@@ -35,20 +35,20 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   );
 
   const renderMultiChoiceQuestion = () => (
-    <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
-      <div className="space-y-2">
+    <div className="mb-6">
+      <label className="block text-lg text-petrol-blue mb-3">{question.data.prompt || question.data.questionText}</label>
+      <div className="space-y-3">
         {question.data.options.map((option, index) => (
-          <label key={index} className="flex items-center space-x-2 cursor-pointer">
+          <label key={index} className="flex items-center space-x-3 cursor-pointer hover:bg-sky-blue p-2 rounded-md transition-colors">
             <input
               type="radio"
               name={question._id}
               value={option}
               checked={localResponse === option}
               onChange={(e) => handleChange(e.target.value)}
-              className="form-radio"
+              className="form-radio text-petrol-blue focus:ring-petrol-blue h-5 w-5"
             />
-            <span>{option}</span>
+            <span className="text-gray-700">{option}</span>
           </label>
         ))}
       </div>
@@ -56,11 +56,11 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   );
 
   const renderCheckboxQuestion = () => (
-    <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
-      <div className="space-y-2">
+    <div className="mb-6">
+      <label className="block text-lg text-petrol-blue mb-3">{question.data.prompt || question.data.questionText}</label>
+      <div className="space-y-3">
         {question.data.options.map((option, index) => (
-          <label key={index} className="flex items-center space-x-2 cursor-pointer">
+          <label key={index} className="flex items-center space-x-3 cursor-pointer hover:bg-sky-blue p-2 rounded-md transition-colors">
             <input
               type="checkbox"
               value={option}
@@ -71,9 +71,9 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
                   : (localResponse || []).filter(item => item !== option);
                 handleChange(newResponse);
               }}
-              className="form-checkbox"
+              className="form-checkbox text-petrol-blue focus:ring-petrol-blue h-5 w-5"
             />
-            <span>{option}</span>
+            <span className="text-gray-700">{option}</span>
           </label>
         ))}
       </div>
@@ -81,18 +81,18 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   );
 
   const renderRatingQuestion = () => (
-    <div className="mb-4">
-      <label className="block text-lg mb-2">{question.title}</label>
+    <div className="mb-6">
+      <label className="block text-lg text-petrol-blue mb-3">{question.data.prompt || question.data.questionText}</label>
       <div className="flex items-center space-x-4">
         {Array.from({ length: question.data.maxRating }, (_, i) => i + 1).map((value) => (
           <button
             key={value}
             type="button"
             onClick={() => handleChange(value)}
-            className={`w-10 h-10 rounded-full ${
+            className={`w-12 h-12 rounded-full transition-colors duration-300 ${
               localResponse === value 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-200 hover:bg-gray-300'
+                ? 'bg-petrol-blue text-white hover:bg-oxford-blue' 
+                : 'bg-gray-200 text-gray-700 hover:bg-sky-blue'
             }`}
           >
             {value}
@@ -101,6 +101,9 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
       </div>
     </div>
   );
+
+  // Add debugging log to check question data
+  console.log('Question data:', question);
 
   switch (question.type) {
     case 'text':
