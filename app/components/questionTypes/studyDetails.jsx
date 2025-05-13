@@ -24,7 +24,7 @@ export default function StudyDetails({
       studyId,
       { title: newName },
       () => {
-        if (onStudyUpdated) onStudyUpdated();
+        if (onStudyUpdated) onStudyUpdated({ title: newName});
       },
       (error) => {
         console.error("Failed to update study title:", error);
@@ -39,7 +39,7 @@ export default function StudyDetails({
       studyId,
       { description: newDescription },
       () => {
-        if (onStudyUpdated) onStudyUpdated();
+        if (onStudyUpdated) onStudyUpdated({ description: newDescription });
       },
       (error) => {
         console.error("Failed to update study description:", error);
@@ -54,7 +54,7 @@ export default function StudyDetails({
       studyId,
       { hasTermsAndConditions: newTermsEnabled },
       () => {
-        if (onStudyUpdated) onStudyUpdated();
+        if (onStudyUpdated) onStudyUpdated({ hasTermsAndConditions: newTermsEnabled });
       },
       (error) => {
         console.error("Failed to update study terms enabled:", error);
@@ -69,7 +69,7 @@ export default function StudyDetails({
       studyId,
       { termsAndConditions: newTermsText },
       () => {
-        if (onStudyUpdated) onStudyUpdated();
+        if (onStudyUpdated) onStudyUpdated({ termsAndConditions: newTermsText });
       },
       (error) => {
         console.error("Failed to update study terms text:", error);
