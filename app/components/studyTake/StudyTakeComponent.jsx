@@ -9,6 +9,8 @@ export default function StudyTakeComponent({ study }) {
     return <div className="p-8">Invalid study configuration.</div>;
   }
 
+  const [hasStarted, setHasStarted] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -138,6 +140,66 @@ export default function StudyTakeComponent({ study }) {
     }
   }, [completed, router]);
 
+  // Handle starting the study
+  const handleStartStudy = () => {
+    // If there are terms, only start if they've been accepted
+    if (study.hasTermsAndConditions && !termsAccepted) {
+      return;
+    }
+    setHasStarted(true);
+  };
+
+  // Render the welcome screen with study information
+  const renderWelcomeScreen = () => {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-8">
+        <h1 className="text-3xl font-bold mb-6 text-petrol-blue">{study.title}</h1>
+        
+        {/* Description */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-2">About this study</h2>
+          <p className="text-gray-700 whitespace-pre-line">{study.description}</p>
+        </div>
+        
+        {/* Terms and Conditions */}
+        {study.hasTermsAndConditions && (
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold mb-2">Terms and Conditions</h2>
+            <div className="bg-sky-blue/20 p-4 rounded-md max-h-60 overflow-y-auto mb-4 border border-sky-blue">
+              <p className="text-gray-700 whitespace-pre-line">{study.termsAndConditions}</p>
+            </div>
+            
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="accept-terms"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="mr-2 h-5 w-5"
+              />
+              <label htmlFor="accept-terms" className="text-gray-700">
+                I have read and accept the terms and conditions
+              </label>
+            </div>
+          </div>
+        )}
+        
+        <button
+          type="button"
+          onClick={handleStartStudy}
+          disabled={study.hasTermsAndConditions && !termsAccepted}
+          className={`px-6 py-3 rounded-md text-white font-medium text-lg transition-colors duration-300 ${
+            study.hasTermsAndConditions && !termsAccepted
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-petrol-blue hover:bg-oxford-blue"
+          }`}
+        >
+          Begin Study
+        </button>
+      </div>
+    );
+  };
+
   if (completed) {
     return (
       <div className="bg-white rounded-lg shadow-md p-8 text-center">
@@ -160,6 +222,11 @@ export default function StudyTakeComponent({ study }) {
 
   if (!study || questions.length === 0) {
     return <div className="p-8">No questions available for this study.</div>;
+  }
+
+  // Show welcome screen if the study hasn't started yet
+  if (!hasStarted) {
+    return renderWelcomeScreen();
   }
 
   return (
