@@ -9,7 +9,6 @@ on:
 jobs:
 
   build:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: Docker
     runs-on: ubuntu-latest
 
