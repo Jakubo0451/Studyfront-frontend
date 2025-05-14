@@ -92,9 +92,12 @@ const SideBar = ({
   studyTitle,
   onViewStudyDetails,
   onChange,
-  //study,
   deleteQuestion,
   saveStatus,
+  // Add these new props
+  previewMode,
+  onTogglePreview,
+  study
 }) => {
   const params = useParams();
 
@@ -195,6 +198,18 @@ const SideBar = ({
       >
         Study Information
       </button>
+      
+      {/* Add Preview Study button here */}
+      {study && study._id && (
+        <button
+          onClick={onTogglePreview}
+          type="button"
+          className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center hover:bg-oxford-blue transition duration-300 cursor-pointer"
+        >
+          {previewMode ? 'Close Preview' : 'Preview Study'}
+        </button>
+      )}
+      
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}

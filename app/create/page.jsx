@@ -94,6 +94,7 @@ export default function CreateStudyPage() {
   const [viewingStudyDetails, setViewingStudyDetails] = useState(false);
   const [saveStatus, setSaveStatus] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [previewMode, setPreviewMode] = useState(false);
 
   const searchParams = useSearchParams();
   const editStudyId = searchParams.get("studyId");
@@ -467,6 +468,8 @@ export default function CreateStudyPage() {
             );
           }}
           saveStatus={saveStatus}
+          previewMode={previewMode}
+          onTogglePreview={() => setPreviewMode(!previewMode)}
         />
         <div className="flex-1 p-4 overflow-auto max-h-[90vh]">
           {viewingStudyDetails ? (
@@ -578,6 +581,20 @@ export default function CreateStudyPage() {
                     the study.
                   </p>
                 )}
+            </div>
+          )}
+          {previewMode && study && (
+            <div className="mt-4">
+              <div className="bg-gray-100 p-2 mb-4 rounded text-center text-petrol-blue font-semibold">
+                PREVIEW MODE - Responses will not be saved
+              </div>
+              <div className="border-2 border-petrol-blue rounded-lg h-[600px]">
+                <iframe 
+                  src={`/study/${study._id}?preview=true`} 
+                  className="w-full h-full"
+                  title="Study Preview"
+                />
+              </div>
             </div>
           )}
         </div>

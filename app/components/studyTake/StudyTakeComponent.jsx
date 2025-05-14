@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
 
-export default function StudyTakeComponent({ study }) {
+// Add previewMode to props
+export default function StudyTakeComponent({ study, previewMode = false }) {
   if (!study?._id) {
     return <div className="p-8">Invalid study configuration.</div>;
   }
@@ -85,14 +86,15 @@ export default function StudyTakeComponent({ study }) {
     const question = questions.find(q => q._id === questionId);
     if (!question) return;
 
-    /* eslint-disable-next-line */
-    const questionTypeLower = question.type?.toLowerCase();
-    let validatedAndFormattedResponse = responseFromChild;
+    // For preview mode, ensure we don't have issues with null responses
+    if (previewMode && responseFromChild === null) {
+      responseFromChild = ""; // Use empty string instead of null in preview
+    }
 
-    console.log(`PARENT StudyTakeComponent: Setting response for Q_ID ${questionId}:`, JSON.stringify(validatedAndFormattedResponse));
+    console.log(`PARENT StudyTakeComponent: Setting response for Q_ID ${questionId}:`, JSON.stringify(responseFromChild));
     setResponses(prev => ({
       ...prev,
-      [questionId]: validatedAndFormattedResponse
+      [questionId]: responseFromChild
     }));
   };
 
@@ -134,7 +136,7 @@ export default function StudyTakeComponent({ study }) {
     }
   };
 
-  // Update the handleSubmit function
+  // Modify the handleSubmit function to handle preview mode
   const handleSubmit = async () => {
     if (!study._id) return;
 
@@ -159,6 +161,17 @@ export default function StudyTakeComponent({ study }) {
     }
 
     setSubmitting(true);
+    
+    // If in preview mode, don't actually submit the data
+    if (previewMode) {
+      // Just simulate success
+      setTimeout(() => {
+        setSubmitting(false);
+        setCompleted(true);
+      }, 1000);
+      return;
+    }
+
     try {
       const submissionData = {
         studyId: study._id,
@@ -280,6 +293,81 @@ export default function StudyTakeComponent({ study }) {
       </div>
     );
   };
+
+  // Add a preview banner at the top when in preview mode
+  if (previewMode) {
+    return (
+      <div>
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+          <p className="font-bold">Preview Mode</p>
+          <p>This is a preview of your study. Responses will not be saved.</p>
+        </div>
+        
+        {/* Render the appropriate content based on state */}
+        {!hasStarted ? (
+          renderWelcomeScreen()
+        ) : completed ? (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">Thank You for Your Participation!</h2>
+            <p className="mb-6">This was a preview - your responses were not submitted.</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h1 className="text-2xl font-bold mb-6">{study.title}</h1>
+            
+            <div className="mb-4">
+              <p className="text-gray-600">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </p>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {currentQuestion && (
+              <div>
+                <h3 className="text-xl font-medium mb-4">
+                  {currentQuestion.data?.title || `Question ${currentQuestionIndex + 1}`}
+                </h3>
+                <div className="question-container">
+                  <QuestionRenderer
+                    question={currentQuestion}
+                    onResponse={(response) => handleResponse(currentQuestion._id, response)}
+                    currentResponse={responses[currentQuestion._id]}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-between mt-8">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                disabled={currentQuestionIndex === 0}
+                className={`px-4 py-2 rounded ${
+                  currentQuestionIndex === 0
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-gray-500 hover:bg-gray-600 text-white"
+                }`}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                {isLastQuestion ? "Submit" : "Next"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (completed) {
     return (
