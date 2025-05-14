@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
+import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
 export default function StudyTakeComponent({ study }) {
   if (!study?._id) {
@@ -232,16 +233,16 @@ export default function StudyTakeComponent({ study }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h1 className="text-2xl font-bold mb-6">{study.title}</h1>
+    <div className="w-[70%]">
+      <h1 className="text-4xl mb-6 text-center text-petrol-blue">{study.title}</h1>
       
       <div className="mb-4">
-        <p className="text-gray-600">
+        <p className="text-petrol-blue text-center mb-1">
           Question {currentQuestionIndex + 1} of {questions.length}
         </p>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div className="w-full bg-sky-blue rounded-full h-2.5">
           <div 
-            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+            className="bg-petrol-blue h-2.5 rounded-full transition-all duration-300" 
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>
@@ -249,7 +250,7 @@ export default function StudyTakeComponent({ study }) {
 
       {currentQuestion && (
         <div>
-          <h3 className="text-xl font-medium mb-4">
+          <h3 className="text-2xl mb-4 text-center mt-8">
             {currentQuestion.data?.title || `Question ${currentQuestionIndex + 1}`}
           </h3>
           <div className="question-container">
@@ -267,13 +268,13 @@ export default function StudyTakeComponent({ study }) {
           type="button"
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded flex items-center ${
             currentQuestionIndex === 0
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-gray-500 hover:bg-gray-600 text-white"
+              : "bg-sky-blue hover:brightness-90 transition duration-300"
           }`}
         >
-          Previous
+           <FaArrowLeft className="mr-2" /> Previous question
         </button>
         <button
           type="button"
@@ -282,14 +283,15 @@ export default function StudyTakeComponent({ study }) {
           className={`px-4 py-2 rounded ${
             !responses[currentQuestion?._id] || submitting
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
+              : "bg-petrol-blue hover:bg-oxford-blue transition duration-300 text-white"
           }`}
         >
           {submitting 
             ? "Submitting..." 
             : isLastQuestion 
               ? "Submit" 
-              : "Next"}
+              : <div className="flex items-center">Next question <FaArrowRight className="ml-2" /></div>
+          }
         </button>
       </div>
     </div>

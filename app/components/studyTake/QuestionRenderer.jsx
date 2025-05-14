@@ -123,7 +123,6 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     
     return (
       <div className="mb-6">
-        <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
         <div className="space-y-3">
           {options.map((option, index) => {
             const optionValue = typeof option === 'string' ? option : option.text;
@@ -152,51 +151,58 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   };
 
   const renderRatingQuestion = () => {
-    // Check if we have valid rating scale data
-    if (!question.data?.ratingScales || !question.data.ratingScales.length) {
-      return (
-        <div className="text-red-500">
-          This rating question has no rating scales defined.
-        </div>
-      );
-    }
-  
-    // Get the first rating scale
-    const ratingScale = question.data.ratingScales[0];
-    const min = parseInt(ratingScale.min) || 1;
-    const max = parseInt(ratingScale.max) || 5;
-    
-    // Create an array of possible values
-    const ratingValues = Array.from(
-      { length: max - min + 1 },
-      (_, i) => i + min
-    );
-  
+  // Check if we have valid rating scale data
+  if (!question.data?.ratingScales || !question.data.ratingScales.length) {
     return (
-      <div className="mb-6">
-        <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
-        {ratingScale.name && (
-          <p className="text-gray-600 mb-2">{ratingScale.name}</p>
-        )}
-        <div className="flex items-center space-x-2 flex-wrap">
-          {ratingValues.map((value) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => handleChange(value)}
-              className={`w-12 h-12 rounded-full transition-colors duration-300 ${
-                localResponse === value
-                  ? 'bg-petrol-blue text-white hover:bg-oxford-blue'
-                  : 'bg-gray-200 text-gray-700 hover:bg-sky-blue'
-              }`}
-            >
-              {value}
-            </button>
-          ))}
-        </div>
+      <div className="text-red-500">
+        This rating question has no rating scales defined.
       </div>
     );
-  };
+  }
+
+  // Get the first rating scale
+  const ratingScale = question.data.ratingScales[0];
+  const min = parseInt(ratingScale.min) || 1;
+  const max = parseInt(ratingScale.max) || 5;
+  const value = localResponse || min;
+  
+  // Calculate fill percentage for the slider
+  const fillPercentage = ((value - min) / (max - min)) * 100;
+  
+  return (
+    <div className="mb-6">
+      {ratingScale.name && (
+        <p className="text-oxford-blue">{ratingScale.name}:</p>
+      )}
+      <div className="mt-1">
+        
+        <div className="relative">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            step="1"
+            value={value}
+            onChange={(e) => handleChange(parseInt(e.target.value))}
+            className={`${commonStyles.rangeInput} w-full h-2 rounded-lg appearance-none cursor-pointer bg-sky-blue`}
+            style={{
+              background: `linear-gradient(to right, var(--color-petrol-blue) 0%, var(--color-petrol-blue) ${fillPercentage}%, var(--color-sky-blue) ${fillPercentage}%, var(--color-sky-blue) 100%)`
+            }}
+          />
+        </div>
+        <div className="flex justify-between text-sm text-oxford-blue">
+          <span>{min}</span>
+          <span>{max}</span>
+        </div>
+        <div className="flex justify-center">
+          <span className="inline-block px-3 py-1 bg-sky-blue text-black rounded">
+            Selected: <span className="font-bold">{value}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
   const renderDropdownQuestion = () => (
     <div className="mb-6">

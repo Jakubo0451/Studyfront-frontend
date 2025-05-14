@@ -1,0 +1,29 @@
+.rangeInput {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 8px;
+}
+
+.rangeInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  border: solid 3px var(--color-petrol-blue);
+  cursor: pointer;
+}
+
+.rangeInput::-webkit-slider-thumb:active {
+   background: rgb(215, 215, 215);
+}
+
+.rangeInput::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: solid 3px var(--color-petrol-blue);
+  cursor: pointer;
+}

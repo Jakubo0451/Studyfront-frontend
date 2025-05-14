@@ -5,7 +5,7 @@ const backendUrl = (() => {
         case 'production':
             return 'https://group5-api.sustainability.it.ntnu.no';
         default:
-            return 'https://group5-api.sustainability.it.ntnu.no';
+            return 'http://localhost:5000';
     }
 })();
 
