@@ -351,22 +351,34 @@ const SingleArtifact = ({
                   artifact
                 </p>
                 <div className={styles.artifactItems}>
-                  {artifactsList.map((artifact) => (
-                    <div
-                      key={artifact.id}
-                      className={styles.artifactItem}
-                      onClick={selectArtifact(
-                        artifact.id,
-                        artifact.displayName,
-                        artifact.imageUrl,
-                        artifact.contentType
-                      )}
-                      title={artifact.displayName}
-                    >
-                      <img src={artifact.imageUrl} alt={artifact.displayName} />
-                      <p>{artifact.displayName}</p>
-                    </div>
-                  ))}
+                  {artifactsList.length === 0 ? (
+                    <>
+                      <div className={styles.noArtifacts}>
+                      </div>
+                      <div className={styles.noArtifacts}>
+                          <p>No artifacts uploaded</p>
+                      </div>
+                      <div className={styles.noArtifacts}>
+                      </div>
+                    </>
+                  ) : (
+                    artifactsList.map((artifact) => (
+                      <div
+                        key={artifact.id}
+                        className={styles.artifactItem}
+                        onClick={selectArtifact(
+                          artifact.id,
+                          artifact.displayName,
+                          artifact.imageUrl,
+                          artifact.contentType
+                        )}
+                        title={artifact.displayName}
+                      >
+                        <img src={artifact.imageUrl} alt={artifact.displayName} />
+                        <p>{artifact.displayName}</p>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>

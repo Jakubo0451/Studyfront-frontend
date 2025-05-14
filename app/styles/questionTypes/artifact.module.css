@@ -323,3 +323,11 @@
   .artifactTitleInput:focus {
     outline: solid 3px var(--color-petrol-blue);
   }
+
+  .noArtifacts:nth-child(2) {
+    text-align: center;
+    font-style: italic;
+    padding: 1rem;
+    border: solid 3px var(--color-sky-blue);
+    border-radius: .25rem;
+  }
