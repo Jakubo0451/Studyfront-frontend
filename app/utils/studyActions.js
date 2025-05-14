@@ -365,57 +365,28 @@ export const addQuestion = async (studyId, newQuestion, onSuccess, onError) => {
     }
 };
 
-export const updateQuestion = async (studyId, questionId, payload, onSuccess, onError) => {
-    if (!studyId || !questionId) {
-        console.error("Study ID or Question ID is missing for updating the question.");
-        return;
-    }
-
-    try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("No token provided. Redirecting to login.");
-            return;
-        }
-
-        // Log the data we're sending to help debug
-        console.log("Sending question update:", {
-            studyId,
-            questionId,
-            payload
-        });
-
-        // Make sure we have a valid payload object
-        if (!payload || typeof payload !== 'object') {
-            console.error("Invalid payload format for question update");
-            if (onError) onError("Invalid payload format");
-            return;
-        }
-
-        // Send the payload directly as is - no additional wrapping
-        const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions/${questionId}`, {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-        });
-
-        if (response.ok) {
-            const updatedData = await response.json();
-            if (onSuccess) {
-                onSuccess(updatedData);
-            }
-        } else {
-            const errorData = await response.json();
-            console.error("Error updating question:", errorData.error || "Failed to update question.");
-            if (onError) onError(errorData.error || "Failed to update question.");
-        }
-    } catch (error) {
-        console.error("Error updating question:", error);
-        if (onError) onError(error.message);
-    }
+export const updateQuestion = async (studyId, questionId, dataToUpdate, onSuccess, onError) => {
+  try {
+    // Make sure the payload structure matches what your API expects
+    const response = await fetch(`${backendUrl}/api/studies/${studyId}/questions/${questionId}`, {
+      method: 'PUT', 
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dataToUpdate) // Make sure this includes artifacts
+    });
+    
+    if (!response.ok) throw new Error('Failed to update question');
+    
+    const updatedData = await response.json();
+    if (onSuccess) onSuccess(updatedData);
+    return updatedData;
+  } catch (error) {
+    console.error('Error updating question:', error);
+    if (onError) onError(error);
+    throw error;
+  }
 };
 
 export const deleteQuestion = async (studyId, questionId, onSuccess, onError) => {

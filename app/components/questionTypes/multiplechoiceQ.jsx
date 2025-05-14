@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react"; // Added useEffect
+import { useState, useEffect } from "react"; // Added useEffect
 import multiplechoiceStyles from "../../styles/questionTypes/multiplechoiceQ.module.css";
 import commonStyles from "../../styles/questionTypes/common.module.css";
 import Artifact from "./artifact";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-function MultipleChoiceQuestionComponent({ questionData, onChange, study }) {
+export default function MultipleChoiceQuestionBuilder({ questionData, onChange, study }) {
   // Renamed and added props
   const [title, setTitle] = useState(questionData?.title || "");
   const [choiceGroups, setChoiceGroups] = useState(
@@ -24,15 +24,17 @@ function MultipleChoiceQuestionComponent({ questionData, onChange, study }) {
       },
     ]
   );
+  const [artifacts, setArtifacts] = useState(questionData?.artifacts || []);
 
   useEffect(() => {
     if (onChange) {
       onChange({
         title,
         choiceGroups,
+        artifacts // Include artifacts in data sent back
       });
     }
-  }, [title, choiceGroups, onChange]);
+  }, [title, choiceGroups, artifacts, onChange]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -114,6 +116,54 @@ function MultipleChoiceQuestionComponent({ questionData, onChange, study }) {
     );
   };
 
+  // Update the existing handleArtifactSelect function
+  const handleArtifactSelect = (artifactId, artifactName, artifactImage, contentType) => {
+    const newArtifact = {
+      id: artifactId,
+      name: artifactName,
+      imageUrl: artifactImage,
+      contentType: contentType || 'image',
+      title: artifactName, // Initialize title with artifact name
+      label: artifactName  // Add label field
+    };
+    
+    // Check if artifact already exists to preserve its label/title
+    const existingArtifactIndex = artifacts.findIndex(a => a.id === artifactId);
+    if (existingArtifactIndex >= 0) {
+      // Update existing artifact but preserve its title/label
+      const updatedArtifacts = [...artifacts];
+      updatedArtifacts[existingArtifactIndex] = {
+        ...updatedArtifacts[existingArtifactIndex],
+        name: artifactName,
+        imageUrl: artifactImage,
+        contentType: contentType || 'image'
+      };
+      setArtifacts(updatedArtifacts);
+    } else {
+      // Add new artifact
+      setArtifacts(prev => [...prev, newArtifact]);
+    }
+  };
+
+  // Add this function to update artifact labels
+  const updateArtifactLabel = (artifactId, newLabel) => {
+    const updatedArtifacts = artifacts.map(artifact => 
+      artifact.id === artifactId 
+        ? { ...artifact, label: newLabel, title: newLabel } 
+        : artifact
+    );
+    
+    setArtifacts(updatedArtifacts);
+  };
+  
+  // Add or update the removeArtifact function
+  const removeArtifact = (artifactIdToRemove) => {
+    // Remove the artifact from state
+    const updatedArtifacts = artifacts.filter(artifact => artifact.id !== artifactIdToRemove);
+    setArtifacts(updatedArtifacts);
+    // The onChange callback will trigger automatically via useEffect
+  };
+
   return (
     <div className={commonStyles.questionType + " question-type"}>
       <h2>Multiple choice question</h2>
@@ -134,15 +184,12 @@ function MultipleChoiceQuestionComponent({ questionData, onChange, study }) {
         allowMultiple={true}
         studyId={study?._id}
         initialArtifactId={null}
-        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
-          console.log(
-            "Selected artifact:",
-            artifactId,
-            artifactName,
-            artifactImage
-          );
-        }}
+        initialArtifacts={artifacts} 
+        onArtifactSelect={handleArtifactSelect}
+        onLabelChange={updateArtifactLabel}
+        onRemoveArtifact={removeArtifact} // Add this line
       />
+      
 
       {choiceGroups.map((group, groupIndex) => (
         <div key={group.id} className={commonStyles.itemBox + " mb-6"}>
@@ -225,8 +272,3 @@ function MultipleChoiceQuestionComponent({ questionData, onChange, study }) {
     </div>
   );
 }
-
-const MultipleChoiceQuestionBuilder = React.memo(
-  MultipleChoiceQuestionComponent
-);
-export default MultipleChoiceQuestionBuilder;

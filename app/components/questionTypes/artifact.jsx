@@ -143,7 +143,7 @@ const SingleArtifact = ({
       if (contentType && contentType.startsWith("audio/")) {
         displayImage = "/audio.png";
       }
-      else if (contentType && contentType.startsWith("video/")) {
+      else if (contentType.startsWith("video/")) {
         displayImage = "/video.png";
       }
       else if (contentType === "application/pdf") {
@@ -154,7 +154,7 @@ const SingleArtifact = ({
 
       // Call the callback if provided
       if (onArtifactSelect) {
-        onArtifactSelect(artifactId, artifactName, artifactImage);
+        onArtifactSelect(artifactId, artifactName, artifactImage, contentType);
       }
 
       closePopup();
@@ -415,27 +415,39 @@ const SingleArtifact = ({
   );
 };
 
-// Main Artifact component
+// Update the props to include initialArtifacts and onRemoveArtifact
 export default function Artifact({
   studyId,
   initialArtifactId,
   onArtifactSelect,
+  onLabelChange,
+  onRemoveArtifact, // Add this prop
   allowMultiple = false,
   mode = "normal",
+  initialArtifacts = [], // Add this prop
 }) {
-  // For standalone mode only - track both id and selected artifact info
+  // Initialize with provided artifacts if available
   const [artifacts, setArtifacts] = useState(
-    mode === "standalone"
-      ? [
-          {
-            id: 1,
-            selectedArtifactId: null,
-            selectedArtifactName: "No artifact selected",
-            selectedArtifactImage: null,
-            artifactTitle: "", // Add title to the state
-          },
-        ]
-      : []
+    initialArtifacts.length > 0
+      ? initialArtifacts.map((artifact, index) => ({
+          id: index + 1,
+          selectedArtifactId: artifact.id,
+          selectedArtifactName: artifact.name,
+          selectedArtifactImage: artifact.imageUrl,
+          artifactTitle: artifact.label || artifact.title || artifact.name,
+          contentType: artifact.contentType,
+        }))
+      : mode === "standalone"
+        ? [
+            {
+              id: 1,
+              selectedArtifactId: null,
+              selectedArtifactName: "No artifact selected",
+              selectedArtifactImage: null,
+              artifactTitle: "",
+            },
+          ]
+        : []
   );
 
   // Functions for standalone mode
@@ -454,7 +466,12 @@ export default function Artifact({
     ]);
   };
 
+  // Update the removeArtifact function in Artifact component
   const removeArtifact = (idToRemove) => {
+    // Find the artifact to get its selected artifact ID
+    const artifactToRemove = artifacts.find(a => a.id === idToRemove);
+    const selectedId = artifactToRemove?.selectedArtifactId;
+    
     // Remove the artifact with the specified ID
     const filteredArtifacts = artifacts.filter(
       (artifact) => artifact.id !== idToRemove
@@ -467,11 +484,16 @@ export default function Artifact({
 
     // Renumber the remaining artifacts sequentially but keep their selection data
     const renumberedArtifacts = filteredArtifacts.map((artifact, index) => ({
-      ...artifact, // Keep all existing properties (including selectedArtifactName)
+      ...artifact,
       id: index + 1,
     }));
 
     setArtifacts(renumberedArtifacts);
+    
+    // Call the parent component's onRemoveArtifact function if provided
+    if (onRemoveArtifact && selectedId) {
+      onRemoveArtifact(selectedId);
+    }
   };
 
   // Update the title for a specific artifact
@@ -483,6 +505,11 @@ export default function Artifact({
           : artifact
       )
     );
+    
+    const artifact = artifacts.find(a => a.id === artifactPositionId);
+    if (artifact && onLabelChange && artifact.selectedArtifactId) {
+      onLabelChange(artifact.selectedArtifactId, newTitle);
+    }
   };
 
   // Update the selected artifact for a specific position
@@ -490,7 +517,8 @@ export default function Artifact({
     artifactPositionId,
     artifactId,
     artifactName,
-    artifactImage
+    artifactImage,
+    contentType
   ) => {
     setArtifacts(
       artifacts.map((artifact) =>
@@ -500,6 +528,7 @@ export default function Artifact({
               selectedArtifactId: artifactId,
               selectedArtifactName: artifactName,
               selectedArtifactImage: artifactImage,
+              contentType: contentType,
             }
           : artifact
       )
@@ -507,7 +536,7 @@ export default function Artifact({
 
     // Call the parent callback if provided
     if (onArtifactSelect) {
-      onArtifactSelect(artifactId, artifactName, artifactImage); // Pass image data to parent callback
+      onArtifactSelect(artifactId, artifactName, artifactImage, contentType); 
     }
   };
 
@@ -536,8 +565,8 @@ export default function Artifact({
                 initialName={artifact.selectedArtifactName}
                 initialImage={artifact.selectedArtifactImage}
                 initialTitle={artifact.artifactTitle} // Pass the title
-                onArtifactSelect={(id, name, image) =>
-                  handleArtifactSelection(artifact.id, id, name, image)
+                onArtifactSelect={(id, name, image, contentType) =>
+                  handleArtifactSelection(artifact.id, id, name, image, contentType)
                 }
                 onTitleChange={(newTitle) =>
                   handleTitleChange(artifact.id, newTitle)
@@ -558,12 +587,15 @@ export default function Artifact({
   return (
     <SingleArtifact
       studyId={studyId}
-      artifactId={artifact.selectedArtifactId}
-      initialName={artifact.selectedArtifactName}
-      initialImage={artifact.selectedArtifactImage}
-      initialTitle={artifact.artifactTitle}
-      onArtifactSelect={(id, name, image) =>
-        handleArtifactSelection(artifact.id, id, name, image)
+      artifactId={initialArtifactId || null}
+      initialName={initialArtifacts[0]?.name || "No artifact selected"}
+      initialImage={initialArtifacts[0]?.imageUrl || null}
+      initialTitle={initialArtifacts[0]?.label || initialArtifacts[0]?.title || ""}
+      onArtifactSelect={(id, name, image, contentType) =>
+        onArtifactSelect && onArtifactSelect(id, name, image, contentType)
+      }
+      onTitleChange={(newTitle) =>
+        onLabelChange && onLabelChange(initialArtifactId, newTitle)
       }
     />
   );

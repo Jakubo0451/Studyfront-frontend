@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react"; // Added useEffect
+import { useState, useEffect } from "react"; // Added useEffect
 import commonStyles from "../../styles/questionTypes/common.module.css";
 import rankStyles from "../../styles/questionTypes/rankQ.module.css";
 import Artifact from "./artifact";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 
-function RankQuestionComponent({ questionData, onChange, study }) {
+export default function RankQuestionBuilder({ questionData, onChange, study }) {
   // Renamed and added props
   const [title, setTitle] = useState(questionData?.title || "");
   const [rankGroups, setRankGroups] = useState(
@@ -25,15 +25,17 @@ function RankQuestionComponent({ questionData, onChange, study }) {
       },
     ]
   );
+  const [artifacts, setArtifacts] = useState(questionData?.artifacts || []);
 
   useEffect(() => {
     if (onChange) {
       onChange({
         title,
         rankGroups,
+        artifacts, // Include artifacts in data sent back
       });
     }
-  }, [title, rankGroups, onChange]);
+  }, [title, rankGroups, artifacts, onChange]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -48,7 +50,7 @@ function RankQuestionComponent({ questionData, onChange, study }) {
         label: "",
         options: [
           { id: `${Date.now()}-ro-${rankGroups.length}-0`, text: "" },
-          { id: `${Date.now()}-ro-${rankGroups.length}-1`, text: "" },
+          { id: `${Date.now()}-ro-${rankGroups.length}-1}`, text: "" },
         ], // Start with 2 items
       },
     ]);
@@ -118,6 +120,51 @@ function RankQuestionComponent({ questionData, onChange, study }) {
     );
   };
 
+  const handleArtifactSelect = (artifactId, artifactName, artifactImage, contentType) => {
+    const newArtifact = {
+      id: artifactId,
+      name: artifactName,
+      imageUrl: artifactImage,
+      contentType: contentType || 'image',
+      title: artifactName, // Initialize title with artifact name
+      label: artifactName  // Add label field
+    };
+    
+    // Check if artifact already exists to preserve its label/title
+    const existingArtifactIndex = artifacts.findIndex(a => a.id === artifactId);
+    if (existingArtifactIndex >= 0) {
+      // Update existing artifact but preserve its title/label
+      const updatedArtifacts = [...artifacts];
+      updatedArtifacts[existingArtifactIndex] = {
+        ...updatedArtifacts[existingArtifactIndex],
+        name: artifactName,
+        imageUrl: artifactImage,
+        contentType: contentType || 'image'
+      };
+      setArtifacts(updatedArtifacts);
+    } else {
+      // Add new artifact
+      setArtifacts(prev => [...prev, newArtifact]);
+    }
+  };
+
+  const updateArtifactLabel = (artifactId, newLabel) => {
+    const updatedArtifacts = artifacts.map(artifact => 
+      artifact.id === artifactId 
+        ? { ...artifact, label: newLabel, title: newLabel } 
+        : artifact
+    );
+    
+    setArtifacts(updatedArtifacts);
+  };
+
+  const removeArtifact = (artifactIdToRemove) => {
+    // Remove the artifact from state
+    const updatedArtifacts = artifacts.filter(artifact => artifact.id !== artifactIdToRemove);
+    setArtifacts(updatedArtifacts);
+    // The onChange callback will trigger automatically via useEffect
+  };
+
   return (
     <div className={commonStyles.questionType + " question-type"}>
       <h2>Ranking question</h2>
@@ -138,14 +185,10 @@ function RankQuestionComponent({ questionData, onChange, study }) {
         allowMultiple={true}
         studyId={study?._id}
         initialArtifactId={null}
-        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
-          console.log(
-            "Selected artifact:",
-            artifactId,
-            artifactName,
-            artifactImage
-          );
-        }}
+        initialArtifacts={artifacts} 
+        onArtifactSelect={handleArtifactSelect}
+        onLabelChange={updateArtifactLabel}
+        onRemoveArtifact={removeArtifact}
       />
 
       <p className={commonStyles.infoBox}>
@@ -241,6 +284,3 @@ function RankQuestionComponent({ questionData, onChange, study }) {
     </div>
   );
 }
-
-const TextanswerQuestionBuilder = React.memo(RankQuestionComponent);
-export default TextanswerQuestionBuilder;

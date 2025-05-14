@@ -23,15 +23,17 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange, study }) {
       },
     ]
   );
+  const [artifacts, setArtifacts] = useState(questionData?.artifacts || []);
 
   useEffect(() => {
     if (onChange) {
       onChange({
         title,
         checkboxGroups,
+        artifacts
       });
     }
-  }, [title, checkboxGroups, onChange]);
+  }, [title, checkboxGroups, artifacts, onChange]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -112,6 +114,54 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange, study }) {
     );
   };
 
+  // Update the existing handleArtifactSelect function
+  const handleArtifactSelect = (artifactId, artifactName, artifactImage, contentType) => {
+    const newArtifact = {
+      id: artifactId,
+      name: artifactName,
+      imageUrl: artifactImage,
+      contentType: contentType || 'image',
+      title: artifactName, // Initialize title with artifact name
+      label: artifactName  // Add label field
+    };
+    
+    // Check if artifact already exists to preserve its label/title
+    const existingArtifactIndex = artifacts.findIndex(a => a.id === artifactId);
+    if (existingArtifactIndex >= 0) {
+      // Update existing artifact but preserve its title/label
+      const updatedArtifacts = [...artifacts];
+      updatedArtifacts[existingArtifactIndex] = {
+        ...updatedArtifacts[existingArtifactIndex],
+        name: artifactName,
+        imageUrl: artifactImage,
+        contentType: contentType || 'image'
+      };
+      setArtifacts(updatedArtifacts);
+    } else {
+      // Add new artifact
+      setArtifacts(prev => [...prev, newArtifact]);
+    }
+  };
+
+  // Add this function to update artifact labels
+  const updateArtifactLabel = (artifactId, newLabel) => {
+    const updatedArtifacts = artifacts.map(artifact => 
+      artifact.id === artifactId 
+        ? { ...artifact, label: newLabel, title: newLabel } 
+        : artifact
+    );
+    
+    setArtifacts(updatedArtifacts);
+  };
+
+  // Add or update the removeArtifact function
+  const removeArtifact = (artifactIdToRemove) => {
+    // Remove the artifact from state
+    const updatedArtifacts = artifacts.filter(artifact => artifact.id !== artifactIdToRemove);
+    setArtifacts(updatedArtifacts);
+    // The onChange callback will trigger automatically via useEffect
+  };
+
   return (
     <div className={commonStyles.questionType + " question-type"}>
       <h2>Checkbox question</h2>
@@ -127,19 +177,15 @@ function CheckboxQuestionBuilderComponent({ questionData, onChange, study }) {
         />
       </div>
 
-      <Artifact
+      <Artifact 
+        studyId={study?._id}
         mode="standalone"
         allowMultiple={true}
-        studyId={study?._id}
         initialArtifactId={null}
-        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
-          console.log(
-            "Selected artifact:",
-            artifactId,
-            artifactName,
-            artifactImage
-          );
-        }}
+        initialArtifacts={artifacts}
+        onArtifactSelect={handleArtifactSelect}
+        onLabelChange={updateArtifactLabel}
+        onRemoveArtifact={removeArtifact}
       />
 
       {checkboxGroups.map((group, groupIndex) => (

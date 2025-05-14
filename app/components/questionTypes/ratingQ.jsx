@@ -1,26 +1,29 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ratingStyles from "../../styles/questionTypes/ratingQ.module.css";
 import commonStyles from "../../styles/questionTypes/common.module.css";
 import Artifact from "./artifact";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-function RatingScaleQuestionComponent({ questionData, onChange, study }) {
+export default function RatingScaleQuestionBuilder({ questionData, onChange, study }) {
   const [ratingScales, setRatingScales] = useState(
     questionData?.ratingScales || [
       { id: Date.now(), name: "", min: "", max: "" },
     ]
   );
   const [title, setTitle] = useState(questionData?.title || "");
+  const [artifacts, setArtifacts] = useState(questionData?.artifacts || []);
 
   useEffect(() => {
-    onChange({
-      title,
-      ratingScales,
-    });
-  }, [title, ratingScales]);
+    if (onChange) {
+      onChange({
+        title,
+        ratingScales,
+        artifacts
+      });
+    }
+  }, [title, ratingScales, artifacts, onChange]);
 
-  // Function to add a new rating scale
   const addRatingScale = () => {
     const newId = Date.now();
     setRatingScales([
@@ -29,7 +32,6 @@ function RatingScaleQuestionComponent({ questionData, onChange, study }) {
     ]);
   };
 
-  // Function to remove a rating scale
   const removeRatingScale = (idToRemove) => {
     if (ratingScales.length <= 1) return;
 
@@ -39,13 +41,59 @@ function RatingScaleQuestionComponent({ questionData, onChange, study }) {
     setRatingScales(filteredScales);
   };
 
-  // Function to handle input changes
   const handleRatingScaleChange = (id, field, value) => {
     setRatingScales((prev) =>
       prev.map((scale) =>
         scale.id === id ? { ...scale, [field]: value } : scale
       )
     );
+  };
+
+  const handleArtifactSelect = (artifactId, artifactName, artifactImage, contentType) => {
+    const newArtifact = {
+      id: artifactId,
+      name: artifactName,
+      imageUrl: artifactImage,
+      contentType: contentType || 'image',
+      title: artifactName, // Initialize title with artifact name
+      label: artifactName  // Add label field
+    };
+    
+    // Check if artifact already exists to preserve its label/title
+    const existingArtifactIndex = artifacts.findIndex(a => a.id === artifactId);
+    if (existingArtifactIndex >= 0) {
+      // Update existing artifact but preserve its title/label
+      const updatedArtifacts = [...artifacts];
+      updatedArtifacts[existingArtifactIndex] = {
+        ...updatedArtifacts[existingArtifactIndex],
+        name: artifactName,
+        imageUrl: artifactImage,
+        contentType: contentType || 'image'
+      };
+      setArtifacts(updatedArtifacts);
+    } else {
+      // Add new artifact
+      setArtifacts(prev => [...prev, newArtifact]);
+    }
+  };
+
+  // Add this function to update artifact labels
+  const updateArtifactLabel = (artifactId, newLabel) => {
+    const updatedArtifacts = artifacts.map(artifact => 
+      artifact.id === artifactId 
+        ? { ...artifact, label: newLabel, title: newLabel } 
+        : artifact
+    );
+    
+    setArtifacts(updatedArtifacts);
+  };
+
+  // Add or update the removeArtifact function
+  const removeArtifact = (artifactIdToRemove) => {
+    // Remove the artifact from state
+    const updatedArtifacts = artifacts.filter(artifact => artifact.id !== artifactIdToRemove);
+    setArtifacts(updatedArtifacts);
+    // The onChange callback will trigger automatically via useEffect
   };
 
   return (
@@ -68,15 +116,12 @@ function RatingScaleQuestionComponent({ questionData, onChange, study }) {
         allowMultiple={true}
         studyId={study?._id}
         initialArtifactId={null}
-        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
-          console.log(
-            "Selected artifact:",
-            artifactId,
-            artifactName,
-            artifactImage
-          );
-        }}
+        initialArtifacts={artifacts} 
+        onArtifactSelect={handleArtifactSelect}
+        onLabelChange={updateArtifactLabel}
+        onRemoveArtifact={removeArtifact} // Add this line
       />
+
 
       {ratingScales.map((scale, index) => (
         <div key={scale.id} className={ratingStyles.ratingScale}>
@@ -144,6 +189,3 @@ function RatingScaleQuestionComponent({ questionData, onChange, study }) {
     </div>
   );
 }
-
-const RatingScaleQuestionBuilder = React.memo(RatingScaleQuestionComponent);
-export default RatingScaleQuestionBuilder;

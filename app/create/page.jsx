@@ -25,17 +25,21 @@ const defaultQuestionData = {
         options: [{ id: `${Date.now()}-opt-initial`, text: "" }],
       },
     ],
+    artifacts: [], // Add this line
   },
   ratingScale: {
     title: "",
     ratingScales: [
       { id: `${Date.now()}-rs-initial`, name: "", min: "", max: "" },
     ],
+    artifacts: [], // Add this line
   },
   text: {
     title: "",
     textAreas: [{ id: `${Date.now()}-ta-initial`, label: "" }],
+    artifacts: [], // Add this line
   },
+  // Add artifacts array to all other question types as well
   multipleChoice: {
     title: "",
     choiceGroups: [
@@ -45,6 +49,7 @@ const defaultQuestionData = {
         options: [{ id: `${Date.now()}-mco-initial`, text: "" }],
       },
     ],
+    artifacts: [],
   },
   dropdown: {
     title: "",
@@ -55,6 +60,7 @@ const defaultQuestionData = {
         options: [{ id: `${Date.now()}-ddo-initial`, text: "" }],
       },
     ],
+    artifacts: [],
   },
   ranking: {
     title: "",
@@ -65,6 +71,7 @@ const defaultQuestionData = {
         options: [{ id: `${Date.now()}-ro-initial`, text: "" }],
       },
     ],
+    artifacts: [],
   },
   matrix: {
     title: "",
@@ -76,6 +83,7 @@ const defaultQuestionData = {
         verticalItems: [{ id: `${Date.now()}-mgv-initial`, text: "" }],
       },
     ],
+    artifacts: [],
   },
 };
 
@@ -200,6 +208,14 @@ export default function CreateStudyPage() {
                 (q.type === "text"
                   ? defaultQuestionData.text.textAreas
                   : undefined),
+              artifacts: q.data?.artifacts?.map(artifact => ({
+                id: artifact.id,
+                name: artifact.name,
+                imageUrl: artifact.imageUrl,
+                contentType: artifact.contentType || 'image',
+                title: artifact.title || artifact.label || artifact.name,
+                label: artifact.label || artifact.title || artifact.name
+              })) || []
             },
           }));
 

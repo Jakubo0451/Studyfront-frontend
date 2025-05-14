@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import commonStyles from "../../styles/questionTypes/common.module.css";
 import Artifact from "./artifact";
 import { FaPlus, FaTrash } from "react-icons/fa";
 
-function TextanswerQuestionComponent({ questionData, onChange, study }) {
+export default function TextanswerQuestionBuilder({ questionData, onChange, study }) {
   const [title, setTitle] = useState(questionData?.title || "");
   const [textAreas, setTextAreas] = useState(
     questionData?.textAreas?.map((area, index) => ({
@@ -12,15 +12,18 @@ function TextanswerQuestionComponent({ questionData, onChange, study }) {
       id: area.id || `${Date.now()}-ta-${index}`,
     })) || [{ id: `${Date.now()}-ta-0`, label: "" }]
   );
+  // Initialize artifacts from questionData
+  const [artifacts, setArtifacts] = useState(questionData?.artifacts || []);
 
   useEffect(() => {
     if (onChange) {
       onChange({
         title,
         textAreas,
+        artifacts // Include artifacts in the data sent back
       });
     }
-  }, [title, textAreas, onChange]);
+  }, [title, textAreas, artifacts, onChange]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -44,6 +47,53 @@ function TextanswerQuestionComponent({ questionData, onChange, study }) {
     );
   };
 
+  const handleArtifactSelect = (artifactId, artifactName, artifactImage, contentType) => {
+    const newArtifact = {
+      id: artifactId,
+      name: artifactName,
+      imageUrl: artifactImage,
+      contentType: contentType || 'image',
+      title: artifactName, // Initialize title with artifact name
+      label: artifactName  // Add label field
+    };
+    
+    // Check if artifact already exists to preserve its label/title
+    const existingArtifactIndex = artifacts.findIndex(a => a.id === artifactId);
+    if (existingArtifactIndex >= 0) {
+      // Update existing artifact but preserve its title/label
+      const updatedArtifacts = [...artifacts];
+      updatedArtifacts[existingArtifactIndex] = {
+        ...updatedArtifacts[existingArtifactIndex],
+        name: artifactName,
+        imageUrl: artifactImage,
+        contentType: contentType || 'image'
+      };
+      setArtifacts(updatedArtifacts);
+    } else {
+      // Add new artifact
+      setArtifacts(prev => [...prev, newArtifact]);
+    }
+  };
+
+  // Add this function to update artifact labels
+  const updateArtifactLabel = (artifactId, newLabel) => {
+    const updatedArtifacts = artifacts.map(artifact => 
+      artifact.id === artifactId 
+        ? { ...artifact, label: newLabel, title: newLabel } 
+        : artifact
+    );
+    
+    setArtifacts(updatedArtifacts);
+  };
+  
+  // Update the removeArtifact function
+  const removeArtifact = (artifactIdToRemove) => {
+    // Remove the artifact from state
+    const updatedArtifacts = artifacts.filter(artifact => artifact.id !== artifactIdToRemove);
+    setArtifacts(updatedArtifacts);
+    // The onChange callback will trigger automatically via useEffect when artifacts state changes
+  };
+
   return (
     <div className={commonStyles.questionType + " question-type"}>
       <h2>Text answer question</h2>
@@ -64,14 +114,10 @@ function TextanswerQuestionComponent({ questionData, onChange, study }) {
         allowMultiple={true}
         studyId={study?._id}
         initialArtifactId={null}
-        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
-          console.log(
-            "Selected artifact:",
-            artifactId,
-            artifactName,
-            artifactImage
-          );
-        }}
+        initialArtifacts={artifacts} // Add this line to pass saved artifacts
+        onArtifactSelect={handleArtifactSelect}
+        onLabelChange={updateArtifactLabel} // Add this new callback
+        onRemoveArtifact={removeArtifact} // Add this line
       />
 
       {textAreas.map((textArea, index) => (
@@ -116,6 +162,3 @@ function TextanswerQuestionComponent({ questionData, onChange, study }) {
     </div>
   );
 }
-
-const TextanswerQuestionBuilder = React.memo(TextanswerQuestionComponent);
-export default TextanswerQuestionBuilder;

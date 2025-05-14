@@ -1,11 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react"; // Added useEffect
+import { useState, useEffect } from "react"; // Added useEffect
 import commonStyles from "../../styles/questionTypes/common.module.css";
 import Artifact from "./artifact";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 
-function MatrixQuestionComponent({ questionData, onChange, study }) {
+export default function MatrixQuestionBuilder({ questionData, onChange, study }) {
   // Renamed and added props
   const [title, setTitle] = useState(questionData?.title || "");
   const [matrixGroups, setMatrixGroups] = useState(
@@ -36,14 +36,17 @@ function MatrixQuestionComponent({ questionData, onChange, study }) {
     ]
   );
 
+  const [artifacts, setArtifacts] = useState(questionData?.artifacts || []);
+
   useEffect(() => {
     if (onChange) {
       onChange({
         title,
         matrixGroups,
+        artifacts // Include artifacts in data sent back
       });
     }
-  }, [title, matrixGroups, onChange]);
+  }, [title, matrixGroups, artifacts, onChange]);
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -187,6 +190,52 @@ function MatrixQuestionComponent({ questionData, onChange, study }) {
     );
   };
 
+  // Update the existing handleArtifactSelect function
+const handleArtifactSelect = (artifactId, artifactName, artifactImage, contentType) => {
+  const newArtifact = {
+    id: artifactId,
+    name: artifactName,
+    imageUrl: artifactImage,
+    contentType: contentType || 'image',
+    title: artifactName, // Initialize title with artifact name
+    label: artifactName  // Add label field
+  };
+  
+  // Check if artifact already exists to preserve its label/title
+  const existingArtifactIndex = artifacts.findIndex(a => a.id === artifactId);
+  if (existingArtifactIndex >= 0) {
+    // Update existing artifact but preserve its title/label
+    const updatedArtifacts = [...artifacts];
+    updatedArtifacts[existingArtifactIndex] = {
+      ...updatedArtifacts[existingArtifactIndex],
+      name: artifactName,
+      imageUrl: artifactImage,
+      contentType: contentType || 'image'
+    };
+    setArtifacts(updatedArtifacts);
+  } else {
+    // Add new artifact
+    setArtifacts(prev => [...prev, newArtifact]);
+  }
+};
+
+// Add this function to update artifact labels
+const updateArtifactLabel = (artifactId, newLabel) => {
+  const updatedArtifacts = artifacts.map(artifact => 
+    artifact.id === artifactId 
+      ? { ...artifact, label: newLabel, title: newLabel } 
+      : artifact
+  );
+  
+  setArtifacts(updatedArtifacts);
+};
+
+  const removeArtifact = (artifactIdToRemove) => {
+    const updatedArtifacts = artifacts.filter(artifact => artifact.id !== artifactIdToRemove);
+    setArtifacts(updatedArtifacts);
+    // The onChange callback will trigger automatically via useEffect
+  };
+
   return (
     <div className={commonStyles.questionType + " question-type"}>
       <h2>Matrix question</h2>
@@ -207,15 +256,12 @@ function MatrixQuestionComponent({ questionData, onChange, study }) {
         allowMultiple={true}
         studyId={study?._id}
         initialArtifactId={null}
-        onArtifactSelect={(artifactId, artifactName, artifactImage) => {
-          console.log(
-            "Selected artifact:",
-            artifactId,
-            artifactName,
-            artifactImage
-          );
-        }}
+        initialArtifacts={artifacts}
+        onArtifactSelect={handleArtifactSelect}
+        onLabelChange={updateArtifactLabel}
+        onRemoveArtifact={removeArtifact}
       />
+
 
       <p className={commonStyles.infoBox}>
         <IoIosInformationCircleOutline /> A matrix question creates a grid where
@@ -362,6 +408,3 @@ function MatrixQuestionComponent({ questionData, onChange, study }) {
     </div>
   );
 }
-
-const MatrixQuestionBuilder = React.memo(MatrixQuestionComponent);
-export default MatrixQuestionBuilder;
