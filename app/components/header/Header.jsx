@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FaPlus, FaBars } from "react-icons/fa";
-import logo from "../../../public/logo/logo.png";
+import logo from "../../../public/logo/logo_wide.png";
 import LogoutButton from '../logout/Logout.jsx';
 import { VscAccount } from "react-icons/vsc";
 import { FaRegQuestionCircle } from "react-icons/fa";
@@ -22,11 +22,11 @@ export default function Header({ onCreateStudy }) {
                             />
                         </Link>
                     </div>                
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 ml-2">
                         <Link href="/dashboard" passHref>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 hover:border-b">
                                 <FaBars />
-                                <span className="text-gray-700 hover:text-gray-900 hover:border-b">Your studies</span>
+                                <span>Your studies</span>
                             </div>
                         </Link>
                     </div>
@@ -42,17 +42,17 @@ export default function Header({ onCreateStudy }) {
                     </div>
                     <div className="flex items-center space-x-4">
                         <Link href="/about" passHref>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 hover:border-b">
                                 <FaRegQuestionCircle />
-                                <span className="text-gray-700 hover:text-gray-900 hover:border-b">About</span>
+                                <span>About</span>
                             </div>
                         </Link>
                     </div>
                     <div className="flex items-center space-x-4">
                         <Link href="/profile" passHref>
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 hover:border-b">
                                 <VscAccount />
-                                <span className="text-gray-700 hover:text-gray-900 hover:border-b">Your Profile</span>
+                                <span>Your Profile</span>
                             </div>
                         </Link>
                     </div>

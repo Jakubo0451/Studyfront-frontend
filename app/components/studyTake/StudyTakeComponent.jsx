@@ -152,7 +152,8 @@ export default function StudyTakeComponent({ study }) {
   // Render the welcome screen with study information
   const renderWelcomeScreen = () => {
     return (
-      <div className="mt-[2rem] w-[60%]">
+      <div className="mt-[1rem] w-[60%]">
+        <img src="/logo/logo.png" className="mx-auto mb-10" width={80} height={80} alt="Studyfront Logo" />
         <h1 className="text-4xl text-center font-bold mb-[3rem] text-petrol-blue">{study.title}</h1>
         
         {/* Description */}
@@ -166,7 +167,7 @@ export default function StudyTakeComponent({ study }) {
           <div className="mb-8">
             <p className="mt-[1.5rem] mb-[1rem] text-oxford-blue">This study requires you to accept Terms and Conditions before starting.</p>
             <div className="bg-sky-blue/20 p-4 rounded-md max-h-60 overflow-y-auto mb-4 border border-sky-blue">
-              <h2 className="text-xl font-semibold mb-2">Terms and Conditions</h2>
+              <h2 className="text-xl text-oxford-blue font-semibold mb-2">Terms and Conditions</h2>
               <p className="text-gray-700 whitespace-pre-line">{study.termsAndConditions}</p>
             </div>
             
@@ -189,7 +190,7 @@ export default function StudyTakeComponent({ study }) {
           type="button"
           onClick={handleStartStudy}
           disabled={study.hasTermsAndConditions && !termsAccepted}
-          className={`mx-auto block px-6 py-3 rounded-md text-white font-medium text-lg transition-colors duration-300 ${
+          className={`mx-auto block px-6 py-2 rounded-md text-white text-lg transition-colors duration-300 ${
             study.hasTermsAndConditions && !termsAccepted
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-petrol-blue hover:bg-oxford-blue"
