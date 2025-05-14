@@ -395,6 +395,9 @@ export default function CreateStudyPage() {
               alert("Cannot add question: study information is missing. Please reload.");
               return;
             }
+
+            setViewingStudyDetails(false);
+
             addQuestion(
               study._id,
               newQuestionPayload,
