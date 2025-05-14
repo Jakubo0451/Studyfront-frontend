@@ -1,7 +1,80 @@
 import { useState, useEffect } from 'react';
 import commonStyles from '../../styles/questionRenderer/common.module.css';
+import backendUrl from 'environment';
 
+// Add a new component for rendering artifacts
+const ArtifactDisplay = ({ artifact }) => {
+  if (!artifact) return null;
+
+  const renderContent = () => {
+    // Determine how to render based on contentType
+    if (artifact.contentType && artifact.contentType.startsWith('image/')) {
+      return (
+        <img 
+          src={artifact.imageUrl} 
+          alt={artifact.name || artifact.label || 'Image artifact'} 
+          className="max-w-full h-auto max-h-64 rounded-md"
+        />
+      );
+    } else if (artifact.contentType && artifact.contentType.startsWith('audio/')) {
+      return (
+        <div className="flex flex-col items-center">
+          <img src="/audio.png" alt="Audio icon" className="w-16 h-16 mb-2" />
+          <audio controls className="w-full max-w-md">
+            <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
+            Your browser does not support the audio element.
+          </audio>
+          <p className="mt-1 text-sm text-gray-500">{artifact.name || artifact.label}</p>
+        </div>
+      );
+    } else if (artifact.contentType && artifact.contentType.startsWith('video/')) {
+      return (
+        <div className="flex flex-col items-center">
+          <video controls className="max-w-full max-h-64 rounded-md">
+            <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
+            Your browser does not support the video element.
+          </video>
+          <p className="mt-1 text-sm text-gray-500">{artifact.name || artifact.label}</p>
+        </div>
+      );
+    } else if (artifact.contentType === 'application/pdf') {
+      return (
+        <div className="flex flex-col items-center">
+          <img src="/pdf.png" alt="PDF icon" className="w-16 h-16 mb-2" />
+          <a 
+            href={`${backendUrl}/api/upload/${artifact.id}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="px-4 py-2 bg-petrol-blue text-white rounded-md hover:bg-oxford-blue transition-colors"
+          >
+            View PDF: {artifact.name || artifact.label || 'Document'}
+          </a>
+        </div>
+      );
+    } else {
+      // Default display for other file types
+      return (
+        <div className="flex flex-col items-center">
+          <img src={artifact.imageUrl || "/file.png"} alt="File" className="w-16 h-16 mb-2" />
+          <p>{artifact.name || artifact.label || 'File attachment'}</p>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div className="p-4 border border-gray-200 rounded-md mb-4 bg-white">
+      {artifact.label && artifact.label !== artifact.name && (
+        <h4 className="font-medium mb-2">{artifact.label}</h4>
+      )}
+      {renderContent()}
+    </div>
+  );
+};
+
+// Now modify the QuestionRenderer component by adding artifact rendering
 export default function QuestionRenderer({ question, onResponse, currentResponse }) {
+  // Existing code remains unchanged
   const [localResponse, setLocalResponse] = useState(currentResponse);
 
   useEffect(() => {
@@ -14,6 +87,27 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     fullData: question.data,
     currentLocalResponse: localResponse,
   });
+
+  // Add this new function to render artifacts for a question
+  const renderArtifacts = () => {
+    if (!question.data || !question.data.artifacts || !Array.isArray(question.data.artifacts) || question.data.artifacts.length === 0) {
+      return null;
+    }
+    
+    return (
+      <div className="artifacts-container mt-4 mb-4">
+        <h4 className="text-lg font-medium mb-2">Supporting Material:</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {question.data.artifacts.map((artifact, index) => (
+            <ArtifactDisplay key={artifact.id || `artifact-${index}`} artifact={artifact} />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // Now let's update each render function to include artifacts
+  // I'll just show an example for one function, and you should apply the pattern to others
 
   const handleChange = (value, fieldId = null) => {
     const questionTypeLower = question.type?.toLowerCase();
@@ -121,6 +215,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
         <div className={commonStyles.questionContainer}>
           <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
           {textAreas?.[0]?.label && <p className="block text-md text-gray-700 mb-1">{textAreas[0].label}</p>}
+          
+          {/* Add artifacts display */}
+          {renderArtifacts()}
+          
           <textarea
             className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
             rows="4"
@@ -135,6 +233,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     return (
       <div className={commonStyles.questionContainer}>
         <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
+        
+        {/* Add artifacts display */}
+        {renderArtifacts()}
+        
         {textAreas.map((area) => (
           <div key={area.id} className="mb-4">
             <label htmlFor={area.id} className="block text-md text-gray-700 mb-1">{area.label || `Input for ${area.id}`}</label>
@@ -155,6 +257,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   const renderNumberQuestion = () => (
     <div className="mb-6">
       <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
+      
+      {/* Add artifacts display */}
+      {renderArtifacts()}
+      
       <input
         type="number"
         className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
@@ -172,6 +278,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
       return (
         <div className="mb-6">
           <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
+          
+          {/* Add artifacts display */}
+          {renderArtifacts()}
+          
           {choiceGroups.map((group, groupIndex) => {
             const groupId = group.id || `choiceGroup-${groupIndex}`;
             const options = group.options || [];
@@ -289,6 +399,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
       return (
         <div className="mb-6">
           <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
+          
+          {/* Add artifacts display */}
+          {renderArtifacts()}
+          
           {checkboxGroups.map((group, groupIndex) => {
             const groupId = group.id || `checkboxGroup-${groupIndex}`;
             const groupOptions = group.options || [];
@@ -343,6 +457,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     return (
       <div className="mb-6">
         <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
+        
+        {/* Add artifacts display */}
+        {renderArtifacts()}
+        
         {checkboxGroups && checkboxGroups.length === 1 && checkboxGroups[0].name && (
             <p className="text-md text-gray-700 font-semibold mb-2">{checkboxGroups[0].name}</p>
         )}
@@ -401,6 +519,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
           {ratingScale.name && (
             <p className="text-gray-600 mb-2">{ratingScale.name}</p>
           )}
+          
+          {/* Add artifacts display */}
+          {renderArtifacts()}
+          
           <div className="flex flex-col items-center space-y-2">
             <div className="flex justify-between w-full px-1 text-sm text-gray-500">
               <span>{min}</span>
@@ -423,6 +545,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     return (
       <div className="mb-6">
         <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
+        
+        {/* Add artifacts display */}
+        {renderArtifacts()}
+        
         {ratingScales.map((ratingScale, index) => {
           const scaleId = ratingScale.id || `ratingScale-${index}`;
           const min = parseInt(ratingScale.min) || 1;
@@ -485,6 +611,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
           <label htmlFor={dropdownId} className="block text-lg text-petrol-blue mb-3">
             {singleDropdown.name || question.data.title || question.data.prompt || "Select an option"}
           </label>
+          
+          {/* Add artifacts display */}
+          {renderArtifacts()}
+          
           <select
             id={dropdownId}
             className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
@@ -507,6 +637,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
         <label className="block text-lg text-petrol-blue mb-3">
           {question.data.title || question.data.prompt || "Please make your selections"}
         </label>
+        
+        {/* Add artifacts display */}
+        {renderArtifacts()}
+        
         {dropdowns.map((dropdownItem, index) => {
           const dropdownId = dropdownItem.id || `dropdown-${index}`;
           const options = dropdownItem.options || [];
@@ -572,6 +706,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
           <label className="block text-lg text-petrol-blue mb-3">
             {singleGroup.name || question.data.title || question.data.prompt || "Rank the following items"}
           </label>
+          
+          {/* Add artifacts display */}
+          {renderArtifacts()}
+          
           <div className="mt-3 space-y-2">
             <p className="text-sm text-gray-500">Enter a number to rank items (e.g., 1 for highest).</p>
             <div className="bg-sky-blue p-3 rounded-md">
@@ -610,6 +748,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
         <label className="block text-lg text-petrol-blue mb-3">
           {question.data.title || question.data.prompt || "Please rank items in each group"}
         </label>
+        
+        {/* Add artifacts display */}
+        {renderArtifacts()}
+        
         {rankGroups.map((group, groupIndex) => {
           const groupId = group.id || `rankGroup-${groupIndex}`;
           const options = group.options || [];
@@ -688,6 +830,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
           <label className="block text-lg text-petrol-blue mb-3">
             {singleGroup.name || question.data.title || question.data.prompt || "Matrix Question"}
           </label>
+          
+          {/* Add artifacts display */}
+          {renderArtifacts()}
+          
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse">
               <thead>
@@ -736,6 +882,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
         <label className="block text-lg text-petrol-blue mb-3">
           {question.data.title || question.data.prompt || "Please complete all matrices"}
         </label>
+        
+        {/* Add artifacts display */}
+        {renderArtifacts()}
+        
         {matrixGroups.map((group, groupIndex) => {
           const groupId = group.id || `matrixGroup-${groupIndex}`;
           const verticalItems = group.verticalItems || [];
@@ -828,6 +978,10 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
         return (
           <div className="p-4 border border-red-300 bg-red-50 rounded">
             <p>Unsupported question type: {question.type}</p>
+            
+            {/* Add artifacts display */}
+            {renderArtifacts()}
+            
             <pre className="mt-2 text-xs bg-gray-100 p-2 rounded overflow-auto">
               {JSON.stringify(question, null, 2)}
             </pre>
