@@ -83,26 +83,26 @@ export default function LoginPage() {
             className="h-10"
             src={"/logo/logo.png"}
             alt="Logo"
-            height={40}
-            width={40}
+            height={80}
+            width={80}
             layout="intrinsic"
           />
         </div>
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-zinc-800" htmlFor="Email">Email</label>
-            <input className="w-full px-4 py-3 mt-2 bg-rainy-blue text-ice-blue rounded shadow-sm bg-color-green-400 focus:outline-none sm:text-sm" name="Email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <label className="block text-md text-zinc-800" htmlFor="Email">Email:</label>
+            <input className="w-full px-4 py-3 mt-2 bg-white text-black rounded shadow-sm bg-color-green-400 focus:outline-3 focus:outline-petrol-blue sm:text-md" name="Email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-800" htmlFor="password">Password</label>
-            <input className="w-full px-4 py-3 mt-2 bg-rainy-blue text-ice-blue rounded shadow-sm focus:outline-none sm:text-sm" type="password" name="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <label className="block text-md text-zinc-800" htmlFor="password">Password:</label>
+            <input className="w-full px-4 py-3 mt-2 bg-white text-black rounded shadow-sm focus:outline-3 focus:outline-petrol-blue sm:text-md" type="password" name="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
         </div>
-        <div className="flex items-center justify-between mt-4 mb-0">
-          <p className="text-sm text-zinc-700">Don't have an account?</p>
-          <a href="./signup" className="text-sm font-medium text-petrol-blue">Sign up!</a>
+        <div className="flex items-center mt-4 mb-0">
+          <p className="text-md text-zinc-700 mr-2">Don't have an account?</p>
+          <a href="./signup" className="text-md text-petrol-blue hover:text-oxford-blue transition duration-300">Sign up!</a>
         </div>
-        <button id="button" type="submit" className="w-full px-4 py-3 mt-4 text-white bg-petrol-blue rounded cursor-pointer">Login</button>
+        <button id="button" type="submit" className="w-full px-4 py-3 mt-4 text-white bg-petrol-blue rounded cursor-pointer hover:bg-oxford-blue transition duration-300">Login</button>
       </form>
     </div>
   );

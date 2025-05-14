@@ -61,8 +61,9 @@ export default function TakeStudyPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
-        <div className="text-xl text-petrol-blue">Loading study...</div>
+      <div className="min-h-screen bg-ice-blue p-8 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-petrol-blue"></div>
+        <div className="text-xl text-petrol-blue ml-[1rem]">Loading study...</div>
       </div>
     );
   }

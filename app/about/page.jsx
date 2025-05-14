@@ -8,7 +8,7 @@ export default function About() {
       <Header/>
       <div className="px-4 sm:px-8 py-8 max-w-7xl mx-auto">
         <section className="text-center mb-16 bg-ice-blue p-8 sm:p-12 rounded">
-          <h1 className="text-4xl sm:text-5xl text-petrol-blue mb-4">About StudyFront</h1>
+          <h1 className="text-4xl sm:text-5xl text-petrol-blue mb-4">About Studyfront</h1>
           <p className="text-xl text-gray-700">Empowering research through innovative digital solutions</p>
         </section>
 

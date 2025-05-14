@@ -50,30 +50,30 @@ export default function RegisterPage() {
             className="h-10"
             src={"/logo/logo.png"}
             alt="Logo"
-            height={40}
-            width={40}
+            height={80}
+            width={80}
             layout="intrinsic"
           />
         </div>
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-zinc-800" htmlFor="username">Name</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-4 py-3 mt-2 bg-rainy-blue text-ice-blue rounded shadow-sm bg-color-green-400 focus:outline-none sm:text-sm" name="username" placeholder="Username" required />
+            <label className="block text-md text-zinc-800" htmlFor="username">Name:</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} className="w-full px-4 py-3 mt-2 bg-white text-black rounded shadow-sm bg-color-green-400 focus:outline-3 focus:outline-petrol-blue sm:text-md" name="username" placeholder="Username" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-800" htmlFor="email">Email</label>
-            <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 mt-2 bg-rainy-blue text-ice-blue rounded shadow-sm focus:outline-none sm:text-sm" name="email" placeholder="Email" required />
+            <label className="block text-md text-zinc-800" htmlFor="email">Email:</label>
+            <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 mt-2 bg-white text-black rounded shadow-sm focus:outline-3 focus:outline-petrol-blue sm:text-md" name="email" placeholder="Email" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-800" htmlFor="password">Password</label>
-            <input value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 mt-2 bg-rainy-blue text-ice-blue rounded shadow-sm focus:outline-none sm:text-sm" type="password" name="password" placeholder="Password" required />
+            <label className="block text-md text-zinc-800" htmlFor="password">Password:</label>
+            <input value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 mt-2 bg-white text-black rounded shadow-sm focus:outline-3 focus:outline-petrol-blue sm:text-md" type="password" name="password" placeholder="Password" required />
           </div>
         </div>
-        <div className="flex items-center justify-between mt-4 mb-0">
-          <p className="text-sm text-zinc-700">Already have an account?</p>
-          <a href="./login" className="text-sm font-medium text-petrol-blue">Log in!</a>
+        <div className="flex items-center mt-4 mb-0">
+          <p className="text-md text-zinc-700 mr-2">Already have an account?</p>
+          <a href="./login" className="text-md text-petrol-blue hover:text-oxford-blue">Log in!</a>
         </div>
-        <button id="button" type="submit" className="w-full px-4 py-3 mt-4 text-white bg-petrol-blue rounded cursor-pointer">Sign up</button>
+        <button id="button" type="submit" className="w-full px-4 py-3 mt-4 text-white bg-petrol-blue rounded cursor-pointer hover:bg-oxford-blue transition duration-300">Sign up</button>
       </form>
     </div>
   );
