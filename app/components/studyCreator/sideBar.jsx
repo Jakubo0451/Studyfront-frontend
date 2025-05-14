@@ -22,6 +22,7 @@ import {
 } from "@dnd-kit/modifiers";
 import styles from '../../styles/studyCreator/sidebar.module.css';
 import { IoIosClose } from "react-icons/io";
+import Link from "next/link";
 
 const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDeleteQuestion }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -178,14 +179,14 @@ const SideBar = ({
 
   return (
     <div className="w-80 bg-sky-blue h-full p-4 flex flex-col">
-      <h2 className="text-xl w-full mb-4 text-center">{studyTitle}</h2>
+      <h2 className="text-xl w-full text-center">{studyTitle}</h2>
       <div
-        className={`flex flex-row items-center justify-center text-green-500 mb-4 ${
+        className={` flex flex-row items-center justify-center text-green-700 mb-1 ${
           saveStatus ? '' : 'invisible'
       }`}
       >
         <FaCheck />
-        <p>Study saved</p>
+        <p className="ml-2">Study saved</p>
       </div>
       <button
         onClick={onViewStudyDetails}
@@ -249,6 +250,9 @@ const SideBar = ({
           <FaPlus className="mr-2" />
           Add Question
         </button>
+        <Link href="/dashboard" className="mt-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center w-full hover:bg-oxford-blue transition duration-300 cursor-pointer">
+          Return to Dashboard
+        </Link>
         {showAddQuestionMenu && (
           <div className={styles.addQuestionPopup}>
             <div className="closePopupBackground" onClick={handleAddButtonClick}></div>
