@@ -12,7 +12,39 @@ export default function StudyTakeComponent({ study }) {
   const [hasStarted, setHasStarted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [responses, setResponses] = useState({});
+
+  const [responses, setResponses] = useState(() => {
+    const initial = {};
+    if (study && study.questions) {
+      study.questions.forEach(q => {
+        const qType = q.type?.toLowerCase();
+        if (qType === 'text' && q.data?.textAreas?.length > 1) {
+          initial[q._id] = {};
+        } else if (
+          (qType === 'ratingscale' || qType === 'rating' || qType === 'rating scale') &&
+          q.data?.ratingScales?.length > 1
+        ) {
+          initial[q._id] = {};
+        } else if (qType === 'checkbox') {
+          if (q.data?.checkboxGroups?.length > 1) {
+            initial[q._id] = {};
+          } else {
+            initial[q._id] = [];
+          }
+        } else if (qType === 'ranking' || qType === 'matrix') {
+          if (q.data?.matrixGroups?.length > 1) {
+            initial[q._id] = {};
+          } else {
+            initial[q._id] = {};
+          }
+        } else {
+          initial[q._id] = null;
+        }
+      });
+    }
+    return initial;
+  });
+
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState(30);
@@ -32,34 +64,60 @@ export default function StudyTakeComponent({ study }) {
     100
   );
 
-  const validateResponse = (response) => {
-    if (!response) return false;
-    if (typeof response === 'string' && !response.trim()) return false;
-    return true;
+  /* eslint-disable-next-line */
+  const validateResponse = (response, questionType) => {
+    if (typeof response === 'object' && response !== null && !Array.isArray(response)) {
+      if (questionType === 'checkbox' || questionType === 'text' || questionType === 'ratingscale' || questionType === 'rating' || questionType === 'rating scale') {
+        return Object.values(response).some(value => {
+          if (Array.isArray(value)) return value.length > 0;
+          if (typeof value === 'string') return value.trim() !== '';
+          return value !== null && value !== undefined;
+        });
+      }
+    }
+    if (Array.isArray(response)) return response.length > 0;
+    if (typeof response === 'string') return response.trim() !== '';
+    if (typeof response === 'number') return true;
+    return response !== null && response !== undefined;
   };
 
-  const handleResponse = (questionId, response) => {
-    // Ensure type consistency based on question type
+  const handleResponse = (questionId, responseFromChild) => {
     const question = questions.find(q => q._id === questionId);
     if (!question) return;
 
-    let formattedResponse = response;
+    /* eslint-disable-next-line */
+    const questionTypeLower = question.type?.toLowerCase();
+    let validatedAndFormattedResponse = responseFromChild;
 
-    // Ensure checkbox responses are always arrays
-    if (question.type?.toLowerCase() === 'checkbox' && !Array.isArray(response)) {
-      formattedResponse = response ? [response] : [];
-    }
-
-    if (!validateResponse(formattedResponse)) return;
-    
+    console.log(`PARENT StudyTakeComponent: Setting response for Q_ID ${questionId}:`, JSON.stringify(validatedAndFormattedResponse));
     setResponses(prev => ({
       ...prev,
-      [questionId]: formattedResponse
+      [questionId]: validatedAndFormattedResponse
     }));
   };
 
   const handleNext = async () => {
-    if (!currentQuestion?._id || !responses[currentQuestion._id]) {
+    if (!currentQuestion?._id) return;
+
+    const currentQuestionDetails = questions.find(q => q._id === currentQuestion._id);
+    /* eslint-disable-next-line */
+    const currentQType = currentQuestionDetails?.type?.toLowerCase();
+
+    const responseForCurrentQuestion = responses[currentQuestion._id];
+    let isCurrentQuestionAnswered = false;
+    if (typeof responseForCurrentQuestion === 'object' && responseForCurrentQuestion !== null && !Array.isArray(responseForCurrentQuestion)) {
+      isCurrentQuestionAnswered = Object.keys(responseForCurrentQuestion).length > 0 &&
+        Object.values(responseForCurrentQuestion).some(val =>
+          Array.isArray(val) ? val.length > 0 : (val !== null && val !== '' && val !== undefined)
+        );
+    } else if (Array.isArray(responseForCurrentQuestion)) {
+      isCurrentQuestionAnswered = responseForCurrentQuestion.length > 0;
+    } else {
+      isCurrentQuestionAnswered = responseForCurrentQuestion !== null && responseForCurrentQuestion !== undefined && responseForCurrentQuestion !== '';
+    }
+
+    if (!isCurrentQuestionAnswered) {
+      alert("Please answer the current question before proceeding.");
       return;
     }
 
@@ -79,10 +137,24 @@ export default function StudyTakeComponent({ study }) {
   // Update the handleSubmit function
   const handleSubmit = async () => {
     if (!study._id) return;
-    
-    const unansweredQuestions = questions.filter(q => !responses[q._id]);
+
+    const unansweredQuestions = questions.filter(q => {
+      const response = responses[q._id];
+      /* eslint-disable-next-line */
+      const qType = q.type?.toLowerCase();
+
+      if (typeof response === 'object' && response !== null && !Array.isArray(response)) {
+        return !Object.values(response).some(val => Array.isArray(val) ? val.length > 0 : (val !== null && val !== '' && val !== undefined));
+      }
+      if (Array.isArray(response)) {
+        return response.length === 0;
+      }
+      return response === null || response === undefined || response === '';
+    });
+
     if (unansweredQuestions.length > 0) {
-      alert("Please answer all questions before submitting.");
+      const unansweredTitles = unansweredQuestions.map((q) => q.data?.title || `Question ${study.questions.findIndex(sq => sq._id === q._id) + 1}`).join(', ');
+      alert(`Please answer all questions before submitting. Missing: ${unansweredTitles}`);
       return;
     }
 
