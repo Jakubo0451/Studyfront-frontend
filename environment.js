@@ -1,5 +1,7 @@
+
+
 const backendUrl = (() => {
-    switch (process.env.BACKENDUrl) {
+    switch (process.env.NEXT_PUBLIC_BACKEND_ENV) {
         case 'development':
             return 'http://localhost:5000';
         case 'production':
@@ -8,5 +10,8 @@ const backendUrl = (() => {
             return 'https://group5-api.sustainability.it.ntnu.no';
     }
 })();
+
+console.log(`Environment: ${process.env.NEXT_PUBLIC_BACKEND_ENV}`);
+console.log(`Using backend URL: ${backendUrl}`);
 
 export default backendUrl;
