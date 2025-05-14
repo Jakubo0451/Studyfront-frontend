@@ -195,22 +195,29 @@ export default function StudyTakeComponent({ study }) {
     }
   };
 
+  // Find the useEffect with the completed countdown timer
   useEffect(() => {
     if (completed) {
+      // Move the state update and navigation to separate effects
       const timer = setInterval(() => {
-        setRedirectCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            router.push('/login');
-            return 0;
-          }
-          return prev - 1;
-        });
+        setRedirectCountdown(prev => prev > 0 ? prev - 1 : 0); // Just update the counter
       }, 1000);
 
       return () => clearInterval(timer);
     }
-  }, [completed, router]);
+  }, [completed]);
+
+  // Add a separate effect just for navigation
+  useEffect(() => {
+    if (completed && redirectCountdown === 0) {
+      // Delay navigation slightly to ensure state updates are complete
+      const navigationTimer = setTimeout(() => {
+        router.push('/login');
+      }, 100);
+      
+      return () => clearTimeout(navigationTimer);
+    }
+  }, [completed, redirectCountdown, router]);
 
   // Handle starting the study
   const handleStartStudy = () => {
