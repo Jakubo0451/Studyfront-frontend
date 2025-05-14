@@ -90,7 +90,7 @@ const SideBar = ({
   selectedQuestionIndex,
   studyTitle,
   onViewStudyDetails,
-  //onChange,
+  onChange,
   //study,
   deleteQuestion,
   saveStatus,
@@ -166,9 +166,12 @@ const SideBar = ({
       );
 
       if (oldIndex !== -1 && newIndex !== -1) {
-        setQuestions((prevQuestions) =>
-          arrayMove(prevQuestions, oldIndex, newIndex)
-        );
+        const newQuestions = arrayMove([...questions], oldIndex, newIndex);
+        setQuestions(newQuestions);
+
+        if (onChange) {
+          onChange(newQuestions);
+        }
       }
     }
   }; 
