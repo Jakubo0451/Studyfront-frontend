@@ -35,6 +35,7 @@ export default defineConfig([
     rules: {
       "@eslint-react/no-missing-key": "warn",
       "@eslint-react/no-array-index-key": "off",
+      "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": "off",
     },
   },
 ]);
