@@ -219,7 +219,7 @@ export const downloadAsCSV = async (studyId, fileName = "study.csv") => {
             if (entry.responses && Array.isArray(entry.responses)) {
                 entry.responses.forEach(response => {
                     // Use questionId as column name for now (can be improved to use question text)
-                    const columnName = `Q_${response.questionId}`;
+                    const columnName = response.questionText || `Q_${response.questionId}`;;
                     
                     // Handle different response types appropriately
                     if (Array.isArray(response.response)) {
