@@ -155,14 +155,6 @@ export default function SharePopup({ study, onStudyChange }) {
     }
   }
 
-  function sendEmails() {
-    // after emails have successfully been sent
-    document.querySelector('.sendBtn').classList.add('sentEmails');
-    setTimeout(() => {
-      document.querySelector('.sendBtn').classList.remove('sentEmails');
-    }, 3000);
-  }
-
   return (
     <div className="sharePopup">
       <div className="closePopupBackground" onClick={closePopup}></div>
