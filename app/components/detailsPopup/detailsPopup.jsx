@@ -1,21 +1,44 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { RiPencilLine } from "react-icons/ri";
 import { IoIosClose } from "react-icons/io";
+import { IoPlayOutline } from 'react-icons/io5';
 import { FaAngleDown } from "react-icons/fa6";
-import { BsCalendar4 } from "react-icons/bs";
 import { FaPowerOff } from "react-icons/fa6";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { BsPersonCheck, BsPersonX, BsPeople } from "react-icons/bs";
+import { BsPeople, BsCalendar4 } from "react-icons/bs";
 import { useRouter } from "next/navigation";
 import { fetchStudies, fetchStudyDetails, deleteStudy, startStudy, endStudy, editStudy } from "../../utils/studyActions";
+import { fetchStudyResults } from '@/utils/download';
 
 export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyChange }) {
     const router = useRouter();
     const [studies, setStudies] = useState([]);
+    const [responseCount, setResponseCount] = useState(null);
+    const [loadingResponses, setLoadingResponses] = useState(false);
 
     useEffect(() => {
         fetchStudies(router, setStudies, console.error);
     }, [router]);
+    
+    useEffect(() => {
+        if (study?._id) {
+            fetchResponseCount(study._id);
+        }
+    }, [study]);
+
+    const fetchResponseCount = async (studyId) => {
+        setLoadingResponses(true);
+        try {
+            const responses = await fetchStudyResults(studyId);
+            setResponseCount(Array.isArray(responses) ? responses.length : 0);
+        } catch (error) {
+            console.error("Error fetching response count:", error);
+            setResponseCount(0);
+        } finally {
+            setLoadingResponses(false);
+        }
+    };
 
     const handleStudyChange = (e) => {
         const selectedStudyId = e.target.value;
@@ -84,30 +107,39 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyCh
                                 <tr>
                                     <td>
                                         <div>
-                                            <BsPersonCheck />
-                                            Finished participants
-                                        </div>
-                                    </td>
-                                    <td>26</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div>
-                                            <BsPersonX />
-                                            Unfinished participants
-                                        </div>
-                                    </td>
-                                    <td>2</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div>
                                             <BsPeople />
                                             Total participants
                                         </div>
                                     </td>
-                                    <td>28</td>
+                                    <td>
+                                        {loadingResponses ? (
+                                            <span>Loading...</span>
+                                        ) : responseCount !== null ? (
+                                            responseCount
+                                        ) : (
+                                            <span>Unknown</span>
+                                        )}
+                                    </td>
                                 </tr>
+                                {study.startedAt && (
+                                <tr>
+                                    <td>
+                                        <div>
+                                            <IoPlayOutline />
+                                            Study started at:
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {new Date(study.startedAt).toLocaleString(undefined, {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </td>
+                                </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
@@ -118,6 +150,7 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyCh
                             onClick={handleEdit}
                             className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center hover:bg-oxford-blue transition duration-300"
                         >
+                            <RiPencilLine />
                             Edit Study
                         </button>
                         {study.active ? (
@@ -148,4 +181,4 @@ export default function DetailsPopup({ study, onClose, onStudyDeleted, onStudyCh
             </div>
         </div>
     );
-}
+};
