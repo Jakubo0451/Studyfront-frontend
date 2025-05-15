@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
+import DemographicForm from "./DemographicForm";
 
 // Add previewMode to props
 export default function StudyTakeComponent({ study, previewMode = false }) {
@@ -27,6 +28,34 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
       console.error("Error reading session:", error);
     }
     return false;
+  });
+
+  const [showDemographics, setShowDemographics] = useState(() => {
+    if (typeof window === 'undefined' || previewMode) return false;
+    try {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        return parsedSession.showDemographics || false;
+      }
+    } catch (error) {
+      console.error("Error reading session:", error);
+    }
+    return true;
+  });
+
+  const [demographics, setDemographics] = useState(() => {
+    if (typeof window === 'undefined' || previewMode) return null;
+    try {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        return parsedSession.demographics || null;
+      }
+    } catch (error) {
+      console.error("Error reading session:", error);
+    }
+    return null;
   });
 
   const [termsAccepted, setTermsAccepted] = useState(() => {
@@ -119,6 +148,17 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   const [participantId, setParticipantId] = useState('');
   const startTime = new Date().toISOString();
 
+  const transformDemographics = (data) => {
+    if (!data) return null;
+
+    return {
+      age: data.age || '',
+      gender: data.gender || '',
+      education: data.education || '',
+      occupation: data.occupation || ''
+    };
+  };
+
   // Initialize fingerprint on component mount
   useEffect(() => {
     if (previewMode) {
@@ -193,13 +233,15 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         currentQuestionIndex,
         hasStarted,
         termsAccepted,
+        demographics,
+        showDemographics
       };
       
       sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
     } catch (error) {
       console.error("Error saving session:", error);
     }
-  }, [responses, currentQuestionIndex, hasStarted, termsAccepted, completed, previewMode, sessionKey]);
+  }, [responses, currentQuestionIndex, hasStarted, termsAccepted, demographics, showDemographics, completed, previewMode, sessionKey]);
 
   const questions = study?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
@@ -416,7 +458,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     if (study.hasTermsAndConditions && !termsAccepted) {
       return;
     }
-    setHasStarted(true);
+    setShowDemographics(true);
   };
 
   // Render already completed message
