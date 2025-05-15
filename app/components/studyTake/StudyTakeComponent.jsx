@@ -372,11 +372,442 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     }
 
     try {
-      const responsesArray = Object.entries(responses).map(([questionId, response]) => ({
-        questionId,
-        response,
-        timestamp: new Date().toISOString()
-      }));
+      const responsesArray = Object.entries(responses).map(([questionId, responseValue]) => {
+        // Find the corresponding question
+        const question = study.questions.find(q => q._id === questionId);
+        if (!question) return { questionId, response: responseValue };
+        
+        // Handle case variations in question type (camelCase, lowercase, etc.)
+        const questionType = question.type?.toLowerCase() || "unknown";
+        
+        // Create structured response with metadata
+        let structuredResponse;
+        
+        if (questionType === 'ratingscale' || questionType === 'rating scale' || questionType === 'rating') {
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type, // Keep original casing from database
+            ratingScales: []
+          };
+          
+          // Handle single or multiple rating scales
+          if (typeof responseValue === 'number') {
+            // Single rating scale
+            const scale = question.data?.ratingScales?.[0] || {};
+            structuredResponse.ratingScales.push({
+              id: scale.id || "default",
+              name: scale.name || scale.question || scale.label || "Rating",
+              min: scale.min || "0",  // Match string format from DB
+              max: scale.max || "10", // Match string format from DB
+              value: responseValue
+            });
+          } else if (typeof responseValue === 'object') {
+            // Multiple rating scales
+            Object.entries(responseValue).forEach(([scaleId, value]) => {
+              // Try to find the scale with exact match first
+              let scale = question.data?.ratingScales?.find(s => s.id === scaleId);
+              
+              // If not found, try type-converted comparison (number vs string issue)
+              if (!scale) {
+                scale = question.data?.ratingScales?.find(s => String(s.id) === String(scaleId));
+              }
+              
+              // Use empty object as fallback
+              scale = scale || {};
+              
+              structuredResponse.ratingScales.push({
+                id: scaleId,
+                name: scale.name || `Rating ${scaleId}`, // Simpler fallback
+                min: scale.min || "0",
+                max: scale.max || "10",
+                value: value
+              });
+            });
+          }
+        } 
+        else if (questionType === 'text') {
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type, // Keep original casing from database
+            textAreas: []
+          };
+          
+          if (typeof responseValue === 'string') {
+            // Single text area
+            const textArea = question.data?.textAreas?.[0] || {};
+            structuredResponse.textAreas.push({
+              id: textArea.id || "default",
+              label: textArea.label || "Response",
+              value: responseValue
+            });
+          } else if (typeof responseValue === 'object') {
+            // Multiple text areas
+            Object.entries(responseValue).forEach(([areaId, value]) => {
+              // Try to find the area with exact match first
+              let textArea = question.data?.textAreas?.find(t => t.id === areaId);
+              
+              // If not found, try type-converted comparison
+              if (!textArea) {
+                textArea = question.data?.textAreas?.find(t => String(t.id) === String(areaId));
+              }
+              
+              // Use empty object as fallback
+              textArea = textArea || {};
+              
+              structuredResponse.textAreas.push({
+                id: areaId,
+                label: textArea.label || `Text ${areaId}`,
+                value: value
+              });
+            });
+          }
+        }
+        else if (questionType === 'checkbox') {
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type, // Keep original casing from database
+            checkboxGroups: []
+          };
+          
+          if (Array.isArray(responseValue)) {
+            // Single group of checkboxes
+            const group = question.data?.checkboxGroups?.[0] || {};
+            const groupOptions = group.options || [];
+            
+            // Log values for debugging
+            console.log("Single checkbox group - Selected values:", responseValue);
+            console.log("Available options:", groupOptions);
+            
+            structuredResponse.checkboxGroups.push({
+              id: group.id || "default",
+              name: group.label || "Options",
+              options: groupOptions.map(opt => {
+                // Check if this option was selected using multiple comparison approaches
+                let isSelected = false;
+                
+                // First check by direct ID comparison
+                if (responseValue.includes(opt.id)) {
+                  isSelected = true;
+                } 
+                // Then try string comparison
+                else if (responseValue.some(id => String(id) === String(opt.id))) {
+                  isSelected = true;
+                }
+                // Try by text value (if options are storing text values)
+                else if (responseValue.some(val => val === opt.text)) {
+                  isSelected = true;
+                }
+                
+                console.log(`Option ${opt.id} (${opt.text}) selected: ${isSelected}`);
+                
+                return {
+                  id: opt.id,
+                  label: opt.text || opt.label || `Option ${opt.id}`,
+                  selected: isSelected
+                };
+              })
+            });
+          } else if (typeof responseValue === 'object') {
+            // Similar fixes for multiple checkbox groups
+            Object.entries(responseValue).forEach(([groupId, selections]) => {
+              // Rest of the code remains the same but with similar changes to isSelected logic
+              let group = question.data?.checkboxGroups?.find(g => g.id === groupId);
+              
+              if (!group) {
+                group = question.data?.checkboxGroups?.find(g => String(g.id) === String(groupId));
+              }
+              
+              group = group || {};
+              const groupOptions = group.options || [];
+              
+              console.log(`Group ${groupId} selections:`, selections);
+              
+              structuredResponse.checkboxGroups.push({
+                id: groupId,
+                name: group.label || `Group ${groupId}`,
+                options: groupOptions.map(opt => {
+                  // Expanded selection checking
+                  let isSelected = false;
+                  
+                  if (Array.isArray(selections)) {
+                    if (selections.includes(opt.id)) {
+                      isSelected = true;
+                    } 
+                    else if (selections.some(id => String(id) === String(opt.id))) {
+                      isSelected = true;
+                    }
+                    else if (selections.some(val => val === opt.text)) {
+                      isSelected = true;
+                    }
+                  }
+                  
+                  return {
+                    id: opt.id,
+                    label: opt.text || opt.label || `Option ${opt.id}`,
+                    selected: isSelected
+                  };
+                })
+              });
+            });
+          }
+        }
+        else if (questionType === 'ranking') {
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type,
+            rankingGroups: []
+          };
+
+          if (Array.isArray(responseValue)) {
+            // Single ranking group
+            const group = question.data?.rankGroups?.[0] || {};
+            const items = group.items || [];
+
+            // Log for debugging
+            console.log('Single-group ranking responseValue:', responseValue);
+
+            structuredResponse.rankingGroups.push({
+              id: group.id || "default",
+              name: group.label || "Ranking",
+              items: responseValue.map((itemId, index) => {
+                const item = items.find(i => i.id === itemId) || {};
+                return {
+                  id: itemId,
+                  label: item.label || `Item ${itemId}`,
+                  rank: index + 1
+                };
+              })
+            });
+          } else if (typeof responseValue === 'object' && responseValue !== null) {
+            // Multiple ranking groups
+            Object.entries(responseValue).forEach(([groupId, rankings]) => {
+              let group = question.data?.rankGroups?.find(g => g.id === groupId)
+                || question.data?.rankGroups?.find(g => String(g.id) === String(groupId))
+                || {};
+              const items = group.items || [];
+
+              // Log for debugging
+              console.log(`Group ${groupId} ranking responseValue:`, rankings);
+
+              let parsedItems = [];
+
+              if (Array.isArray(rankings)) {
+                // If rankings is somehow an array, handle it similarly
+                parsedItems = rankings.map((itemId, index) => {
+                  const item = items.find(i => i.id === itemId) || {};
+                  return {
+                    id: itemId,
+                    label: item.label || `Item ${itemId}`,
+                    rank: index + 1
+                  };
+                });
+              } else if (typeof rankings === 'object' && rankings !== null) {
+                // Rankings is an object of { itemId: rankValue }
+                parsedItems = Object.entries(rankings).map(([itemId, rankValue]) => {
+                  const item = items.find(i => i.id === itemId) || {};
+                  return {
+                    id: itemId,
+                    label: item.label || `Item ${itemId}`,
+                    rank: Number(rankValue)
+                  };
+                });
+                // Optional: sort items ascending based on rank value
+                parsedItems.sort((a, b) => a.rank - b.rank);
+              }
+
+              structuredResponse.rankingGroups.push({
+                id: groupId,
+                name: group.label || `Ranking ${groupId}`,
+                items: parsedItems
+              });
+            });
+          }
+        }
+        else if (questionType === 'matrix') {
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type, // Keep original casing from database
+            matrixGroups: []
+          };
+          
+          // Matrix responses are typically objects with row/column selections
+          if (typeof responseValue === 'object' && !Array.isArray(responseValue)) {
+            if (question.data?.matrixGroups?.length > 1) {
+              // Multiple matrix groups
+              Object.entries(responseValue).forEach(([groupId, groupSelections]) => {
+                // Try to find the matrix group
+                let group = question.data?.matrixGroups?.find(g => g.id === groupId);
+                
+                // If not found, try type-converted comparison
+                if (!group) {
+                  group = question.data?.matrixGroups?.find(g => String(g.id) === String(groupId));
+                }
+                
+                // Use empty object as fallback
+                group = group || {};
+                const rows = group.rows || [];
+                const columns = group.columns || [];
+                
+                // Use the parameter directly instead of redeclaring
+                const itemSelections = typeof groupSelections === 'object' ? 
+                  groupSelections : {};
+                
+                structuredResponse.matrixGroups.push({
+                  id: groupId,
+                  name: group.label || `Matrix ${groupId}`,
+                  selections: Object.entries(itemSelections).map(([rowId, colId]) => {
+                    const row = rows.find(r => r.id === rowId) || {};
+                    const col = columns.find(c => c.id === colId) || {};
+                    return {
+                      row: rowId,
+                      column: colId,
+                    };
+                  })
+                });
+              });
+            } else {
+              // Single matrix group
+              const group = question.data?.matrixGroups?.[0] || {};
+              const rows = group.rows || [];
+              const columns = group.columns || [];
+              
+              structuredResponse.matrixGroups.push({
+                id: group.id || "default",
+                name: group.label || "Matrix",
+                selections: Object.entries(responseValue).map(([rowId, colId]) => {
+                  const row = rows.find(r => r.id === rowId) || {};
+                  const col = columns.find(c => c.id === colId) || {};
+                  return {
+                    row: rowId,
+                    column: colId,
+                  };
+                })
+              });
+            }
+          }
+        }
+        else if (questionType === 'dropdown') {
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type,
+            dropdownGroups: []
+          };
+          
+          // Single or multiple dropdown groups
+          if (typeof responseValue === 'string') {
+            // Single group
+            const group = question.data?.dropdowns?.[0] || {};
+            const groupOptions = group.options || [];
+            
+            // Find the matching option (by ID or label)
+            const selectedOption = groupOptions.find(opt =>
+              opt.id === responseValue || String(opt.id) === String(responseValue) || opt.label === responseValue
+            ) || {};
+            
+            structuredResponse.dropdownGroups.push({
+              id: group.id || "default",
+              name: group.label || "Dropdown",
+              selectedOption: {
+                id: selectedOption.id || responseValue,
+                label: selectedOption.label || responseValue
+              }
+            });
+          } else if (typeof responseValue === 'object' && !Array.isArray(responseValue)) {
+            // Multiple dropdown groups
+            Object.entries(responseValue).forEach(([groupId, selection]) => {
+              let group = question.data?.dropdowns?.find(g => g.id === groupId);
+              if (!group) {
+                group = question.data?.dropdowns?.find(g => String(g.id) === String(groupId));
+              }
+              group = group || {};
+              const groupOptions = group.options || [];
+              
+              // Find the matching option (by ID or label)
+              const selectedOption = groupOptions.find(opt =>
+                opt.id === selection || String(opt.id) === String(selection) || opt.label === selection
+              ) || {};
+              
+              structuredResponse.dropdownGroups.push({
+                id: groupId,
+                name: group.label || `Dropdown ${groupId}`,
+                selectedOption: {
+                  id: selectedOption.id || selection,
+                  label: selectedOption.label || selection
+                }
+              });
+            });
+          }
+        }
+        else if (questionType === 'multiplechoice') {
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type,
+            multipleChoiceGroups: []
+          };
+
+          // Single vs. multiple groups
+          if (typeof responseValue === 'string') {
+            // Single group
+            const group = question.data?.choiceGroups?.[0] || {};
+            const groupOptions = group.options || [];
+
+            // Match user selection by ID or label
+            const selectedOption = groupOptions.find(opt =>
+              opt.id === responseValue ||
+              String(opt.id) === String(responseValue) ||
+              opt.label === responseValue
+            ) || {};
+
+            structuredResponse.multipleChoiceGroups.push({
+              id: group.id || "default",
+              name: group.label || "Multiple Choice",
+              selectedOption: {
+                id: selectedOption.id || responseValue,
+                label: selectedOption.label || responseValue
+              }
+            });
+          } else if (typeof responseValue === 'object' && !Array.isArray(responseValue)) {
+            // Multiple groups
+            Object.entries(responseValue).forEach(([groupId, selection]) => {
+              let group = question.data?.multipleChoiceGroups?.find(g => g.id === groupId);
+              if (!group) {
+                group = question.data?.choiceGroups?.find(g => String(g.id) === String(groupId));
+              }
+              group = group || {};
+              const groupOptions = group.options || [];
+
+              const selectedOption = groupOptions.find(opt =>
+                opt.id === selection ||
+                String(opt.id) === String(selection) ||
+                opt.label === selection
+              ) || {};
+
+              structuredResponse.multipleChoiceGroups.push({
+                id: groupId,
+                name: group.label || `Multiple Choice ${groupId}`,
+                selectedOption: {
+                  id: selectedOption.id || selection,
+                  label: selectedOption.label || selection
+                }
+              });
+            });
+          }
+        }
+        else {
+          // Fallback for any other question types
+          structuredResponse = {
+            title: question.data?.title || "Untitled Question",
+            type: question.type, // Keep original casing from database
+            value: responseValue
+          };
+        }
+        
+        return {
+          questionId,
+          response: structuredResponse,
+          timestamp: new Date().toISOString()
+        };
+      });
       
       const submissionData = {
         studyId: study._id,
