@@ -147,7 +147,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   // Generate a device fingerprint for uniquely identifying participants
   const [fingerprint, setFingerprint] = useState('');
   const [participantId, setParticipantId] = useState('');
-  const startTime = new Date().toISOString();
+  const [startTime, setStartTime] = useState(null);
 
   const transformDemographics = (data) => {
     if (!data) return null;
@@ -330,6 +330,10 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     setDemographics(() => data);
     setShowDemographics(false);
     setHasStarted(true);
+
+    if (!startTime) {
+      setStartTime(new Date().toISOString());
+    }
   };
 
   // Simplified handleSubmit function - remove redundant localStorage saving
@@ -378,7 +382,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         studyId: study._id,
         participantId,
         visitorId: fingerprint,
-        startTime,
+        startTime: startTime || new Date().toISOString(),
         endTime: new Date().toISOString(),
         responses: responsesArray,
         demographics: transformDemographics(demographics)
@@ -442,6 +446,8 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     if (study.hasTermsAndConditions && !termsAccepted) {
       return;
     }
+    
+    setStartTime(new Date().toISOString());
 
     if (study.hasDemographics) {
       setShowDemographics(true);
