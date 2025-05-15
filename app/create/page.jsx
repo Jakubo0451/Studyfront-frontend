@@ -214,8 +214,12 @@ export default function CreateStudyPage() {
                 name: artifact.name,
                 imageUrl: artifact.imageUrl,
                 contentType: artifact.contentType || 'image',
-                title: artifact.title || artifact.label || artifact.name,
-                label: artifact.label || artifact.title || artifact.name
+                title: artifact.title !== undefined && artifact.title !== null ? artifact.title : 
+                       artifact.label !== undefined && artifact.label !== null ? artifact.label : 
+                       artifact.name,
+                label: artifact.label !== undefined && artifact.label !== null ? artifact.label : 
+                       artifact.title !== undefined && artifact.title !== null ? artifact.title : 
+                       artifact.name
               })) || []
             },
           }));
@@ -253,7 +257,6 @@ export default function CreateStudyPage() {
     setStudy((prevStudy) => {
       if (!prevStudy) return null;
       const newStudyState = { ...prevStudy, ...updatedFields };
-      console.log("Optimistically updated study state:", newStudyState);
       return newStudyState;
     });
 
@@ -263,7 +266,6 @@ export default function CreateStudyPage() {
 
   const handleQuestionsChange = (updatedQuestions) => {
     if (!Array.isArray(updatedQuestions)) {
-        console.error("Expected questions to be an array but got:", typeof updatedQuestions);
         return;
     }
     
@@ -273,7 +275,6 @@ export default function CreateStudyPage() {
         study._id,
         updatedQuestions,
         () => {
-            console.log("Questions saved successfully");
             setSaveStatus("Questions saved successfully!");
             setTimeout(() => setSaveStatus(""), 3000);
         },
@@ -288,8 +289,6 @@ export default function CreateStudyPage() {
   const handleQuestionDataChange = useCallback(
   (updatedDataFromChild) => {
     if (selectedQuestionIndex === null) return;
-    
-    console.log("Data from child component:", updatedDataFromChild);
     
     const nextQuestions = questions.map((q, index) => {
       if (index === selectedQuestionIndex) {
@@ -310,15 +309,14 @@ export default function CreateStudyPage() {
     const questionToSave = nextQuestions[selectedQuestionIndex];
 
     if (study?._id && questionToSave?._id) {
-      console.log("Saving question with ID:", questionToSave._id, "Data:", updatedDataFromChild);
       
       // Send the data properly formatted for the backend
       debouncedSave(
         study._id,
         questionToSave._id,
         { data: updatedDataFromChild },
+        // eslint-disable-next-line
         (updatedData) => {
-          console.log("Question saved successfully:", updatedData);
           setSaveStatus("Question saved!");
           setTimeout(() => setSaveStatus(""), 3000);
         },
