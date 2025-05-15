@@ -22,6 +22,14 @@ export const metadata = {
 export default function RootLayout({ children}) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/logo/logo.png" />
+        <meta name="description" content="Simple and powerful research tool for your studies" />
+        <meta name="keywords" content="Studyfront, research, study, tool" />
+        <meta name="author" content="Group 5" />
+        <meta name="theme-color" content="#29353C" />
+        <link rel="apple-touch-icon" href="/logo/logo.png" />
+      </head>
       <body className={ readexPro.className + " " + frankRuhlLibre.className + " " + 'bg-ice-blue'  }>
         {children}
       </body>
