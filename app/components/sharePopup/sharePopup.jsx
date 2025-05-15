@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react';
 import { FaRegCopy } from "react-icons/fa6";
-import { IoSend } from "react-icons/io5";
 import { IoIosClose } from "react-icons/io";
 import { FaAngleDown } from "react-icons/fa6";
 import { useRouter } from 'next/navigation';
