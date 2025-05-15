@@ -13,6 +13,7 @@ export default function TakeStudyPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [redirectCountdown, setRedirectCountdown] = useState(30);
+  const [studyEnded, setStudyEnded] = useState(false);
 
   useEffect(() => {
     const fetchStudy = async () => {
@@ -70,6 +71,28 @@ export default function TakeStudyPage() {
     }
   }, [study, router]);
 
+    useEffect(() => {
+    if (study && study.endDate) {
+      const currentDate = new Date();
+      const endDate = new Date(study.endDate);
+      
+      if (currentDate > endDate) {
+        setStudyEnded(true);
+      } else {
+        setStudyEnded(false);
+        
+        const timeUntilEnd = endDate - currentDate;
+        if (timeUntilEnd <= 2147483647) {
+          const timer = setTimeout(() => {
+            setStudyEnded(true);
+          }, timeUntilEnd);
+          
+          return () => clearTimeout(timer);
+        }
+      }
+    }
+  }, [study]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-ice-blue p-8 flex justify-center items-center">
@@ -96,7 +119,31 @@ export default function TakeStudyPage() {
     );
   }
 
-  if (!study?.active) {
+  if (!study?.active && !study?.completed) {
+    return (
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full text-center">
+          <h2 className="text-2xl font-bold text-petrol-blue mb-4">Study Has not started</h2>
+          <p className="mb-6 text-gray-600">
+            Thank you for your interest, but this study is not ready yet, chack back later.
+          </p>
+          <div className="my-8">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+              <div 
+                className="bg-petrol-blue h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${(redirectCountdown / 30) * 100}%` }}
+              ></div>
+            </div>
+            <p className="text-gray-600">
+              Redirecting in {redirectCountdown} seconds...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if ((study && !study?.active) || studyEnded) {
     return (
       <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
         <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full text-center">

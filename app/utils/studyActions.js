@@ -164,7 +164,7 @@ export const startStudy = async (study, onStudyUpdated, onError) => {
                 "Authorization": `Bearer ${token}`,
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ active: true, completed: false }),
+            body: JSON.stringify({ active: true, completed: false, startedAt: Date.now() }),
         });
 
         if (response.ok) {
