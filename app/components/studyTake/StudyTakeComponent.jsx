@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
+import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
 export default function StudyTakeComponent({ study }) {
   if (!study?._id) {
@@ -98,7 +99,7 @@ export default function StudyTakeComponent({ study }) {
 
   const handleNext = async () => {
     if (!currentQuestion?._id) return;
-
+    document.querySelector("#pleaseAnswer").style.display = "none";
     const currentQuestionDetails = questions.find(q => q._id === currentQuestion._id);
     /* eslint-disable-next-line */
     const currentQType = currentQuestionDetails?.type?.toLowerCase();
@@ -117,7 +118,8 @@ export default function StudyTakeComponent({ study }) {
     }
 
     if (!isCurrentQuestionAnswered) {
-      alert("Please answer the current question before proceeding.");
+      // alert("Please answer the current question before proceeding.");
+      document.querySelector("#pleaseAnswer").style.display = "block";
       return;
     }
 
@@ -129,6 +131,7 @@ export default function StudyTakeComponent({ study }) {
   };
 
   const handlePrevious = () => {
+    document.querySelector("#pleaseAnswer").style.display = "none";
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
     }
@@ -304,16 +307,16 @@ export default function StudyTakeComponent({ study }) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h1 className="text-2xl font-bold mb-6">{study.title}</h1>
+    <div className="w-[70%]">
+      <h1 className="text-3xl mb-6 text-center text-petrol-blue">{study.title}</h1>
       
       <div className="mb-4">
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-center mb-1">
           Question {currentQuestionIndex + 1} of {questions.length}
         </p>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div className="w-full bg-sky-blue rounded-full h-2.5">
           <div 
-            className="bg-blue-600 h-2.5 rounded-full transition-all duration-300" 
+            className="bg-petrol-blue h-2.5 rounded-full transition-all duration-300" 
             style={{ width: `${progressPercentage}%` }}
           ></div>
         </div>
@@ -321,7 +324,7 @@ export default function StudyTakeComponent({ study }) {
 
       {currentQuestion && (
         <div>
-          <h3 className="text-xl font-medium mb-4">
+          <h3 className="text-2xl text-center mb-4 mt-8">
             {currentQuestion.data?.title || `Question ${currentQuestionIndex + 1}`}
           </h3>
           <div className="question-container">
@@ -333,35 +336,36 @@ export default function StudyTakeComponent({ study }) {
           </div>
         </div>
       )}
-
+      <p className="text-right text-red-500 hidden" id="pleaseAnswer">Please answer the question before continuing.</p>
       <div className="flex justify-between mt-8">
         <button
           type="button"
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded flex items-center ${
             currentQuestionIndex === 0
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-gray-500 hover:bg-gray-600 text-white"
+              : "bg-sky-blue hover:brightness-90 text-black"
           }`}
         >
-          Previous
+          <FaArrowLeft className="mr-1" /> Previous question
         </button>
         <button
           type="button"
           onClick={handleNext}
           disabled={!responses[currentQuestion?._id] || submitting}
-          className={`px-4 py-2 rounded ${
+          className={`px-4 py-2 rounded flex items-center ${
             !responses[currentQuestion?._id] || submitting
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600 text-white"
+              : "bg-petrol-blue hover:bg-oxford-blue text-white"
           }`}
         >
           {submitting 
             ? "Submitting..." 
             : isLastQuestion 
-              ? "Submit" 
-              : "Next"}
+              ? "Submit study" 
+              : (<>Next question <FaArrowRight className="ml-1" /></>)
+          }
         </button>
       </div>
     </div>
