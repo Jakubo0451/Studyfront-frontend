@@ -218,6 +218,7 @@ export default function StudyDetails({
             type="datetime-local"
             name="studyEndDate"
             id="studyEndDate"
+            className="bg-white p-1 rounded ml-1"
             placeholder="End date and time"
             value={timedDate}
             onChange={handleTimedDateChange}
@@ -260,6 +261,13 @@ export default function StudyDetails({
         />
         <label htmlFor="enableDemographics">Enable Demographics</label>
       </div>
+      {demographicsEnabled && (
+        <div className={`${commonStyles.questionDescription} ${detailsStyles.termsBox}`}>
+          <p className={`${commonStyles.infoBox} ${detailsStyles.termsInfo}`}>
+            <IoIosInformationCircleOutline /> Participants will have to fill out the demographics form before starting the study. It includes the following questions: age, gender, education and occupation.
+          </p>
+        </div>
+      )}
     </div>
   );
 }
