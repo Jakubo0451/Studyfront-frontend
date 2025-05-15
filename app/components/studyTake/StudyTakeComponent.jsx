@@ -3,6 +3,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
+import DemographicForm from "./DemographicForm";
+// import { transform } from "next/dist/build/swc/generated-native";
+
+const transformDemographics = (demoObj) => {
+  if (!demoObj) return null;
+  return Object.entries(demoObj).map(([field, value]) => ({
+    field,
+    value,
+    timestamp: new Date().toISOString()
+  }));
+};
 
 // Add previewMode to props
 export default function StudyTakeComponent({ study, previewMode = false }) {
@@ -13,6 +24,9 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   const [hasStarted, setHasStarted] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+
+  const [showDemographics, setShowDemographics] = useState(false);
+  const [demographics, setDemographics] = useState(null);
 
   const [responses, setResponses] = useState(() => {
     const initial = {};
@@ -136,6 +150,14 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     }
   };
 
+  // Handle demographic form completion
+  const handleDemographicFormComplete = (data) => {
+    console.log("Demographic form completed with data:", data); // Debugging log
+    setDemographics(() => data);
+    setShowDemographics(false);
+    setHasStarted(true);
+  };
+
   // Modify the handleSubmit function to handle preview mode
   const handleSubmit = async () => {
     if (!study._id) return;
@@ -173,17 +195,38 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     }
 
     try {
+      const responsesArray = Object.entries(responses).map(([questionId, response]) => ({
+        questionId,
+        response,
+        timestamp: new Date().toISOString()
+      }));
+
+      console.log("Aboout to submit demographics:", demographics); // Debugging log
+
+      /*
+      if (demographics) {
+        responsesArray.unshift({
+          questionId: "demographics",
+          response: demographics,
+          timestamp: new Date().toISOString()
+        });
+      }
+      */
+      
+      if (!demographics) {
+        console.warn("Demopgraphics is null before submission!"); // Debugging log
+      }
+
       const submissionData = {
         studyId: study._id,
         participantId,
         startTime,
         endTime: new Date().toISOString(),
-        responses: Object.entries(responses).map(([questionId, response]) => ({
-          questionId,
-          response,
-          timestamp: new Date().toISOString()
-        }))
+        responses: responsesArray,
+        demographics: transformDemographics(demographics)
       };
+
+      console.log("Final submission data:", submissionData); // Debugging log
       
       const result = await fetch(`${backendUrl}/api/responses/submit`, {
         method: 'POST',
@@ -238,7 +281,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     if (study.hasTermsAndConditions && !termsAccepted) {
       return;
     }
-    setHasStarted(true);
+    setShowDemographics(true);
   };
 
   // Render the welcome screen with study information
@@ -304,8 +347,10 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         </div>
         
         {/* Render the appropriate content based on state */}
-        {!hasStarted ? (
+        {!hasStarted && !showDemographics ? (
           renderWelcomeScreen()
+        ) : showDemographics ? (
+          <DemographicForm onComplete={handleDemographicFormComplete} />
         ) : completed ? (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Thank You for Your Participation!</h2>
@@ -391,6 +436,15 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
 
   if (!study || questions.length === 0) {
     return <div className="p-8">No questions available for this study.</div>;
+  }
+
+  // Show demographic form after welcome screen
+  if (showDemographics) {
+    return(
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <DemographicForm onComplete={handleDemographicFormComplete} />
+      </div>
+    ) 
   }
 
   // Show welcome screen if the study hasn't started yet
