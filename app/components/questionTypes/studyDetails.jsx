@@ -13,6 +13,7 @@ export default function StudyDetails({
   onStudyUpdated,
   timedStudy,
   endDate,
+  studyDemographicsEnabled,
 }) {
   const [name, setName] = useState(studyName);
   const [description, setDescription] = useState(studyDescription);
@@ -20,7 +21,7 @@ export default function StudyDetails({
   const [timed, setTimed] = useState(timedStudy || false);
   const [timedDate, setTimedDate] = useState("");
   const [termsEnabled, setTermsEnabled] = useState(studyTermsEnabled || false);
-  const [demographicsEnabled, setDemographicsEnabled] = useState(false);
+  const [demographicsEnabled, setDemographicsEnabled] = useState(studyDemographicsEnabled || false);
   const [termsText, setTermsText] = useState(studyTerms || "");
 
   // Format date for datetime-local input when endDate prop changes
@@ -57,7 +58,8 @@ export default function StudyDetails({
     // Don't set timedDate here - it's handled in its own useEffect
     setTermsEnabled(studyTermsEnabled || false);
     setTermsText(studyTerms || '');
-  }, [studyName, studyDescription, studyTermsEnabled, studyTerms, timedStudy]);
+    setDemographicsEnabled(studyDemographicsEnabled || false);
+  }, [studyName, studyDescription, studyTermsEnabled, studyTerms, timedStudy, studyDemographicsEnabled]);
 
   const handleNameChange = (e) => {
     const newName = e.target.value;

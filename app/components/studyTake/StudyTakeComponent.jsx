@@ -42,7 +42,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     } catch (error) {
       console.error("Error reading session:", error);
     }
-    return true;
+    return false;
   });
 
   const [demographics, setDemographics] = useState(() => {
@@ -327,7 +327,6 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
 
   // Handle demographic form completion
   const handleDemographicFormComplete = (data) => {
-    console.log("Demographic form completed with data:", data); // Debugging log
     setDemographics(() => data);
     setShowDemographics(false);
     setHasStarted(true);
@@ -374,23 +373,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         response,
         timestamp: new Date().toISOString()
       }));
-
-      console.log("Aboout to submit demographics:", demographics); // Debugging log
-
-      /*
-      if (demographics) {
-        responsesArray.unshift({
-          questionId: "demographics",
-          response: demographics,
-          timestamp: new Date().toISOString()
-        });
-      }
-      */
       
-      if (!demographics) {
-        console.warn("Demopgraphics is null before submission!"); // Debugging log
-      }
-
       const submissionData = {
         studyId: study._id,
         participantId,
@@ -400,8 +383,6 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         responses: responsesArray,
         demographics: transformDemographics(demographics)
       };
-
-      console.log("Final submission data:", submissionData); // Debugging log
       
       const result = await fetch(`${backendUrl}/api/responses/submit`, {
         method: 'POST',
@@ -461,7 +442,14 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     if (study.hasTermsAndConditions && !termsAccepted) {
       return;
     }
-    setShowDemographics(true);
+
+    if (study.hasDemographics) {
+      setShowDemographics(true);
+    } else {
+      setShowDemographics(false);
+      setHasStarted(true);
+    }
+    
   };
 
   // Render already completed message
@@ -619,6 +607,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     return renderWelcomeScreen();
   }
 
+  
   return (
     <div className="w-[70%]">
       <h1 className="text-3xl mb-6 text-center text-petrol-blue">{study.title}</h1>

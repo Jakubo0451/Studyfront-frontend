@@ -19,7 +19,6 @@ export default function DemographicForm({ onComplete }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Demographic form submitting data:", formData); // Debugging log
     onComplete(formData);
   };
 

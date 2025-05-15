@@ -482,6 +482,7 @@ export default function CreateStudyPage() {
               onStudyUpdated={handleStudyUpdate}
               timedStudy={study.timedStudy}
               endDate={study.endDate}
+              studyDemographicsEnabled={study.hasDemographics}
             />
           ) : (
             <div>
