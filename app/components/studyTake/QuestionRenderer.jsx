@@ -1055,7 +1055,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
                 <table className="min-w-full border-collapse">
                   <thead>
                     <tr>
-                      <th className="p-2 border border-petrol-blue border-petrol-blue bg-sky-blue/10"></th>
+                      <th className="p-2 border border-petrol-blue bg-sky-blue/10"></th>
                       {horizontalItems.map((hItem, hIndex) => (
                         <th key={hItem.id || `h-${groupId}-${hIndex}`} className="p-2 border border-petrol-blue bg-sky-blue text-center font-normal">
                           {hItem.text}
