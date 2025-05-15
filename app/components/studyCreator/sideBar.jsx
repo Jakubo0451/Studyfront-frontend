@@ -170,8 +170,19 @@ const SideBar = ({
       );
 
       if (oldIndex !== -1 && newIndex !== -1) {
+        const selectedQuestionId = selectedQuestionIndex !== null ?
+          questions[selectedQuestionIndex]?.id : null;
+        
         const newQuestions = arrayMove([...questions], oldIndex, newIndex);
         setQuestions(newQuestions);
+
+        if (selectedQuestionId) {
+          const newSelectedIndex = newQuestions.findIndex(q => q.id === selectedQuestionId);
+
+          if (newSelectedIndex !== -1 && onQuestionSelect) {
+            onQuestionSelect(newSelectedIndex);
+          }
+        }
 
         if (onChange) {
           onChange(newQuestions);
