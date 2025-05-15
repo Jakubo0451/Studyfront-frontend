@@ -8,77 +8,138 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import { MdDragIndicator } from 'react-icons/md';
 
-// Add a new component for rendering artifacts
 const ArtifactDisplay = ({ artifact }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!artifact) return null;
 
+  const handleExpandArtifact = () => {
+    setIsExpanded(true);
+  };
+  
+  const handleCloseArtifact = () => {
+    setIsExpanded(false);
+  };
+
   const renderContent = () => {
-    // Determine how to render based on contentType
-    if (artifact.contentType && artifact.contentType.startsWith('image/')) {
-      return (
-      <div className="flex">
-        <img 
-          src={artifact.imageUrl} 
-          alt={artifact.name || artifact.label || 'Image artifact'} 
-          className="max-w-full h-auto object-contain object-bottom bg-sky-blue"
+  // Determine how to render based on contentType
+  if (artifact.contentType && artifact.contentType.startsWith('image/')) {
+    return (
+    <div className="flex">
+      <img 
+        src={artifact.imageUrl} 
+        alt={artifact.name || artifact.label || 'Image artifact'} 
+        className="max-w-full h-auto object-contain object-bottom bg-sky-blue"
+      />
+    </div>
+    );
+  } else if (artifact.contentType && artifact.contentType.startsWith('audio/')) {
+    return (
+      <div className="flex flex-col items-center bg-sky-blue pt-2 px-2">
+        <img src="/audio.png" alt="Audio icon" className="w-16 h-16 mb-2" />
+        <audio controls className="max-w-full">
+          <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    );
+  } else if (artifact.contentType && artifact.contentType.startsWith('video/')) {
+    return (
+      <div className="flex flex-col items-center bg-sky-blue">
+        <video controls className="max-w-full max-h-64">
+          <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
+          Your browser does not support the video element.
+        </video>
+      </div>
+    );
+  } else if (artifact.contentType === 'application/pdf') {
+    return (
+      <div className="flex flex-col items-center bg-sky-blue">
+        <iframe 
+          src={`${backendUrl}/api/upload/${artifact.id}`}
+          className="w-full h-64 border-0"
+          title={artifact.name || artifact.label || "PDF document"}
         />
       </div>
-      );
-    } else if (artifact.contentType && artifact.contentType.startsWith('audio/')) {
-      return (
-        <div className="flex flex-col items-center">
-          <img src="/audio.png" alt="Audio icon" className="w-16 h-16 mb-2" />
-          <audio controls className="w-full max-w-md">
-            <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
-            Your browser does not support the audio element.
-          </audio>
-          <p className="mt-1 text-sm text-gray-500">{artifact.name || artifact.label}</p>
-        </div>
-      );
-    } else if (artifact.contentType && artifact.contentType.startsWith('video/')) {
-      return (
-        <div className="flex flex-col items-center">
-          <video controls className="max-w-full max-h-64 rounded-md">
+    );
+  } else {
+    // Default display for other file types
+    return (
+      <div className="flex flex-col items-center">
+        <img src={artifact.imageUrl || "/file.png"} alt="File" className="w-16 h-16 mb-2" />
+        <p>{artifact.name || artifact.label || 'File attachment'}</p>
+      </div>
+    );
+  }
+};
+
+return (
+  <div className="rounded-md mb-4 grid justify-center max-w-md mx-auto">
+    {renderContent()}
+    <h4 className="mb-2 text-center bg-sky-blue px-4 py-2 rounded rounded-t-none wrap-break-word overflow-hidden flex flex-col items-center">
+      {artifact.label && (<>{artifact.label}</>)}
+      {(artifact.contentType && (artifact.contentType.startsWith('image/') || 
+                               artifact.contentType.startsWith('video/') || 
+                               artifact.contentType === 'application/pdf')) && (
+        <button 
+          onClick={handleExpandArtifact} 
+          className="text-md mt-1 flex items-center justify-center bg-petrol-blue text-white p-2 rounded" 
+          title={`Enlarge ${
+            artifact.contentType.startsWith('image/') ? 'image' : 
+            artifact.contentType.startsWith('video/') ? 'video' : 'PDF'
+          }`}
+        >
+          <IoExpand />
+        </button>
+      )}
+    </h4>
+    
+    {isExpanded && (
+      <div className="fixed inset-0 bg-black/70 bg-opacity-75 flex flex-col items-center justify-center z-50" onClick={handleCloseArtifact}>
+        {artifact.contentType && artifact.contentType.startsWith('image/') ? (
+          <img 
+            src={artifact.imageUrl}
+            alt="Expanded artifact"
+            className="max-w-[90%] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : artifact.contentType && artifact.contentType.startsWith('video/') ? (
+          <video 
+            controls 
+            className="max-w-[90%] max-h-[90vh]" 
+            onClick={(e) => e.stopPropagation()}
+          >
             <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
             Your browser does not support the video element.
           </video>
-          <p className="mt-1 text-sm text-gray-500">{artifact.name || artifact.label}</p>
-        </div>
-      );
-    } else if (artifact.contentType === 'application/pdf') {
-      return (
-        <div className="flex flex-col items-center">
-          <img src="/pdf.png" alt="PDF icon" className="w-16 h-16 mb-2" />
-          <a 
-            href={`${backendUrl}/api/upload/${artifact.id}`} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-petrol-blue text-white rounded-md hover:bg-oxford-blue transition-colors"
-          >
-            View PDF: {artifact.name || artifact.label || 'Document'}
-          </a>
-        </div>
-      );
-    } else {
-      // Default display for other file types
-      return (
-        <div className="flex flex-col items-center">
-          <img src={artifact.imageUrl || "/file.png"} alt="File" className="w-16 h-16 mb-2" />
-          <p>{artifact.name || artifact.label || 'File attachment'}</p>
-        </div>
-      );
-    }
-  };
-
-  return (
-    <div className="rounded-md mb-4 grid justify-center max-w-md mx-auto">
-      {renderContent()}
-      {artifact.label && (
-        <h4 className="mb-2 text-center bg-sky-blue px-4 py-2 rounded rounded-t-none wrap-break-word overflow-hidden flex flex-col items-center">{artifact.label} <button className="text-md mt-1 flex items-center justify-center bg-petrol-blue text-white p-2 rounded" title="Enlarge image"><IoExpand /></button></h4>
-      )}
-    </div>
-  );
+        ) : artifact.contentType && artifact.contentType === 'application/pdf' ? (
+          <iframe
+            src={`${backendUrl}/api/upload/${artifact.id}`}
+            className="w-[90%] h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : null}
+        <button onClick={handleCloseArtifact} className="bg-petrol-blue text-white mt-2 px-4 py-2 rounded">Close preview</button>
+      </div>
+    )}
+  </div>
+);
 };
+
+const expandImage = (imageUrl) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <img src={imageUrl}
+        alt="Expanded artifact"
+        className="max-w-full max-h-full object-contain"
+        onClick={() => {
+          const modal = document.querySelector('.fixed.inset-0');
+          modal.classList.add('hidden');
+        }}
+      />
+      </div>
+  )
+}
 
 // Component for drag-and-drop ranking items
 const SortableRankingItem = ({ id, text, index }) => {
@@ -402,22 +463,6 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   );
 };
 
-  const renderNumberQuestion = () => (
-    <div className="mb-6">
-      <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
-      
-      {/* Add artifacts display */}
-      {renderArtifacts()}
-      
-      <input
-        type="number"
-        className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
-        value={localResponse || ''}
-        onChange={(e) => handleChange(Number(e.target.value))}
-        placeholder="Enter a number"
-      />
-    </div>
-  );
 
   const renderMultiChoiceQuestion = () => {
     const choiceGroups = question.data?.choiceGroups;
