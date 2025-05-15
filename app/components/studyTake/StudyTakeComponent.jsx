@@ -483,14 +483,12 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   // Add a preview banner at the top when in preview mode
   if (previewMode) {
     return (
-      <div>
-        {/* Preview mode UI remains unchanged */}
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+      <div className="flex flex-col items-center w-full"> {/* Add flex and width control */}
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 w-full" role="alert">
           <p className="font-bold">Preview Mode</p>
           <p>This is a preview of your study. Responses will not be saved.</p>
         </div>
         
-        {/* Render the appropriate content based on state */}
         {!hasStarted ? (
           renderWelcomeScreen()
         ) : completed ? (
@@ -499,9 +497,63 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
             <p className="mb-6">This was a preview - your responses were not submitted.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            {/* Rest of the preview mode UI */}
-            {/* ... */}
+          <div className="w-[70%] mx-auto"> {/* Add mx-auto to center it */}
+            <h1 className="text-3xl mb-6 text-center text-petrol-blue">{study.title}</h1>
+            
+            <div className="mb-4">
+              <p className="text-gray-600 text-center mb-1">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </p>
+              <div className="w-full bg-sky-blue rounded-full h-2.5">
+                <div 
+                  className="bg-petrol-blue h-2.5 rounded-full transition-all duration-300" 
+                  style={{ width: `${progressPercentage}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {currentQuestion && (
+              <div>
+                <h3 className="text-2xl text-center mb-4 mt-8">
+                  {currentQuestion.data?.title || `Question ${currentQuestionIndex + 1}`}
+                </h3>
+                <div className="question-container">
+                  <QuestionRenderer
+                    question={currentQuestion}
+                    onResponse={(response) => handleResponse(currentQuestion._id, response)}
+                    currentResponse={responses[currentQuestion._id]}
+                  />
+                </div>
+              </div>
+            )}
+            <p className="text-right text-red-500 hidden" id="pleaseAnswer">Please answer the question before continuing.</p>
+            <div className="flex justify-between mt-8">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                disabled={currentQuestionIndex === 0}
+                className={`px-4 py-2 rounded flex items-center ${
+                  currentQuestionIndex === 0
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-sky-blue hover:brightness-90 text-black"
+                }`}
+              >
+                <FaArrowLeft className="mr-1" /> Previous question
+              </button>
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={submitting}
+                className="px-4 py-2 rounded flex items-center bg-petrol-blue hover:bg-oxford-blue text-white"
+              >
+                {submitting 
+                  ? "Submitting..." 
+                  : isLastQuestion 
+                    ? "Submit study" 
+                    : (<>Next question <FaArrowRight className="ml-1" /></>)
+                }
+              </button>
+            </div>
           </div>
         )}
       </div>
