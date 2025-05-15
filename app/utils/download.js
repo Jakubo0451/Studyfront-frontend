@@ -218,20 +218,64 @@ export const downloadAsCSV = async (studyId, fileName = "study.csv") => {
             // Process responses
             if (entry.responses && Array.isArray(entry.responses)) {
                 entry.responses.forEach(response => {
-                    // Use questionId as column name for now (can be improved to use question text)
-                    const columnName = response.questionText || `Q_${response.questionId}`;;
+                    // Get the question title or label
+                    const questionText = response.questionTitle || response.questionLabel || response.questionText || `Question_${response.questionId}`;
+                    const questionType = response.questionType || "Unknown Type";
+                    
+                    // Add the question type and text as separate columns for clarity
+                    baseData[`Question Text: ${questionText}`] = questionText;
+                    baseData[`Question Type: ${questionText}`] = questionType;
+                    
+                    // Add the response with both text and type information in the column name
+                    const columnName = `${questionText} (${questionType})`;
                     
                     // Handle different response types appropriately
-                    if (Array.isArray(response.response)) {
+                    if (Array.isArray(response.answer)) {
+                        // Check if answer exists first (from the new format)
+                        baseData[columnName] = response.answer.join("; ");
+                    } else if (Array.isArray(response.response)) {
+                        // Fall back to response if answer doesn't exist
                         baseData[columnName] = response.response.join("; ");
+                    } else if (typeof response.answer === 'object' && response.answer !== null) {
+                        // Check if we have answer instead of response
+                        baseData[columnName] = JSON.stringify(response.answer);
                     } else if (typeof response.response === 'object' && response.response !== null) {
                         baseData[columnName] = JSON.stringify(response.response);
                     } else {
-                        baseData[columnName] = response.response;
+                        // Try answer first, then fall back to response
+                        baseData[columnName] = response.answer !== undefined ? response.answer : response.response;
                     }
                     
                     // Add timestamp for each response if needed
                     baseData[`${columnName}_timestamp`] = response.timestamp || "";
+                });
+            }
+
+            // Process answers (used by some API response formats)
+            if (entry.answers && Array.isArray(entry.answers)) {
+                entry.answers.forEach(answer => {
+                    // Get the question title or label
+                    const questionText = answer.questionTitle || answer.questionLabel || `Question_${answer.questionId}`;
+                    const questionType = answer.questionType || "Unknown Type";
+                    
+                    // Add the question type and text as separate columns for clarity
+                    baseData[`Question Text: ${questionText}`] = questionText;
+                    baseData[`Question Type: ${questionText}`] = questionType;
+                    
+                    // Add the response with both text and type information
+                    const columnName = `${questionText} (${questionType})`;
+                    
+                    // Handle different answer types appropriately
+                    if (Array.isArray(answer.answer)) {
+                        baseData[columnName] = answer.answer.join("; ");
+                    } else if (typeof answer.answer === 'object' && answer.answer !== null) {
+                        baseData[columnName] = JSON.stringify(answer.answer);
+                    } else {
+                        baseData[columnName] = answer.answer;
+                    }
+                    
+                    // Add timestamp for each answer if needed
+                    baseData[`${columnName}_timestamp`] = answer.timestamp || "";
                 });
             }
             
