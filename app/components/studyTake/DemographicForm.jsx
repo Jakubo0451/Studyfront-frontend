@@ -23,7 +23,7 @@ export default function DemographicForm({ onComplete }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div>
       <h2 className="text-2xl font-bold mb-6 text-petrol-blue">Demographic Information</h2>
       <p className="mb-4 text-gray-600">
         Please provide the following demographic information. This helps us better understand our study participants.
@@ -39,7 +39,7 @@ export default function DemographicForm({ onComplete }) {
             name="age"
             value={formData.age}
             onChange={handleChange}
-            className="w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+            className="bg-white w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
             required
           >
             <option value="">Please select</option>
@@ -63,7 +63,7 @@ export default function DemographicForm({ onComplete }) {
             name="gender"
             value={formData.gender}
             onChange={handleChange}
-            className="w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+            className="bg-white w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
             required
           >
             <option value="">Please select</option>
@@ -84,7 +84,7 @@ export default function DemographicForm({ onComplete }) {
             name="education"
             value={formData.education}
             onChange={handleChange}
-            className="w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+            className="bg-white w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
             required
           >
             <option value="">Please select</option>
@@ -108,7 +108,7 @@ export default function DemographicForm({ onComplete }) {
             name="occupation"
             value={formData.occupation}
             onChange={handleChange}
-            className="w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+            className="bg-white w-full p-2 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
             placeholder="Your occupation"
             required
           />
