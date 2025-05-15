@@ -210,16 +210,7 @@ const SideBar = ({
         Study Information
       </button>
       
-      {/* Add Preview Study button here */}
-      {study && study._id && (
-        <button
-          onClick={onTogglePreview}
-          type="button"
-          className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center hover:bg-oxford-blue transition duration-300 cursor-pointer"
-        >
-          {previewMode ? 'Close Preview' : 'Preview Study'}
-        </button>
-      )}
+      
       
       <DndContext
         sensors={sensors}
@@ -276,7 +267,17 @@ const SideBar = ({
           <FaPlus className="mr-2" />
           Add Question
         </button>
-        <Link href="/dashboard" className="mt-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center w-full hover:bg-oxford-blue transition duration-300 cursor-pointer">
+        {/* Add Preview Study button here */}
+        {study && study._id && (
+          <button
+            onClick={onTogglePreview}
+            type="button"
+            className="w-full mt-2 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center hover:bg-oxford-blue transition duration-300 cursor-pointer"
+          >
+            {previewMode ? 'Close Preview' : 'Preview Study'}
+          </button>
+        )}
+        <Link href="/dashboard" className="mt-2 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center w-full hover:bg-oxford-blue transition duration-300 cursor-pointer">
           Return to Dashboard
         </Link>
         {showAddQuestionMenu && (
