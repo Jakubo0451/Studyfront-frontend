@@ -203,11 +203,11 @@ export default function SharePopup({ study, onStudyChange }) {
               <FaRegCopy />
             </button>
           </div>
-          <label htmlFor="share-email">Share by email</label>
+          {/* <label htmlFor="share-email">Share by email</label>
           <div className="share-email">
             <textarea type="email" id="share-email" placeholder="participant1@example.com participant2@example.com" />
             <button type="button" className="sendBtn" title="Send invite(s)" onClick={sendEmails}><IoSend /></button>
-          </div>
+          </div> */}
         </div>
         <div onClick={closePopup}>
           <button type="button" className="closeBtn" title="Close menu" onClick={closePopup}><IoIosClose /></button>
