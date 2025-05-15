@@ -7,7 +7,7 @@ import DetailsPopup from '../detailsPopup/detailsPopup.jsx';
 import backendUrl from 'environment';
 import Loading from "@/loading.js";
 import { useRouter } from 'next/navigation';
-import { downloadAsCSV, downloadAsJSON } from "@/utils/download.js";
+import { downloadAsCSV, downloadAsJSON, fetchStudyResults } from "@/utils/download.js";
 import { startStudy, editStudy, endStudy } from "@/utils/studyActions.js";
 
 const StudiesList = ({ refreshTrigger }) => {
@@ -16,7 +16,41 @@ const StudiesList = ({ refreshTrigger }) => {
     const [error, setError] = useState(null);
     const [showDetailsPopup, setShowDetailsPopup] = useState(false);
     const [selectedStudyDetails, setSelectedStudyDetails] = useState(null);
+    const [responseCounts, setResponseCounts] = useState({});
+    const [loadingResponses, setLoadingResponses] = useState({});
     const router = useRouter();
+
+    const fetchResponseCounts = useCallback(async (studies) => {
+        if (!Array.isArray(studies)) return;
+
+        const counts = {};
+        const loadingStatus = {};
+
+        studies.forEach(study => {
+            loadingStatus[study._id] = true;
+        });
+
+        setLoadingResponses(loadingStatus);
+
+        await Promise.all(
+            studies.map(async (study) => {
+                try {
+                    const responses = await fetchStudyResults(study._id);
+                    counts[study._id] = Array.isArray(responses) ? responses.length : 0;
+                } catch (error) {
+                    console.error(`Error fetching responses for study ${study._id}:`, error);
+                    counts[study._id] = 0;
+                } finally {
+                    setLoadingResponses(prev => ({
+                        ...prev,
+                        [study._id]: false
+                    }));
+                }
+            })
+        );
+
+        setResponseCounts(counts);
+    }, []);
 
     const fetchStudies = useCallback(async () => {
         setLoading(true);
@@ -91,33 +125,37 @@ const StudiesList = ({ refreshTrigger }) => {
             } else {
                 setData(studies);
             }
+
+            fetchResponseCounts(studies);
         } catch (err) {
             console.error("Error fetching studies:", err);
             setError('Failed to load studies.');
         } finally {
             setLoading(false);
         }
-    }, [router]);
+    }, [router, fetchResponseCounts]);
 
     useEffect(() => {
         fetchStudies();
     }, [fetchStudies, refreshTrigger]);
 
     const openShare = (studyId) => {
-    // Get the popup and make it visible
-    const sharePopup = document.querySelector('.sharePopup');
-    sharePopup.style.display = 'flex';
-    
-    // Find the study select dropdown in the popup and set its value
-    const selectElement = sharePopup.querySelector('#study-select');
-    if (selectElement && studyId) {
-        selectElement.value = studyId;
-        
-        // Trigger change event to update the displayed study
-        const event = new Event('change', { bubbles: true });
-        selectElement.dispatchEvent(event);
-    }
-}
+        if (typeof window !== 'undefined' && window.openSharePopup) {
+            window.openSharePopup(studyId);
+        } else {
+            const sharePopup = document.querySelector('.sharePopup');
+            if (sharePopup) {
+                sharePopup.style.display = 'flex';
+                
+                const selectElement = sharePopup.querySelector('#study-select');
+                if (selectElement && studyId) {
+                    selectElement.value = studyId;
+                    const event = new Event('change', { bubbles: true });
+                    selectElement.dispatchEvent(event);
+                }
+            }
+        }
+    };
 
     const openDetails = async (studyId) => {
         setShowDetailsPopup(true);
@@ -202,7 +240,15 @@ const StudiesList = ({ refreshTrigger }) => {
                                                 </div>
                                                 <div className="flex items-center">
                                                     <IoPersonOutline className="mr-1" />
-                                                    <p>{item.questions ? item.questions.length : 0}</p>
+                                                    <p>
+                                                        {loadingResponses[item._id] ? (
+                                                            <span className="text-gray-500 text-sm">Loading...</span>
+                                                        ) : responseCounts[item._id] !== undefined ? (
+                                                            responseCounts[item._id]
+                                                        ) : (
+                                                            0
+                                                        )}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className="flex space-x-2 mb-2">
@@ -218,7 +264,7 @@ const StudiesList = ({ refreshTrigger }) => {
                                                     onClick={() => openDetails(item._id)}
                                                     className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
                                                 >
-                                                    Details
+                                                    Options
                                                 </button>
                                             </div>
                                             <div className="flex flex-wrap border-petrol-blue border-2 rounded p-1 gap-1">
@@ -274,7 +320,15 @@ const StudiesList = ({ refreshTrigger }) => {
                                                     </div>
                                                     <div className="flex items-center">
                                                         <IoPersonOutline className="mr-1" />
-                                                        <p>{item.questions ? item.questions.length : 0}</p>
+                                                        <p>
+                                                            {loadingResponses[item._id] ? (
+                                                                <span className="text-gray-500 text-sm">Loading...</span>
+                                                            ) : responseCounts[item._id] !== undefined ? (
+                                                                responseCounts[item._id]
+                                                            ) : (
+                                                                0
+                                                            )}
+                                                        </p>
                                                     </div>
                                                 </div>
                                                 <div className="flex space-x-2 mb-2">
@@ -290,7 +344,7 @@ const StudiesList = ({ refreshTrigger }) => {
                                                         onClick={() => openDetails(item._id)}
                                                         className="bg-petrol-blue text-white rounded px-4 py-2 flex-grow text-center cursor-pointer hover:bg-oxford-blue transition duration-300"
                                                     >
-                                                        Details
+                                                        Options
                                                     </button>
                                                 </div>
                                                 {item.completed ? (
@@ -334,7 +388,6 @@ const StudiesList = ({ refreshTrigger }) => {
                                                         </button>
                                                     </div>
                                                 )}
-                                                
                                             </div>
                                         ))}
                                 </div>

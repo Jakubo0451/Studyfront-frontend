@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaRegCopy } from "react-icons/fa6";
 import { IoSend } from "react-icons/io5";
 import { IoIosClose } from "react-icons/io";
@@ -13,45 +13,91 @@ export default function SharePopup({ study, onStudyChange }) {
   const [currentStudy, setCurrentStudy] = useState(study);
   /* eslint-disable-next-line */
   const [studyDetails, setStudyDetails] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const pendingStudyIdRef = useRef(null);
 
+  // Fetch studies whenever visibility changes to true
   useEffect(() => {
-    const fetchStudies = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
+    if (isVisible) {
+      fetchStudies();
+    }
+  }, [isVisible]);
 
-        const response = await fetch(`${backendUrl}/api/studies`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch studies');
+  // Make openPopup function available globally but safely
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Store the original function if it exists
+      const originalFunction = window.openSharePopup;
+      
+      // Create our new function
+      window.openSharePopup = (studyId) => {
+        const popup = document.querySelector('.sharePopup');
+        if (popup) {
+          popup.style.display = 'flex';
+          setIsVisible(true);
+          pendingStudyIdRef.current = studyId; // Store ID to select after fetching
         }
-
-        const data = await response.json();
-        setStudies(data);
-        
-        // If a study prop was passed, set it as current
-        if (study) {
-          setCurrentStudy(study);
-          fetchStudyDetails(study._id);
-        } else if (data.length > 0) {
-          setCurrentStudy(data[0]);
-          fetchStudyDetails(data[0]._id);
+      };
+      
+      // Cleanup function to restore original or remove ours
+      return () => {
+        if (typeof window !== 'undefined') {
+          if (originalFunction) {
+            window.openSharePopup = originalFunction;
+          } else {
+            delete window.openSharePopup;
+          }
         }
-      } catch (error) {
-        console.error('Error fetching studies:', error);
+      };
+    }
+  }, []);
+
+  const fetchStudies = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/login');
+        return;
       }
-    };
 
-    fetchStudies();
-  }, [router, study]);
+      const response = await fetch(`${backendUrl}/api/studies`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch studies');
+      }
+
+      const data = await response.json();
+      setStudies(data);
+      
+      // Handle the pending study ID if one was requested
+      if (pendingStudyIdRef.current) {
+        const studyToSelect = data.find(s => s._id === pendingStudyIdRef.current);
+        if (studyToSelect) {
+          setCurrentStudy(studyToSelect);
+          fetchStudyDetails(studyToSelect._id);
+        }
+        pendingStudyIdRef.current = null; // Clear the pending ID
+      }
+      // Otherwise use the study prop or default to first active study
+      else if (study) {
+        setCurrentStudy(study);
+        fetchStudyDetails(study._id);
+      } else {
+        const firstActiveStudy = data.find(s => s.active);
+        if (firstActiveStudy) {
+          setCurrentStudy(firstActiveStudy);
+          fetchStudyDetails(firstActiveStudy._id);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching studies:', error);
+    }
+  };
 
   const fetchStudyDetails = async (studyId) => {
     try {
@@ -84,7 +130,11 @@ export default function SharePopup({ study, onStudyChange }) {
   };
 
   function closePopup() {
-    document.querySelector('.sharePopup').style.display = 'none';
+    if (typeof window !== 'undefined') {
+      const popup = document.querySelector('.sharePopup');
+      if (popup) popup.style.display = 'none';
+      setIsVisible(false);
+    }
   }
 
   function copyLink() {
@@ -127,11 +177,15 @@ export default function SharePopup({ study, onStudyChange }) {
             value={currentStudy?._id || ''}
             onChange={handleStudyChange}
           >
-            {studies.filter(s => s.active).map((s) => (
-              <option key={s._id} value={s._id}>
-                {s.title}
-              </option>
-            ))}
+            {studies.filter(s => s.active).length > 0 ? (
+              studies.filter(s => s.active).map((s) => (
+                <option key={s._id} value={s._id}>
+                  {s.title}
+                </option>
+              ))
+            ) : (
+              <option value="">No active studies available</option>
+            )}
           </select>
           <label htmlFor="share-link">Sharable link</label>
           <div className="share-link">
