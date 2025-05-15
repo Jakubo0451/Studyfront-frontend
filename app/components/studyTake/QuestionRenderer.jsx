@@ -126,6 +126,7 @@ return (
 );
 };
 
+// eslint-disable-next-line
 const expandImage = (imageUrl) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -392,15 +393,6 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
       setLocalResponse(value);
       onResponse(value);
     }
-  };
-
-  const getPrompt = () => {
-    if (!question.data) return "Question text not available";
-    
-    return question.data.title || 
-           question.data.prompt || 
-           question.data.questionText || 
-           `Question ${question._id}`;
   };
 
   const renderTextQuestion = () => {
@@ -1147,8 +1139,6 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     switch (question.type?.toLowerCase()) {
       case 'text':
         return renderTextQuestion();
-      case 'number':
-        return renderNumberQuestion();
       case 'multiplechoice':
       case 'multiple choice':
         return renderMultiChoiceQuestion();
