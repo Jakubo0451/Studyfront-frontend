@@ -549,8 +549,8 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   if (previewMode) {
     return (
       <div className="flex flex-col items-center w-full"> {/* Add flex and width control */}
-        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 w-full" role="alert">
-          <p className="font-bold">Preview Mode</p>
+        <div className="bg-yellow-100 text-center text-yellow-700 p-4 mb-4 w-full rounded" role="alert">
+          <p className="font-semibold font-readex">Preview Mode</p>
           <p>This is a preview of your study. Responses will not be saved.</p>
         </div>
         

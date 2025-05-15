@@ -21,7 +21,7 @@ import {
   restrictToParentElement,
 } from "@dnd-kit/modifiers";
 import styles from '../../styles/studyCreator/sidebar.module.css';
-import { IoIosClose } from "react-icons/io";
+import { IoIosClose, IoMdEye, IoMdEyeOff } from "react-icons/io";
 import Link from "next/link";
 
 const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDeleteQuestion }) => {
@@ -207,7 +207,7 @@ const SideBar = ({
         type="button"
         className="mb-4 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center hover:bg-oxford-blue transition duration-300 cursor-pointer"
       >
-        Study Information
+        Study Options
       </button>
       
       
@@ -274,7 +274,11 @@ const SideBar = ({
             type="button"
             className="w-full mt-2 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center hover:bg-oxford-blue transition duration-300 cursor-pointer"
           >
-            {previewMode ? 'Close Preview' : 'Preview Study'}
+            {previewMode ? (
+              <><IoMdEyeOff className="inline mr-1 text-lg" /> Close Preview </>
+            ) : (
+              <><IoMdEye className="inline mr-1 text-lg" /> Preview Study</>
+            )}
           </button>
         )}
         <Link href="/dashboard" className="mt-2 bg-petrol-blue text-white rounded px-4 py-2 flex items-center justify-center w-full hover:bg-oxford-blue transition duration-300 cursor-pointer">

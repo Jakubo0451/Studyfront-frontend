@@ -585,23 +585,20 @@ export default function CreateStudyPage() {
             </div>
           )}
           {previewMode && study && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-              <div className="bg-white rounded-lg overflow-hidden max-w-5xl w-full max-h-[90vh] flex flex-col">
+            <div className="fixed inset-0 bg-black/70 bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="fixed h-full w-full" onClick={() => setPreviewMode(false)}></div>
+              <div className="bg-white rounded-lg overflow-hidden max-w-5xl w-full max-h-[90vh] flex flex-col z-2">
                 <div className="bg-petrol-blue text-white p-3 flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">Study Preview</h3>
+                  <h3 className="text-lg font-readex">Study Preview</h3>
                   <button 
                     type="button"
                     onClick={() => setPreviewMode(false)}
-                    className="text-white hover:text-red-200 transition-colors"
+                    className="text-white hover:text-sky-blue transition-colors"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
-                </div>
-                
-                <div className="bg-gray-100 p-2 text-center text-petrol-blue font-semibold">
-                  PREVIEW MODE - Responses will not be saved
                 </div>
                 
                 <div className="flex-grow" style={{height: "80vh"}}>

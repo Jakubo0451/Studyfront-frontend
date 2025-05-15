@@ -176,7 +176,7 @@ export default function StudyDetails({
 
   return (
     <div className={commonStyles.questionType + " question-type"}>
-      <h2>Study Information</h2>
+      <h2>Study Options</h2>
       <div className={commonStyles.questionName}>
         <label htmlFor="studyName">Study Name:</label>
         <input
