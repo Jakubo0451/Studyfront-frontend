@@ -416,7 +416,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   // Render the welcome screen with study information
   const renderWelcomeScreen = () => {
     return (
-      <div className="mt-[1rem] w-[60%]">
+      <div className="mt-[1rem] w-[60%] viewport-participant">
         <img src="/logo/logo.png" className="mx-auto mb-10" width={80} height={80} alt="Studyfront Logo" />
         <h1 className="text-4xl text-center font-bold mb-[3rem] text-petrol-blue">{study.title}</h1>
         
@@ -538,7 +538,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   }
 
   return (
-    <div className="w-[70%]">
+    <div className="w-[70%] viewport-participant">
       <h1 className="text-3xl mb-6 text-center text-petrol-blue">{study.title}</h1>
       
       <div className="mb-4">
@@ -568,15 +568,15 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         </div>
       )}
       <p className="text-right text-red-500 hidden" id="pleaseAnswer">Please answer the question before continuing.</p>
-      <div className="flex justify-between mt-8">
+      <div className="button-box flex justify-between mt-8">
         <button
           type="button"
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
-          className={`px-4 py-2 rounded flex items-center ${
+          className={`buttons-mobile px-4 py-2 rounded flex items-center ${
             currentQuestionIndex === 0
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-sky-blue hover:brightness-90 text-black"
+              : "bg-sky-blue hover:brightness-90 transition duration-300 text-black"
           }`}
         >
           <FaArrowLeft className="mr-1" /> Previous question
@@ -585,10 +585,10 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
           type="button"
           onClick={handleNext}
           disabled={!responses[currentQuestion?._id] || submitting}
-          className={`px-4 py-2 rounded flex items-center ${
+          className={`buttons-mobile px-4 py-2 rounded flex items-center ${
             !responses[currentQuestion?._id] || submitting
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-petrol-blue hover:bg-oxford-blue text-white"
+              : "bg-petrol-blue hover:bg-oxford-blue transition duration-300 text-white"
           }`}
         >
           {submitting 
