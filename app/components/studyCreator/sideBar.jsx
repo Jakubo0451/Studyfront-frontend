@@ -59,7 +59,7 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
     <div
       ref={setNodeRef}
       style={style}
-      className={`pl-2 pr-2 text-white flex justify-between items-center cursor-pointer rounded`}
+      className={`touch-none pl-2 pr-2 text-white flex justify-between items-center cursor-pointer rounded`}
       onClick={() => onQuestionSelect(index)}
     >
       <div className="flex items-center space-x-2">
@@ -170,8 +170,19 @@ const SideBar = ({
       );
 
       if (oldIndex !== -1 && newIndex !== -1) {
+        const selectedQuestionId = selectedQuestionIndex !== null ?
+          questions[selectedQuestionIndex]?.id : null;
+        
         const newQuestions = arrayMove([...questions], oldIndex, newIndex);
         setQuestions(newQuestions);
+
+        if (selectedQuestionId) {
+          const newSelectedIndex = newQuestions.findIndex(q => q.id === selectedQuestionId);
+
+          if (newSelectedIndex !== -1 && onQuestionSelect) {
+            onQuestionSelect(newSelectedIndex);
+          }
+        }
 
         if (onChange) {
           onChange(newQuestions);

@@ -446,7 +446,9 @@ export default function Artifact({
           selectedArtifactId: artifact.id,
           selectedArtifactName: artifact.name,
           selectedArtifactImage: artifact.imageUrl,
-          artifactTitle: artifact.label || artifact.title || artifact.name,
+          artifactTitle: artifact.label !== undefined && artifact.label !== null ? artifact.label :
+                artifact.title !== undefined && artifact.title !== null ? artifact.title :
+                artifact.name,
           contentType: artifact.contentType,
         }))
       : mode === "standalone"

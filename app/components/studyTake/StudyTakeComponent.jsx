@@ -5,6 +5,7 @@ import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import FingerprintJS from "@fingerprintjs/fingerprintjs";
+import DemographicForm from "./DemographicForm";
 
 // Add previewMode to props
 export default function StudyTakeComponent({ study, previewMode = false }) {
@@ -28,6 +29,34 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
       console.error("Error reading session:", error);
     }
     return false;
+  });
+
+  const [showDemographics, setShowDemographics] = useState(() => {
+    if (typeof window === 'undefined' || previewMode) return false;
+    try {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        return parsedSession.showDemographics || false;
+      }
+    } catch (error) {
+      console.error("Error reading session:", error);
+    }
+    return false;
+  });
+
+  const [demographics, setDemographics] = useState(() => {
+    if (typeof window === 'undefined' || previewMode) return null;
+    try {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        return parsedSession.demographics || null;
+      }
+    } catch (error) {
+      console.error("Error reading session:", error);
+    }
+    return null;
   });
 
   const [termsAccepted, setTermsAccepted] = useState(() => {
@@ -120,6 +149,17 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   const [participantId, setParticipantId] = useState('');
   const startTime = new Date().toISOString();
 
+  const transformDemographics = (data) => {
+    if (!data) return null;
+
+    return {
+      age: data.age || '',
+      gender: data.gender || '',
+      education: data.education || '',
+      occupation: data.occupation || ''
+    };
+  };
+
   // Initialize fingerprint on component mount
   useEffect(() => {
     if (previewMode) {
@@ -194,13 +234,15 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         currentQuestionIndex,
         hasStarted,
         termsAccepted,
+        demographics,
+        showDemographics
       };
       
       sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
     } catch (error) {
       console.error("Error saving session:", error);
     }
-  }, [responses, currentQuestionIndex, hasStarted, termsAccepted, completed, previewMode, sessionKey]);
+  }, [responses, currentQuestionIndex, hasStarted, termsAccepted, demographics, showDemographics, completed, previewMode, sessionKey]);
 
   const questions = study?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
@@ -283,6 +325,13 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     }
   };
 
+  // Handle demographic form completion
+  const handleDemographicFormComplete = (data) => {
+    setDemographics(() => data);
+    setShowDemographics(false);
+    setHasStarted(true);
+  };
+
   // Simplified handleSubmit function - remove redundant localStorage saving
   const handleSubmit = async () => {
     if (!study._id) return;
@@ -319,17 +368,20 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     }
 
     try {
+      const responsesArray = Object.entries(responses).map(([questionId, response]) => ({
+        questionId,
+        response,
+        timestamp: new Date().toISOString()
+      }));
+      
       const submissionData = {
         studyId: study._id,
         participantId,
         visitorId: fingerprint,
         startTime,
         endTime: new Date().toISOString(),
-        responses: Object.entries(responses).map(([questionId, response]) => ({
-          questionId,
-          response,
-          timestamp: new Date().toISOString()
-        }))
+        responses: responsesArray,
+        demographics: transformDemographics(demographics)
       };
       
       const result = await fetch(`${backendUrl}/api/responses/submit`, {
@@ -390,7 +442,14 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     if (study.hasTermsAndConditions && !termsAccepted) {
       return;
     }
-    setHasStarted(true);
+
+    if (study.hasDemographics) {
+      setShowDemographics(true);
+    } else {
+      setShowDemographics(false);
+      setHasStarted(true);
+    }
+    
   };
 
   // Render already completed message
@@ -416,7 +475,7 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
   // Render the welcome screen with study information
   const renderWelcomeScreen = () => {
     return (
-      <div className="mt-[1rem] w-[60%]">
+      <div className="mt-[1rem] w-[60%] viewport-participant">
         <img src="/logo/logo.png" className="mx-auto mb-10" width={80} height={80} alt="Studyfront Logo" />
         <h1 className="text-4xl text-center font-bold mb-[3rem] text-petrol-blue">{study.title}</h1>
         
@@ -489,8 +548,11 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
           <p>This is a preview of your study. Responses will not be saved.</p>
         </div>
         
-        {!hasStarted ? (
+        {/* Render the appropriate content based on state */}
+        {!hasStarted && !showDemographics ? (
           renderWelcomeScreen()
+        ) : showDemographics ? (
+          <DemographicForm onComplete={handleDemographicFormComplete} />
         ) : completed ? (
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Thank You for Your Participation!</h2>
@@ -584,13 +646,23 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
     return <div className="p-8">No questions available for this study.</div>;
   }
 
+  // Show demographic form after welcome screen
+  if (showDemographics) {
+    return(
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <DemographicForm onComplete={handleDemographicFormComplete} />
+      </div>
+    ) 
+  }
+
   // Show welcome screen if the study hasn't started yet
   if (!hasStarted) {
     return renderWelcomeScreen();
   }
 
+  
   return (
-    <div className="w-[70%]">
+    <div className="w-[70%] viewport-participant">
       <h1 className="text-3xl mb-6 text-center text-petrol-blue">{study.title}</h1>
       
       <div className="mb-4">
@@ -620,15 +692,15 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
         </div>
       )}
       <p className="text-right text-red-500 hidden" id="pleaseAnswer">Please answer the question before continuing.</p>
-      <div className="flex justify-between mt-8">
+      <div className="button-box flex justify-between mt-8">
         <button
           type="button"
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
-          className={`px-4 py-2 rounded flex items-center ${
+          className={`buttons-mobile px-4 py-2 rounded flex items-center ${
             currentQuestionIndex === 0
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-sky-blue hover:brightness-90 text-black"
+              : "bg-sky-blue hover:brightness-90 transition duration-300 text-black"
           }`}
         >
           <FaArrowLeft className="mr-1" /> Previous question
@@ -637,10 +709,10 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
           type="button"
           onClick={handleNext}
           disabled={!responses[currentQuestion?._id] || submitting}
-          className={`px-4 py-2 rounded flex items-center ${
+          className={`buttons-mobile px-4 py-2 rounded flex items-center ${
             !responses[currentQuestion?._id] || submitting
               ? "bg-gray-300 cursor-not-allowed"
-              : "bg-petrol-blue hover:bg-oxford-blue text-white"
+              : "bg-petrol-blue hover:bg-oxford-blue transition duration-300 text-white"
           }`}
         >
           {submitting 

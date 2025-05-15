@@ -52,7 +52,7 @@ const checkAlternativeEndpoints = async (studyId) => {
 };
 
 // Fetch study results from the backend with optimized endpoint selection
-const fetchStudyResults = async (studyId) => {
+export const fetchStudyResults = async (studyId) => {
   const token = localStorage.getItem('token');
   
   // First check if we have a previously successful endpoint stored
@@ -190,105 +190,77 @@ export const downloadAsCSV = async (studyId, fileName = "study.csv") => {
 
         console.log("Data structure for CSV conversion:", jsonArray);
         
-        // Check data structure and adapt accordingly
-        let csvContent;
+        // Get study title for better context
+        const studyTitle = jsonArray[0]?.studyId?.title || "Unknown Study";
         
-        // First, determine if we have the expected structure with answers property
-        const hasAnswersArray = jsonArray.some(entry => entry.answers && Array.isArray(entry.answers));
-        
-        if (hasAnswersArray) {
-            // Original logic for answers array structure
-            // Extract all unique question IDs from the answers
-            const questionIds = new Set();
-            jsonArray.forEach((entry) => {
-                if (entry.answers && Array.isArray(entry.answers)) {
-                    entry.answers.forEach((answer) => {
-                        if (answer && answer.questionId) {
-                            questionIds.add(answer.questionId);
-                        }
-                    });
-                }
-            });
-
-            // Convert the Set to an array for consistent ordering
-            const questionIdArray = Array.from(questionIds);
-
-            // Build the CSV header
-            const headers = [
-                "_id",
-                "studyId",
-                ...questionIdArray.map((id) => `question_${id}`),
-                "submittedAt",
-                "createdAt",
-                "updatedAt",
-            ];
-
-            // Build the CSV rows
-            const rows = jsonArray.map((entry) => {
-                // Flatten the answers into a single row
-                const answersMap = {};
-                
-                if (entry.answers && Array.isArray(entry.answers)) {
-                    entry.answers.forEach((answer) => {
-                        if (answer && answer.questionId) {
-                            answersMap[`question_${answer.questionId}`] = answer.answer;
-                        }
-                    });
-                }
-
-                // Return a row with all fields
-                return [
-                    entry._id || "",
-                    entry.studyId || "",
-                    ...questionIdArray.map((id) => answersMap[`question_${id}`] || ""),
-                    entry.submittedAt || "",
-                    entry.createdAt || "",
-                    entry.updatedAt || "",
-                ];
-            });
-
-            // Combine the header and rows into CSV content
-            csvContent = [
-                headers.join(","), 
-                ...rows.map((row) => row.map((value) => `"${value}"`).join(","))
-            ].join("\n");
+        // Create a flattened structure that's better for CSV
+        const flattenedData = jsonArray.map(entry => {
+            const baseData = {
+                "Response ID": entry._id || "",
+                "Study ID": entry.studyId?._id || entry.studyId || "",
+                "Study Title": entry.studyId?.title || studyTitle,
+                "Participant ID": entry.participantId || "",
+                "Start Time": entry.startTime || "",
+                "End Time": entry.endTime || "",
+                "Completion Time (seconds)": entry.startTime && entry.endTime ? 
+                    ((new Date(entry.endTime) - new Date(entry.startTime)) / 1000).toFixed(2) : "",
+                "Submitted At": entry.createdAt || ""
+            };
             
-        } else {
-            // Alternative logic for different data structure
-            // Extract all keys from the first object to use as headers
-            const firstEntry = jsonArray[0] || {};
-            let headers = Object.keys(firstEntry);
-            
-            // If the data is too complex, flatten it
-            if (headers.some(key => typeof firstEntry[key] === 'object' && firstEntry[key] !== null)) {
-                console.log("Complex data structure detected, flattening for CSV");
-                
-                // Create a simple flattened CSV with stringified objects for complex fields
-                headers = ["_id", "rawData"];
-                const rows = jsonArray.map(entry => {
-                    return [
-                        entry._id || "",
-                        JSON.stringify(entry)
-                    ];
-                });
-                
-                csvContent = [
-                    headers.join(","),
-                    ...rows.map(row => row.map(value => `"${value}"`).join(","))
-                ].join("\n");
-            } else {
-                // Simple object structure with primitive values
-                const rows = jsonArray.map(entry => {
-                    return headers.map(key => entry[key] || "");
-                });
-                
-                csvContent = [
-                    headers.join(","),
-                    ...rows.map(row => row.map(value => `"${value}"`).join(","))
-                ].join("\n");
+            // Add demographics as separate columns
+            if (entry.demographics) {
+                baseData["Age"] = entry.demographics.age || "";
+                baseData["Gender"] = entry.demographics.gender || "";
+                baseData["Education"] = entry.demographics.education || "";
+                baseData["Occupation"] = entry.demographics.occupation || "";
             }
-        }
-
+            
+            // Process responses
+            if (entry.responses && Array.isArray(entry.responses)) {
+                entry.responses.forEach(response => {
+                    // Use questionId as column name for now (can be improved to use question text)
+                    const columnName = `Q_${response.questionId}`;
+                    
+                    // Handle different response types appropriately
+                    if (Array.isArray(response.response)) {
+                        baseData[columnName] = response.response.join("; ");
+                    } else if (typeof response.response === 'object' && response.response !== null) {
+                        baseData[columnName] = JSON.stringify(response.response);
+                    } else {
+                        baseData[columnName] = response.response;
+                    }
+                    
+                    // Add timestamp for each response if needed
+                    baseData[`${columnName}_timestamp`] = response.timestamp || "";
+                });
+            }
+            
+            return baseData;
+        });
+        
+        // Get all possible headers (columns) from all entries
+        const allHeaders = new Set();
+        flattenedData.forEach(entry => {
+            Object.keys(entry).forEach(key => allHeaders.add(key));
+        });
+        const headers = Array.from(allHeaders);
+        
+        // Create CSV content
+        const rows = flattenedData.map(entry => {
+            return headers.map(header => {
+                const value = entry[header] || "";
+                // Properly escape CSV values
+                return typeof value === 'string' ? 
+                    `"${value.replace(/"/g, '""')}"` : 
+                    `"${value}"`;
+            });
+        });
+        
+        const csvContent = [
+            headers.join(","),
+            ...rows.map(row => row.join(","))
+        ].join("\n");
+        
         // Trigger the file download
         downloadFile(csvContent, fileName, "text/csv");
     } catch (error) {

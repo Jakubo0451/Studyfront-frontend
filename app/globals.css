@@ -342,3 +342,24 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]::-moz-range-thumb:active {
   background: #d6d6d6;
 }
+
+/* phone screens */
+@media (max-width: 640px) {
+  .viewport-participant {
+    width: auto;
+  }
+
+  .buttons-mobile {
+    justify-content: center;
+  }
+
+  .button-box {
+    flex-direction: column-reverse;
+    gap: 1rem;
+  }
+
+  .main-viewport {
+    padding: 1rem;
+  }
+}
+

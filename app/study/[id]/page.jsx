@@ -168,7 +168,7 @@ export default function TakeStudyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-ice-blue p-8 flex justify-center">
+    <div className="main-viewport min-h-screen bg-ice-blue p-8 flex justify-center">
       <StudyTakeComponent 
         study={study} 
         previewMode={searchParams.get('preview') === 'true'} 
