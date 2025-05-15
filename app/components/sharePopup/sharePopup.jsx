@@ -133,9 +133,6 @@ export default function SharePopup({ study, onStudyChange }) {
               </option>
             ))}
           </select>
-
-          
-
           <label htmlFor="share-link">Sharable link</label>
           <div className="share-link">
             <input 
