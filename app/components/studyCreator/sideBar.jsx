@@ -59,7 +59,7 @@ const SortableItem = ({ id, content, onQuestionSelect, index, isSelected, onDele
     <div
       ref={setNodeRef}
       style={style}
-      className={`pl-2 pr-2 text-white flex justify-between items-center cursor-pointer rounded`}
+      className={`touch-none pl-2 pr-2 text-white flex justify-between items-center cursor-pointer rounded`}
       onClick={() => onQuestionSelect(index)}
     >
       <div className="flex items-center space-x-2">
