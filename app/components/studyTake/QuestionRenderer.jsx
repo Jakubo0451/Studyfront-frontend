@@ -237,7 +237,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     
     return (
       <div className="artifacts-container mt-4 mb-4">
-        <div class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] justify-center gap-2">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] justify-center gap-2">
           {question.data.artifacts.map((artifact, index) => (
             <ArtifactDisplay key={artifact.id || `artifact-${index}`} artifact={artifact} />
           ))}
@@ -1025,7 +1025,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
                 <table className="min-w-full border-collapse">
                   <thead>
                     <tr>
-                      <th className="p-2 border bg-sky-blue/10"></th> {/* Corner cell */}
+                      <th className="p-2 border bg-sky-blue/10"></th>
                       {horizontalItems.map((hItem, hIndex) => (
                         <th key={hItem.id || `h-${groupId}-${hIndex}`} className="p-2 border bg-sky-blue text-center font-normal">
                           {hItem.text}
