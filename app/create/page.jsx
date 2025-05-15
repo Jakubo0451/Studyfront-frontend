@@ -480,6 +480,8 @@ export default function CreateStudyPage() {
               studyTermsEnabled={study.hasTermsAndConditions}
               studyTerms={study.termsAndConditions}
               onStudyUpdated={handleStudyUpdate}
+              timedStudy={study.timedStudy}
+              endDate={study.endDate}
             />
           ) : (
             <div>
