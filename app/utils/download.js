@@ -52,7 +52,7 @@ const checkAlternativeEndpoints = async (studyId) => {
 };
 
 // Fetch study results from the backend with optimized endpoint selection
-const fetchStudyResults = async (studyId) => {
+export const fetchStudyResults = async (studyId) => {
   const token = localStorage.getItem('token');
   
   // First check if we have a previously successful endpoint stored

@@ -214,8 +214,12 @@ export default function CreateStudyPage() {
                 name: artifact.name,
                 imageUrl: artifact.imageUrl,
                 contentType: artifact.contentType || 'image',
-                title: artifact.title || artifact.label || artifact.name,
-                label: artifact.label || artifact.title || artifact.name
+                title: artifact.title !== undefined && artifact.title !== null ? artifact.title : 
+                       artifact.label !== undefined && artifact.label !== null ? artifact.label : 
+                       artifact.name,
+                label: artifact.label !== undefined && artifact.label !== null ? artifact.label : 
+                       artifact.title !== undefined && artifact.title !== null ? artifact.title : 
+                       artifact.name
               })) || []
             },
           }));
@@ -253,7 +257,6 @@ export default function CreateStudyPage() {
     setStudy((prevStudy) => {
       if (!prevStudy) return null;
       const newStudyState = { ...prevStudy, ...updatedFields };
-      console.log("Optimistically updated study state:", newStudyState);
       return newStudyState;
     });
 
@@ -263,7 +266,6 @@ export default function CreateStudyPage() {
 
   const handleQuestionsChange = (updatedQuestions) => {
     if (!Array.isArray(updatedQuestions)) {
-        console.error("Expected questions to be an array but got:", typeof updatedQuestions);
         return;
     }
     
@@ -273,7 +275,6 @@ export default function CreateStudyPage() {
         study._id,
         updatedQuestions,
         () => {
-            console.log("Questions saved successfully");
             setSaveStatus("Questions saved successfully!");
             setTimeout(() => setSaveStatus(""), 3000);
         },
@@ -288,8 +289,6 @@ export default function CreateStudyPage() {
   const handleQuestionDataChange = useCallback(
   (updatedDataFromChild) => {
     if (selectedQuestionIndex === null) return;
-    
-    console.log("Data from child component:", updatedDataFromChild);
     
     const nextQuestions = questions.map((q, index) => {
       if (index === selectedQuestionIndex) {
@@ -310,15 +309,14 @@ export default function CreateStudyPage() {
     const questionToSave = nextQuestions[selectedQuestionIndex];
 
     if (study?._id && questionToSave?._id) {
-      console.log("Saving question with ID:", questionToSave._id, "Data:", updatedDataFromChild);
       
       // Send the data properly formatted for the backend
       debouncedSave(
         study._id,
         questionToSave._id,
         { data: updatedDataFromChild },
+        // eslint-disable-next-line
         (updatedData) => {
-          console.log("Question saved successfully:", updatedData);
           setSaveStatus("Question saved!");
           setTimeout(() => setSaveStatus(""), 3000);
         },
@@ -587,16 +585,33 @@ export default function CreateStudyPage() {
             </div>
           )}
           {previewMode && study && (
-            <div className="mt-4">
-              <div className="bg-gray-100 p-2 mb-4 rounded text-center text-petrol-blue font-semibold">
-                PREVIEW MODE - Responses will not be saved
-              </div>
-              <div className="border-2 border-petrol-blue rounded-lg h-[600px]">
-                <iframe 
-                  src={`/study/${study._id}?preview=true`} 
-                  className="w-full h-full"
-                  title="Study Preview"
-                />
+            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-lg overflow-hidden max-w-5xl w-full max-h-[90vh] flex flex-col">
+                <div className="bg-petrol-blue text-white p-3 flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Study Preview</h3>
+                  <button 
+                    type="button"
+                    onClick={() => setPreviewMode(false)}
+                    className="text-white hover:text-red-200 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="bg-gray-100 p-2 text-center text-petrol-blue font-semibold">
+                  PREVIEW MODE - Responses will not be saved
+                </div>
+                
+                <div className="flex-grow" style={{height: "80vh"}}>
+                  <iframe 
+                    src={`/study/${study._id}?preview=true`} 
+                    className="w-full h-full"
+                    title="Study Preview"
+                    sandbox="allow-scripts allow-same-origin allow-forms"
+                  />
+                </div>
               </div>
             </div>
           )}

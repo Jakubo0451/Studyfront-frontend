@@ -1,8 +1,37 @@
 "use client"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/header/Header"
 import { BsPeople, BsBook, BsLightbulb } from 'react-icons/bs';
 
 export default function About() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('token');
+    if (!token) {
+      router.push('/login');
+    } else {
+      setIsAuthenticated(true);
+    }
+    setLoading(false);
+  }, [router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-petrol-blue"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect in useEffect
+  }
+
   return (
     <main className="min-h-screen">
       <Header/>
@@ -17,9 +46,9 @@ export default function About() {
             <BsPeople className="text-5xl text-petrol-blue mx-auto mb-4" />
             <h2 className="text-2xl text-gray-800 mb-4">Our Mission</h2>
             <p className="text-gray-600 leading-relaxed">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam 
-              vitae felis vel magna faucibus varius. Suspendisse potenti. 
-              Vestibulum ante ipsum primis in faucibus.
+              Studyfront is committed to empowering researchers by providing a versatile platform 
+              for creating, distributing, and analyzing studies. We aim to democratize the research 
+              process and make data collection both accessible and efficient for academics and organizations alike.
             </p>
           </div>
 
@@ -27,9 +56,9 @@ export default function About() {
             <BsBook className="text-5xl text-petrol-blue mx-auto mb-4" />
             <h2 className="text-2xl text-gray-800 mb-4">What We Do</h2>
             <p className="text-gray-600 leading-relaxed">
-              Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-              Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
-              nisi ut aliquip ex ea commodo consequat.
+              Our platform offers intuitive study creation tools with diverse question types, artifact integration, 
+              and flexible distribution options. We provide secure data collection with real-time analytics, 
+              demographics tracking, and comprehensive export capabilities to streamline your research workflow.
             </p>
           </div>
 
@@ -37,9 +66,9 @@ export default function About() {
             <BsLightbulb className="text-5xl text-petrol-blue mx-auto mb-4" />
             <h2 className="text-2xl text-gray-800 mb-4">Our Vision</h2>
             <p className="text-gray-600 leading-relaxed">
-              Duis aute irure dolor in reprehenderit in voluptate velit esse 
-              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat 
-              cupidatat non proident.
+              We envision a future where digital research tools are accessible to everyone, regardless of 
+              technical expertise. Studyfront strives to continuously innovate, creating solutions that 
+              bridge the gap between complex research needs and user-friendly technology.
             </p>
           </div>
         </section>

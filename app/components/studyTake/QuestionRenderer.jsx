@@ -8,77 +8,139 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 import { MdDragIndicator } from 'react-icons/md';
 
-// Add a new component for rendering artifacts
 const ArtifactDisplay = ({ artifact }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!artifact) return null;
 
+  const handleExpandArtifact = () => {
+    setIsExpanded(true);
+  };
+  
+  const handleCloseArtifact = () => {
+    setIsExpanded(false);
+  };
+
   const renderContent = () => {
-    // Determine how to render based on contentType
-    if (artifact.contentType && artifact.contentType.startsWith('image/')) {
-      return (
-      <div className="flex">
-        <img 
-          src={artifact.imageUrl} 
-          alt={artifact.name || artifact.label || 'Image artifact'} 
-          className="max-w-full h-auto object-contain object-bottom bg-sky-blue"
+  // Determine how to render based on contentType
+  if (artifact.contentType && artifact.contentType.startsWith('image/')) {
+    return (
+    <div className="flex">
+      <img 
+        src={artifact.imageUrl} 
+        alt={artifact.name || artifact.label || 'Image artifact'} 
+        className="max-w-full h-auto object-contain object-bottom bg-sky-blue"
+      />
+    </div>
+    );
+  } else if (artifact.contentType && artifact.contentType.startsWith('audio/')) {
+    return (
+      <div className="flex flex-col items-center bg-sky-blue pt-2 px-2">
+        <img src="/audio.png" alt="Audio icon" className="w-16 h-16 mb-2" />
+        <audio controls className="max-w-full">
+          <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
+          Your browser does not support the audio element.
+        </audio>
+      </div>
+    );
+  } else if (artifact.contentType && artifact.contentType.startsWith('video/')) {
+    return (
+      <div className="flex flex-col items-center bg-sky-blue">
+        <video controls className="max-w-full max-h-64">
+          <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
+          Your browser does not support the video element.
+        </video>
+      </div>
+    );
+  } else if (artifact.contentType === 'application/pdf') {
+    return (
+      <div className="flex flex-col items-center bg-sky-blue">
+        <iframe 
+          src={`${backendUrl}/api/upload/${artifact.id}`}
+          className="w-full h-64 border-0"
+          title={artifact.name || artifact.label || "PDF document"}
         />
       </div>
-      );
-    } else if (artifact.contentType && artifact.contentType.startsWith('audio/')) {
-      return (
-        <div className="flex flex-col items-center">
-          <img src="/audio.png" alt="Audio icon" className="w-16 h-16 mb-2" />
-          <audio controls className="w-full max-w-md">
-            <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
-            Your browser does not support the audio element.
-          </audio>
-          <p className="mt-1 text-sm text-gray-500">{artifact.name || artifact.label}</p>
-        </div>
-      );
-    } else if (artifact.contentType && artifact.contentType.startsWith('video/')) {
-      return (
-        <div className="flex flex-col items-center">
-          <video controls className="max-w-full max-h-64 rounded-md">
+    );
+  } else {
+    // Default display for other file types
+    return (
+      <div className="flex flex-col items-center">
+        <img src={artifact.imageUrl || "/file.png"} alt="File" className="w-16 h-16 mb-2" />
+        <p>{artifact.name || artifact.label || 'File attachment'}</p>
+      </div>
+    );
+  }
+};
+
+return (
+  <div className="rounded-md mb-4 grid justify-center max-w-md mx-auto">
+    {renderContent()}
+    <h4 className="mb-2 text-center bg-sky-blue px-4 py-2 rounded rounded-t-none wrap-break-word overflow-hidden flex flex-col items-center">
+      {artifact.label && (<>{artifact.label}</>)}
+      {(artifact.contentType && (artifact.contentType.startsWith('image/') || 
+                               artifact.contentType.startsWith('video/') || 
+                               artifact.contentType === 'application/pdf')) && (
+        <button 
+          onClick={handleExpandArtifact} 
+          className="text-md mt-1 flex items-center justify-center bg-petrol-blue text-white p-2 rounded hover:bg-oxford-blue transition duration-300" 
+          title={`Enlarge ${
+            artifact.contentType.startsWith('image/') ? 'image' : 
+            artifact.contentType.startsWith('video/') ? 'video' : 'PDF'
+          }`}
+        >
+          <IoExpand />
+        </button>
+      )}
+    </h4>
+    
+    {isExpanded && (
+      <div className="fixed inset-0 bg-black/70 bg-opacity-75 flex flex-col items-center justify-center z-50" onClick={handleCloseArtifact}>
+        {artifact.contentType && artifact.contentType.startsWith('image/') ? (
+          <img 
+            src={artifact.imageUrl}
+            alt="Expanded artifact"
+            className="max-w-[90%] max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : artifact.contentType && artifact.contentType.startsWith('video/') ? (
+          <video 
+            controls 
+            className="max-w-[90%] max-h-[90vh]" 
+            onClick={(e) => e.stopPropagation()}
+          >
             <source src={`${backendUrl}/api/upload/${artifact.id}`} type={artifact.contentType} />
             Your browser does not support the video element.
           </video>
-          <p className="mt-1 text-sm text-gray-500">{artifact.name || artifact.label}</p>
-        </div>
-      );
-    } else if (artifact.contentType === 'application/pdf') {
-      return (
-        <div className="flex flex-col items-center">
-          <img src="/pdf.png" alt="PDF icon" className="w-16 h-16 mb-2" />
-          <a 
-            href={`${backendUrl}/api/upload/${artifact.id}`} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="px-4 py-2 bg-petrol-blue text-white rounded-md hover:bg-oxford-blue transition-colors"
-          >
-            View PDF: {artifact.name || artifact.label || 'Document'}
-          </a>
-        </div>
-      );
-    } else {
-      // Default display for other file types
-      return (
-        <div className="flex flex-col items-center">
-          <img src={artifact.imageUrl || "/file.png"} alt="File" className="w-16 h-16 mb-2" />
-          <p>{artifact.name || artifact.label || 'File attachment'}</p>
-        </div>
-      );
-    }
-  };
-
-  return (
-    <div className="rounded-md mb-4 grid justify-center max-w-md mx-auto">
-      {renderContent()}
-      {artifact.label && (
-        <h4 className="mb-2 text-center bg-sky-blue px-4 py-2 rounded rounded-t-none wrap-break-word overflow-hidden flex flex-col items-center">{artifact.label} <button className="text-md mt-1 flex items-center justify-center bg-petrol-blue text-white p-2 rounded" title="Enlarge image"><IoExpand /></button></h4>
-      )}
-    </div>
-  );
+        ) : artifact.contentType && artifact.contentType === 'application/pdf' ? (
+          <iframe
+            src={`${backendUrl}/api/upload/${artifact.id}`}
+            className="w-[90%] h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : null}
+        <button onClick={handleCloseArtifact} className="bg-petrol-blue text-white mt-2 px-4 py-2 rounded hover:bg-oxford-blue transition duration-300">Close preview</button>
+      </div>
+    )}
+  </div>
+);
 };
+
+// eslint-disable-next-line
+const expandImage = (imageUrl) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <img src={imageUrl}
+        alt="Expanded artifact"
+        className="max-w-full max-h-full object-contain"
+        onClick={() => {
+          const modal = document.querySelector('.fixed.inset-0');
+          modal.classList.add('hidden');
+        }}
+      />
+      </div>
+  )
+}
 
 // Component for drag-and-drop ranking items
 const SortableRankingItem = ({ id, text, index }) => {
@@ -175,11 +237,11 @@ const SingleRankingGroup = ({
   }, [groupId, group, initialItems, handleChange, groupIndex]);
 
   return (
-    <div key={groupId} className={groupIndex > 0 ? "mb-4 p-3 border border-gray-200 rounded-md" : ""}>
+    <div key={groupId} className={groupIndex > 0 ? "mb-4" : ""}>
       {groupIndex > 0 && (
         <>
-          <p className="text-md text-gray-700 font-semibold mb-2">{group.name || `Group ${groupIndex + 1}`}</p>
-          <p className="text-sm text-gray-500 mb-2">Drag items to rank them from highest (top) to lowest (bottom).</p>
+          <p className="text-md text-gray-700 font-semibold mb-1">{group.label || `Group ${groupIndex + 1}`}:</p>
+          
         </>
       )}
 
@@ -190,7 +252,8 @@ const SingleRankingGroup = ({
         modifiers={[restrictToVerticalAxis]}
       >
         <SortableContext items={items.map(item => item.id)}>
-          <div className="bg-sky-blue p-3 rounded-md">
+          <div className="bg-sky-blue p-3 rounded-md touch-none">
+            <p className="text-sm text-petrol-blue mb-2">Drag items to rank them from highest (top) to lowest (bottom).</p>
             {items.map((item, index) => (
               <SortableRankingItem
                 key={item.id}
@@ -332,42 +395,15 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     }
   };
 
-  const getPrompt = () => {
-    if (!question.data) return "Question text not available";
-    
-    return question.data.title || 
-           question.data.prompt || 
-           question.data.questionText || 
-           `Question ${question._id}`;
-  };
-
   const renderTextQuestion = () => {
-    const textAreas = question.data?.textAreas;
+  const textAreas = question.data?.textAreas;
 
-    if (!Array.isArray(textAreas) || textAreas.length <= 1) {
-      const textAreaId = textAreas?.[0]?.id || 'default';
-      const singleLabel = textAreas?.[0]?.label || "Enter your answer here...";
-      const valueForSingleTextArea = typeof localResponse === 'object' && localResponse !== null 
-                                      ? (localResponse[textAreaId] || '') 
-                                      : (typeof localResponse === 'string' ? localResponse : '');
-
-      return (
-        <div className={commonStyles.questionContainer}>
-          {textAreas?.[0]?.label && <p className="block text-md text-gray-700 mb-1">{textAreas[0].label}</p>}
-          
-          {/* Add artifacts display */}
-          {renderArtifacts()}
-          
-          <textarea
-            className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
-            rows="4"
-            value={valueForSingleTextArea}
-            onChange={(e) => handleChange(e.target.value, textAreaId)}
-            placeholder={singleLabel}
-          />
-        </div>
-      );
-    }
+  if (!Array.isArray(textAreas) || textAreas.length <= 1) {
+    const textAreaId = textAreas?.[0]?.id || 'default';
+    const singleLabel = textAreas?.[0]?.label || "Input";
+    const valueForSingleTextArea = typeof localResponse === 'object' && localResponse !== null 
+                                    ? (localResponse[textAreaId] || '') 
+                                    : (typeof localResponse === 'string' ? localResponse : '');
 
     return (
       <div className={commonStyles.questionContainer}>
@@ -375,39 +411,50 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
         {/* Add artifacts display */}
         {renderArtifacts()}
         
-        {textAreas.map((area) => (
-          <div key={area.id} className="mb-4">
-            <label htmlFor={area.id} className="block text-md text-oxford-blue mb-1 font-semibold">{area.label || `Input for ${area.id}`}:</label>
-            <textarea
-              id={area.id}
-              className="w-full p-3 border-2 border-petrol-blue bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
-              rows="3"
-              value={(typeof localResponse === 'object' && localResponse !== null && localResponse[area.id]) || ''}
-              onChange={(e) => handleChange(e.target.value, area.id)}
-              placeholder={`Enter response for ${area.label || area.id}...`}
-            />
-          </div>
-        ))}
+        <div className="mb-4">
+          {textAreas?.[0]?.label && (
+            <label htmlFor={textAreaId} className="block text-md text-oxford-blue mb-1 font-semibold">
+              {singleLabel}:
+            </label>
+          )}
+          <textarea
+            id={textAreaId}
+            className="w-full p-3 border-2 border-petrol-blue bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+            rows="3"
+            value={valueForSingleTextArea}
+            onChange={(e) => handleChange(e.target.value, textAreaId)}
+            placeholder={`Enter response for ${singleLabel}...`}
+          />
+        </div>
       </div>
     );
-  };
+  }
 
-  const renderNumberQuestion = () => (
-    <div className="mb-6">
-      <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
+  return (
+    <div className={commonStyles.questionContainer}>
       
       {/* Add artifacts display */}
       {renderArtifacts()}
       
-      <input
-        type="number"
-        className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
-        value={localResponse || ''}
-        onChange={(e) => handleChange(Number(e.target.value))}
-        placeholder="Enter a number"
-      />
+      {textAreas.map((area) => (
+        <div key={area.id} className="mb-4">
+          <label htmlFor={area.id} className="block text-md text-oxford-blue mb-1 font-semibold">
+            {area.label || `Input for ${area.id}`}:
+          </label>
+          <textarea
+            id={area.id}
+            className="w-full p-3 border-2 border-petrol-blue bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+            rows="3"
+            value={(typeof localResponse === 'object' && localResponse !== null && localResponse[area.id]) || ''}
+            onChange={(e) => handleChange(e.target.value, area.id)}
+            placeholder={`Enter response for ${area.label || area.id}...`}
+          />
+        </div>
+      ))}
     </div>
   );
+};
+
 
   const renderMultiChoiceQuestion = () => {
     const choiceGroups = question.data?.choiceGroups;
@@ -426,7 +473,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
             if (options.length === 0) {
               return (
                 <div key={groupId} className="mb-4 p-3 border border-gray-200 rounded-md">
-                  <p className="text-md text-gray-700 font-semibold mb-1">{group.name || `Group ${groupIndex + 1}`}</p>
+                  <p className="text-md text-gray-700 font-semibold mb-1">{group.label || `Group ${groupIndex + 1}`}:</p>
                   <div className="text-sm text-gray-500">No options defined for this choice group.</div>
                 </div>
               );
@@ -467,29 +514,39 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     }
 
     const singleOptions = (Array.isArray(choiceGroups) && choiceGroups.length === 1)
-                          ? choiceGroups[0].options
-                          : extractOptions(question, 'multipleChoice');
+                        ? choiceGroups[0].options
+                        : extractOptions(question, 'multipleChoice');
 
-    if (!singleOptions || singleOptions.length === 0) {
-      return <div className="text-red-500">This multiple choice question has no options.</div>;
-    }
-    
-    const singleGroupId = (Array.isArray(choiceGroups) && choiceGroups.length === 1) 
-                          ? (choiceGroups[0].id || 'default_choice_group') 
-                          : 'default_choice_group';
+  if (!singleOptions || singleOptions.length === 0) {
+    return <div className="text-red-500">This multiple choice question has no options.</div>;
+  }
+  
+  const singleGroupId = (Array.isArray(choiceGroups) && choiceGroups.length === 1) 
+                        ? (choiceGroups[0].id || 'default_choice_group') 
+                        : 'default_choice_group';
 
+  const groupName = (Array.isArray(choiceGroups) && choiceGroups.length === 1)
+                    ? choiceGroups[0].label || choiceGroups[0].name
+                    : null;
 
-    return (
-      <div className="mb-6">
-        <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
-        {(Array.isArray(choiceGroups) && choiceGroups.length === 1 && choiceGroups[0].name) && (
-            <p className="text-md text-gray-700 font-semibold mb-2">{choiceGroups[0].name}</p>
+  return (
+    <div className="mb-6">
+      
+      {/* Add artifacts display */}
+      {renderArtifacts()}
+      
+      <div className="mb-4 rounded-md flex flex-col items-center">
+        {groupName && (
+          <p className="text-md text-oxford-blue font-semibold mb-2">{groupName}:</p>
         )}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {singleOptions.map((option, index) => {
             const optionValue = typeof option === 'string' ? option : option.text;
             return (
-              <label key={option.id || `option-${singleGroupId}-${index}`} className="flex items-center space-x-3 cursor-pointer hover:bg-sky-blue p-2 rounded-md transition-colors">
+              <label 
+                key={option.id || `option-${singleGroupId}-${index}`} 
+                className="flex items-center space-x-3 cursor-pointer hover:bg-sky-blue px-2 py-1 rounded-md transition-colors"
+              >
                 <input
                   type="radio"
                   name={question._id}
@@ -504,8 +561,9 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
           })}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   // Helper function to extract options from different question structures
   const extractOptions = (question, type) => {
@@ -585,28 +643,37 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     }
 
     const singleGroupOptions = checkboxGroups && checkboxGroups.length === 1
-      ? checkboxGroups[0].options
-      : extractOptions(question, 'checkbox');
+    ? checkboxGroups[0].options
+    : extractOptions(question, 'checkbox');
 
-    const responseArray = Array.isArray(localResponse) ? localResponse : [];
-    const singleGroupId = checkboxGroups && checkboxGroups.length === 1 ? (checkboxGroups[0].id || 'default_checkbox_group') : 'default_checkbox_group';
+  const responseArray = Array.isArray(localResponse) ? localResponse : [];
+  const singleGroupId = checkboxGroups && checkboxGroups.length === 1 
+    ? (checkboxGroups[0].id || 'default_checkbox_group') 
+    : 'default_checkbox_group';
+  
+  const groupName = checkboxGroups && checkboxGroups.length === 1 
+    ? checkboxGroups[0].label 
+    : null;
 
-    return (
-      <div className="mb-6">
-        <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
-        
-        {/* Add artifacts display */}
-        {renderArtifacts()}
-        
-        {checkboxGroups && checkboxGroups.length === 1 && checkboxGroups[0].name && (
-            <p className="text-md text-gray-700 font-semibold mb-2">{checkboxGroups[0].name}</p>
+  return (
+    <div className="mb-6">
+
+      {/* Add artifacts display */}
+      {renderArtifacts()}
+      
+      <div className="mb-4 flex flex-col items-center rounded-md">
+        {groupName && (
+          <p className="text-md text-oxford-blue font-semibold mb-2">{groupName}:</p>
         )}
-        <div className="space-y-3">
+        <div className="space-y-2">
           {singleGroupOptions.map((option, index) => {
             const optionValue = typeof option === 'string' ? option : option.text;
             const optionId = option.id || `option-${singleGroupId}-${index}`;
             return (
-              <label key={optionId} className="flex items-center space-x-3 cursor-pointer hover:bg-sky-blue p-2 rounded-md transition-colors">
+              <label 
+                key={optionId} 
+                className="flex items-center space-x-3 cursor-pointer hover:bg-sky-blue py-1 px-2 rounded-md transition-colors"
+              >
                 <input
                   type="checkbox"
                   value={optionValue}
@@ -625,8 +692,9 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
           })}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
   const renderRatingQuestion = () => {
   const ratingScales = question.data?.ratingScales;
@@ -640,54 +708,54 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
   }
 
   if (ratingScales.length === 1) {
-    const ratingScale = ratingScales[0];
-    const scaleId = ratingScale.id || 'default_rating_scale';
-    const min = parseInt(ratingScale.min) || 1;
-    const max = parseInt(ratingScale.max) || 5;
-    
-    const currentVal = (typeof localResponse === 'object' && localResponse !== null) 
-                       ? localResponse[scaleId] 
-                       : localResponse;
-    const displayValue = currentVal !== null && currentVal !== undefined ? currentVal : '';
-    
-    // Calculate fill percentage for the slider
-    const fillPercentage = currentVal !== undefined && currentVal !== null 
-      ? ((currentVal - min) / (max - min)) * 100 
-      : 0;
+  const ratingScale = ratingScales[0];
+  const scaleId = ratingScale.id || 'default_rating_scale';
+  const min = parseInt(ratingScale.min) || 1;
+  const max = parseInt(ratingScale.max) || 5;
+  
+  const currentVal = (typeof localResponse === 'object' && localResponse !== null) 
+                     ? localResponse[scaleId] 
+                     : localResponse;
+  const displayValue = currentVal !== null && currentVal !== undefined ? currentVal : '';
+  
+  // Calculate fill percentage for the slider
+  const fillPercentage = currentVal !== undefined && currentVal !== null 
+    ? ((currentVal - min) / (max - min)) * 100 
+    : 0;
 
-    return (
-      <div className="mb-6">
-        <label className="block text-lg text-petrol-blue mb-3">{getPrompt()}</label>
-        {ratingScale.name && (
-          <p className="text-gray-600 mb-2">{ratingScale.name}</p>
-        )}
-        
-        {/* Add artifacts display */}
-        {renderArtifacts()}
-        
-        <div className="flex flex-col items-center space-y-2">
-          <div className="flex justify-between w-full px-1 text-sm text-gray-500">
-            <span>{min}</span>
-            <span>{max}</span>
-          </div>
-          <div className="w-full">
-            <input
-              type="range"
-              min={min}
-              max={max}
-              value={currentVal === undefined || currentVal === null ? min : currentVal}
-              onChange={(e) => handleChange(parseInt(e.target.value), scaleId)}
-              className="w-full h-2 rounded-lg appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, #2C3E50 0%, #2C3E50 ${fillPercentage}%, #e2e8f0 ${fillPercentage}%, #e2e8f0 100%)`
-              }}
-            />
-          </div>
-          <span className="text-lg font-semibold text-petrol-blue">{displayValue}</span>
+  return (
+    <div className="mb-6">
+      
+      
+      {/* Add artifacts display */}
+      {renderArtifacts()}
+      
+      {ratingScale.name && (
+        <p className="text-md text-oxford-blue mb-1 font-semibold">{ratingScale.name}:</p>
+      )}
+      <div className="flex flex-col items-center">
+        <div className="w-full">
+          <input
+            type="range"
+            min={min}
+            max={max}
+            value={currentVal === undefined || currentVal === null ? min : currentVal}
+            onChange={(e) => handleChange(parseInt(e.target.value), scaleId)}
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(to right, var(--color-petrol-blue) 0%, var(--color-petrol-blue) ${fillPercentage}%, var(--color-sky-blue) ${fillPercentage}%, var(--color-sky-blue) 100%)`
+            }}
+          />
         </div>
+        <div className="flex justify-between w-full px-1 text-md text-oxford-blue">
+          <span>{min}</span>
+          <span>{max}</span>
+        </div>
+        <span className="text-lg text-black bg-sky-blue px-3 py-1 rounded">Selected: <span className="font-bold">{displayValue}</span></span>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="mb-6">
@@ -710,7 +778,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
           : 0;
 
         return (
-          <div key={scaleId} className="mb-6 p-3 border border-gray-200 rounded-md">
+          <div key={scaleId} className="mb-4">
             {ratingScale.name && (
               <p className="text-md text-oxford-blue mb-1 font-semibold">{ratingScale.name}:</p>
             )}
@@ -742,33 +810,34 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 };
 
   const renderDropdownQuestion = () => {
-    const dropdowns = question.data?.dropdowns;
+  const dropdowns = question.data?.dropdowns;
 
-    if (!Array.isArray(dropdowns) || dropdowns.length === 0) {
-      return <div className="text-red-500">This dropdown question has no dropdowns defined.</div>;
-    }
+  if (!Array.isArray(dropdowns) || dropdowns.length === 0) {
+    return <div className="text-red-500">This dropdown question has no dropdowns defined.</div>;
+  }
 
-    if (dropdowns.length === 1) {
-      const singleDropdown = dropdowns[0];
-      const dropdownId = singleDropdown.id || 'default_dropdown';
-      const options = singleDropdown.options || [];
-      
-      const currentValue = (typeof localResponse === 'object' && localResponse !== null)
-                           ? localResponse[dropdownId]
-                           : localResponse;
+  if (dropdowns.length === 1) {
+    const singleDropdown = dropdowns[0];
+    const dropdownId = singleDropdown.id || 'default_dropdown';
+    const options = singleDropdown.options || [];
+    
+    const currentValue = (typeof localResponse === 'object' && localResponse !== null)
+                         ? localResponse[dropdownId]
+                         : localResponse;
 
-      return (
-        <div className="mb-6">
-          <label htmlFor={dropdownId} className="block text-lg text-petrol-blue mb-3">
-            {singleDropdown.name || question.data.title || question.data.prompt || "Select an option"}
+    return (
+      <div className="mb-6">
+        
+        {/* Add artifacts display */}
+        {renderArtifacts()}
+        
+        <div className="mb-4 p-3 border border-gray-200 rounded-md">
+          <label htmlFor={dropdownId} className="block text-md text-oxford-blue font-semibold mb-2">
+            {singleDropdown.label || singleDropdown.name || "Selection"}:
           </label>
-          
-          {/* Add artifacts display */}
-          {renderArtifacts()}
-          
           <select
             id={dropdownId}
-            className="w-full p-3 border-2 border-petrol-blue rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+            className="w-full p-3 border-2 border-petrol-blue bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
             value={currentValue || ''}
             onChange={(e) => handleChange(e.target.value, dropdownId)}
           >
@@ -780,55 +849,56 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
             ))}
           </select>
         </div>
-      );
-    }
-
-    return (
-      <div className="mb-6">
-        
-        {/* Add artifacts display */}
-        {renderArtifacts()}
-        
-        {dropdowns.map((dropdownItem, index) => {
-          const dropdownId = dropdownItem.id || `dropdown-${index}`;
-          const options = dropdownItem.options || [];
-          const currentDropdownValue = (typeof localResponse === 'object' && localResponse !== null)
-                                       ? localResponse[dropdownId]
-                                       : undefined;
-          
-          if (options.length === 0) {
-            return (
-              <div key={dropdownId} className="mb-4 p-3 border rounded-md">
-                <p className="text-md text-gray-700 font-semibold mb-1">{dropdownItem.name || `Selection ${index + 1}`}</p>
-                <div className="text-sm text-gray-500">No options defined for this selection.</div>
-              </div>
-            );
-          }
-
-          return (
-            <div key={dropdownId} className="mb-4 p-3 border border-gray-200 rounded-md">
-              <label htmlFor={dropdownId} className="block text-md text-oxford-blue font-semibold mb-2">
-                {dropdownItem.label || `Selection ${index + 1}`}:
-              </label>
-              <select
-                id={dropdownId}
-                className="w-full p-3 border-2 border-petrol-blue bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
-                value={currentDropdownValue || ''}
-                onChange={(e) => handleChange(e.target.value, dropdownId)}
-              >
-                <option value="">-- Select an option --</option>
-                {options.map((option, optIndex) => (
-                  <option key={option.id || `option-${dropdownId}-${optIndex}`} value={option.text}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-            </div>
-          );
-        })}
       </div>
     );
-  };
+  }
+
+  return (
+    <div className="mb-6">
+      
+      {/* Add artifacts display */}
+      {renderArtifacts()}
+      
+      {dropdowns.map((dropdownItem, index) => {
+        const dropdownId = dropdownItem.id || `dropdown-${index}`;
+        const options = dropdownItem.options || [];
+        const currentDropdownValue = (typeof localResponse === 'object' && localResponse !== null)
+                                     ? localResponse[dropdownId]
+                                     : undefined;
+        
+        if (options.length === 0) {
+          return (
+            <div key={dropdownId} className="mb-4 p-3 border rounded-md">
+              <p className="text-md text-gray-700 font-semibold mb-1">{dropdownItem.name || `Selection ${index + 1}`}</p>
+              <div className="text-sm text-gray-500">No options defined for this selection.</div>
+            </div>
+          );
+        }
+
+        return (
+          <div key={dropdownId} className="mb-4 p-3 border border-gray-200 rounded-md">
+            <label htmlFor={dropdownId} className="block text-md text-oxford-blue font-semibold mb-2">
+              {dropdownItem.label || `Selection ${index + 1}`}:
+            </label>
+            <select
+              id={dropdownId}
+              className="w-full p-3 border-2 border-petrol-blue bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-petrol-blue"
+              value={currentDropdownValue || ''}
+              onChange={(e) => handleChange(e.target.value, dropdownId)}
+            >
+              <option value="">-- Select an option --</option>
+              {options.map((option, optIndex) => (
+                <option key={option.id || `option-${dropdownId}-${optIndex}`} value={option.text}>
+                  {option.text}
+                </option>
+              ))}
+            </select>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
   const renderRankingQuestion = () => {
     const rankGroups = question.data?.rankGroups;
@@ -855,15 +925,15 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
       return (
         <div className="mb-6">
-          <label className="block text-lg text-petrol-blue mb-3">
-            {singleGroup.name || question.data.title || question.data.prompt || "Drag to rank items"}
-          </label>
 
           {/* Add artifacts display */}
           {renderArtifacts()}
 
-          <div className="mt-3">
-            <p className="text-sm text-gray-500 mb-2">Drag items to rank them from highest (top) to lowest (bottom).</p>
+          <label className="block text-md text-oxford-blue font-semibold">
+            {singleGroup.label || "Please rank items in this group"}:
+          </label>
+
+          <div className="mt-1">
             <SingleRankingGroup
               group={singleGroup}
               groupId={groupId}
@@ -881,9 +951,6 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     
     return (
       <div className="mb-6">
-        <label className="block text-lg text-petrol-blue mb-3">
-          {question.data.title || question.data.prompt || "Please rank items in each group"}
-        </label>
         
         {/* Add artifacts display */}
         {renderArtifacts()}
@@ -894,8 +961,8 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
           if (options.length === 0) {
             return (
-              <div key={groupId} className="mb-4 p-3 border border-gray-200 rounded-md">
-                <p className="text-md text-gray-700 font-semibold mb-1">{group.name || `Group ${groupIndex + 1}`}</p>
+              <div key={groupId} className="mb-4 p-3 border rounded-md">
+                <p className="text-md text-gray-700 font-semibold mb-1">{group.label || `Group ${groupIndex + 1}`}:</p>
                 <div className="text-sm text-gray-500">No options defined for this ranking group.</div>
               </div>
             );
@@ -945,18 +1012,18 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
       return (
         <div className="mb-6">
-          <label className="block text-lg text-petrol-blue mb-3">
-            {singleGroup.name || question.data.title || question.data.prompt || "Matrix Question"}
-          </label>
           
           {/* Add artifacts display */}
           {renderArtifacts()}
           
+          <label className="block text-md text-oxford-blue font-semibold mb-2">
+            {singleGroup.label || "Please select an option for each item"}:
+          </label>
           <div className="overflow-x-auto">
             <table className="min-w-full border-collapse">
               <thead>
                 <tr>
-                  <th className="p-2 border bg-sky-blue/10"></th> {/* Corner cell */}
+                  <th className="p-2 border bg-sky-blue/10"></th>
                   {horizontalItems.map((hItem, hIndex) => (
                     <th key={hItem.id || `h-${hIndex}`} className="p-2 border bg-sky-blue text-center">
                       {hItem.text}
@@ -1019,15 +1086,15 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
                                             ? localResponse[groupId]
                                             : {};
           return (
-            <div key={groupId} className="mb-6 p-3 rounded-md">
-              <p className="text-md text-oxford-blue font-semibold mb-2">{group.name || `Matrix ${groupIndex + 1}`}:</p>
+            <div key={groupId} className="mb-6 rounded-md">
+              <p className="text-md text-oxford-blue font-semibold mb-2">{group.label || `Matrix ${groupIndex + 1}`}:</p>
               <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse">
                   <thead>
                     <tr>
-                      <th className="p-2 border bg-sky-blue/10"></th>
+                      <th className="p-2 border border-petrol-blue bg-sky-blue/10"></th>
                       {horizontalItems.map((hItem, hIndex) => (
-                        <th key={hItem.id || `h-${groupId}-${hIndex}`} className="p-2 border bg-sky-blue text-center font-normal">
+                        <th key={hItem.id || `h-${groupId}-${hIndex}`} className="p-2 border border-petrol-blue bg-sky-blue text-center font-normal">
                           {hItem.text}
                         </th>
                       ))}
@@ -1036,11 +1103,11 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
                   <tbody>
                     {verticalItems.map((vItem, vIndex) => (
                       <tr key={vItem.id || `v-${groupId}-${vIndex}`}>
-                        <td className="p-2 border bg-sky-blue/30">{vItem.text}</td>
+                        <td className="p-2 border border-petrol-blue bg-sky-blue/50">{vItem.text}</td>
                         {horizontalItems.map((hItem, hIndex) => {
                           const isSelected = currentGroupMatrixResponse && currentGroupMatrixResponse[vItem.text] === hItem.text;
                           return (
-                            <td key={hItem.id || `h-val-${groupId}-${hIndex}`} className="p-2 border text-center">
+                            <td key={hItem.id || `h-val-${groupId}-${hIndex}`} className="p-2 border border-petrol-blue text-center">
                               <input
                                 type="radio"
                                 name={`matrix_row_${groupId}_${vItem.id || vIndex}`}
@@ -1072,8 +1139,6 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
     switch (question.type?.toLowerCase()) {
       case 'text':
         return renderTextQuestion();
-      case 'number':
-        return renderNumberQuestion();
       case 'multiplechoice':
       case 'multiple choice':
         return renderMultiChoiceQuestion();
