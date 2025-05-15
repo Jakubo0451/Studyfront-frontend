@@ -127,7 +127,7 @@ export default function SharePopup({ study, onStudyChange }) {
             value={currentStudy?._id || ''}
             onChange={handleStudyChange}
           >
-            {studies.map((s) => (
+            {studies.filter(s => s.active).map((s) => (
               <option key={s._id} value={s._id}>
                 {s.title}
               </option>
