@@ -315,6 +315,7 @@ export default function CreateStudyPage() {
         study._id,
         questionToSave._id,
         { data: updatedDataFromChild },
+        // eslint-disable-next-line
         (updatedData) => {
           setSaveStatus("Question saved!");
           setTimeout(() => setSaveStatus(""), 3000);
