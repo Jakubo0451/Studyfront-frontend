@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import commonStyles from '../../styles/questionRenderer/common.module.css';
 import backendUrl from 'environment';
 import { IoExpand } from "react-icons/io5";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { CSS } from '@dnd-kit/utilities';
+import { MdDragIndicator } from 'react-icons/md';
 
 // Add a new component for rendering artifacts
 const ArtifactDisplay = ({ artifact }) => {
@@ -75,14 +80,147 @@ const ArtifactDisplay = ({ artifact }) => {
   );
 };
 
-// Now modify the QuestionRenderer component by adding artifact rendering
+// Component for drag-and-drop ranking items
+const SortableRankingItem = ({ id, text, index }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id,
+    modifiers: [restrictToVerticalAxis],
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center p-2 mb-2 bg-white border border-gray-200 rounded-md shadow-sm"
+    >
+      <div className="mr-3 cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
+        <MdDragIndicator className="text-petrol-blue text-xl" />
+      </div>
+      <span className="flex-grow">{text}</span>
+      <span className="bg-petrol-blue text-white w-6 h-6 rounded-full flex items-center justify-center text-sm ml-2">
+        {index + 1}
+      </span>
+    </div>
+  );
+};
+
+const SingleRankingGroup = ({
+  group,
+  groupId,
+  groupIndex,
+  initialItems,
+  localResponse,
+  handleChange,
+  sensors
+}) => {
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    let sortedItems = [...initialItems];
+
+    if (typeof localResponse === 'object' && localResponse !== null) {
+      const groupResponse = groupIndex === 0
+        ? localResponse
+        : (localResponse[groupId] || {});
+
+      const rankedItems = initialItems.filter(item =>
+        groupResponse[item.text] !== undefined
+      );
+
+      const unrankedItems = initialItems.filter(item =>
+        groupResponse[item.text] === undefined
+      );
+
+      rankedItems.sort((a, b) =>
+        groupResponse[a.text] - groupResponse[b.text]
+      );
+
+      sortedItems = [...rankedItems, ...unrankedItems];
+    }
+
+    setItems(sortedItems);
+  }, [initialItems, localResponse, groupId]);
+
+  const handleDragEnd = useCallback((event) => {
+    const { active, over } = event;
+
+    if (active.id !== over.id) {
+      setItems(currentItems => {
+        const oldIndex = currentItems.findIndex(item => item.id === active.id);
+        const newIndex = currentItems.findIndex(item => item.id === over.id);
+
+        const newItems = arrayMove(currentItems, oldIndex, newIndex);
+
+        const newResponse = {};
+        newItems.forEach((item, index) => {
+          newResponse[item.text] = index + 1;
+        });
+
+        setTimeout(() => {
+          if (groupIndex === 0 && group.options.length === initialItems.length) {
+            handleChange(newResponse);
+          } else {
+            handleChange(newResponse, groupId);
+          }
+        }, 0);
+
+        return newItems;
+      });
+    }
+  }, [groupId, group, initialItems, handleChange, groupIndex]);
+
+  return (
+    <div key={groupId} className={groupIndex > 0 ? "mb-4 p-3 border border-gray-200 rounded-md" : ""}>
+      {groupIndex > 0 && (
+        <>
+          <p className="text-md text-gray-700 font-semibold mb-2">{group.name || `Group ${groupIndex + 1}`}</p>
+          <p className="text-sm text-gray-500 mb-2">Drag items to rank them from highest (top) to lowest (bottom).</p>
+        </>
+      )}
+
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+        modifiers={[restrictToVerticalAxis]}
+      >
+        <SortableContext items={items.map(item => item.id)}>
+          <div className="bg-sky-blue p-3 rounded-md">
+            {items.map((item, index) => (
+              <SortableRankingItem
+                key={item.id}
+                id={item.id}
+                text={item.text}
+                index={index}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </div>
+  ); 
+};
+
+// Main component
 export default function QuestionRenderer({ question, onResponse, currentResponse }) {
-  // Existing code remains unchanged
   const [localResponse, setLocalResponse] = useState(currentResponse);
 
   useEffect(() => {
     setLocalResponse(currentResponse);
-  }, [currentResponse, question._id]); 
+  }, [currentResponse, question._id]);
+
+  // Sensors for drag and drop functionality
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   console.log('Question data:', {
     type: question.type,
@@ -694,6 +832,7 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
   const renderRankingQuestion = () => {
     const rankGroups = question.data?.rankGroups;
+    const currentRanking = (typeof localResponse === 'object' && localResponse !== null) ? localResponse : {};
 
     if (!Array.isArray(rankGroups) || rankGroups.length === 0) {
       return <div className="text-red-500">This ranking question has no ranking groups defined.</div>;
@@ -701,7 +840,6 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
 
     if (rankGroups.length === 1) {
       const singleGroup = rankGroups[0];
-      /* eslint-disable-next-line */
       const groupId = singleGroup.id || 'default_rank_group';
       const options = singleGroup.options || [];
 
@@ -709,50 +847,38 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
         return <div className="text-red-500">This ranking group has no options.</div>;
       }
 
-      const currentRanking = (typeof localResponse === 'object' && localResponse !== null) ? localResponse : {};
+      // Transform options into a sorted array for dragging
+      const initialItems = options.map(option => ({
+        id: option.id || `option-${option.text}`,
+        text: option.text
+      }));
 
       return (
         <div className="mb-6">
           <label className="block text-lg text-petrol-blue mb-3">
-            {singleGroup.name || question.data.title || question.data.prompt || "Rank the following items"}
+            {singleGroup.name || question.data.title || question.data.prompt || "Drag to rank items"}
           </label>
-          
+
           {/* Add artifacts display */}
           {renderArtifacts()}
-          
-          <div className="mt-3 space-y-2">
-            <p className="text-sm text-gray-500">Enter a number to rank items (e.g., 1 for highest).</p>
-            <div className="bg-sky-blue p-3 rounded-md">
-              {options.map((option, index) => (
-                <div key={option.id || `option-${index}`} className="flex items-center space-x-3 mb-2">
-                  <input
-                    type="number"
-                    min="1"
-                    max={options.length}
-                    value={(currentRanking && currentRanking[option.text]) || ""}
-                    onChange={(e) => {
-                      const newRankingForGroup = { ...(currentRanking || {}) };
-                      const rankValue = e.target.value ? parseInt(e.target.value) : null;
-                      if (rankValue === null || (rankValue >= 1 && rankValue <= options.length)) {
-                        newRankingForGroup[option.text] = rankValue === null ? undefined : rankValue;
-                        if (newRankingForGroup[option.text] === undefined) {
-                          delete newRankingForGroup[option.text];
-                        }
-                      }
-                      handleChange(newRankingForGroup);
-                    }}
-                    className="w-16 p-1 border border-gray-300 rounded"
-                    placeholder="rank"
-                  />
-                  <span>{option.text}</span>
-                </div>
-              ))}
-            </div>
+
+          <div className="mt-3">
+            <p className="text-sm text-gray-500 mb-2">Drag items to rank them from highest (top) to lowest (bottom).</p>
+            <SingleRankingGroup
+              group={singleGroup}
+              groupId={groupId}
+              groupIndex={0}
+              initialItems={initialItems}
+              localResponse={currentRanking}
+              //localResponse={localResponse}
+              handleChange={handleChange}
+              sensors={sensors}
+            />
           </div>
         </div>
       );
     }
-
+    
     return (
       <div className="mb-6">
         <label className="block text-lg text-petrol-blue mb-3">
@@ -775,41 +901,23 @@ export default function QuestionRenderer({ question, onResponse, currentResponse
             );
           }
           
-          const currentGroupRanking = (typeof localResponse === 'object' && localResponse !== null && typeof localResponse[groupId] === 'object')
-                                      ? localResponse[groupId]
-                                      : {};
+          // Transform options into a sorted array for dragging
+          const initialItems = options.map(option => ({
+            id: option.id || `option-${groupId}-${option.text}`,
+            text: option.text
+          }));
 
           return (
-            <div key={groupId} className="mb-4 p-3 border border-gray-200 rounded-md">
-              <p className="text-md text-gray-700 font-semibold mb-2">{group.name || `Group ${groupIndex + 1}`}</p>
-              <p className="text-sm text-gray-500 mb-2">Enter a number to rank items (e.g., 1 for highest).</p>
-              <div className="bg-sky-blue p-3 rounded-md">
-                {options.map((option, optionIndex) => (
-                  <div key={option.id || `option-${groupId}-${optionIndex}`} className="flex items-center space-x-3 mb-2">
-                    <input
-                      type="number"
-                      min="1"
-                      max={options.length}
-                      value={(currentGroupRanking && currentGroupRanking[option.text]) || ""}
-                      onChange={(e) => {
-                        const newRankingForGroup = { ...(currentGroupRanking || {}) };
-                        const rankValue = e.target.value ? parseInt(e.target.value) : null;
-                        if (rankValue === null || (rankValue >= 1 && rankValue <= options.length)) {
-                          newRankingForGroup[option.text] = rankValue === null ? undefined : rankValue;
-                          if (newRankingForGroup[option.text] === undefined) {
-                            delete newRankingForGroup[option.text];
-                          }
-                        }
-                        handleChange(newRankingForGroup, groupId);
-                      }}
-                      className="w-16 p-1 border border-gray-300 rounded"
-                      placeholder="rank"
-                    />
-                    <span>{option.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SingleRankingGroup 
+              key={groupId}
+              group={group}
+              groupId={groupId}
+              groupIndex={groupIndex + 1} // +1 because 0 is special-cased for single groups
+              initialItems={initialItems}
+              localResponse={localResponse}
+              handleChange={handleChange}
+              sensors={sensors}
+            />
           );
         })}
       </div>

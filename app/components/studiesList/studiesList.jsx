@@ -8,7 +8,7 @@ import backendUrl from 'environment';
 import Loading from "@/loading.js";
 import { useRouter } from 'next/navigation';
 import { downloadAsCSV, downloadAsJSON } from "@/utils/download.js";
-import { startStudy, editStudy } from "@/utils/studyActions.js";
+import { startStudy, editStudy, endStudy } from "@/utils/studyActions.js";
 
 const StudiesList = ({ refreshTrigger }) => {
     const [data, setData] = useState([]);
@@ -46,7 +46,51 @@ const StudiesList = ({ refreshTrigger }) => {
             }
 
             const studies = await response.json();
-            setData(studies);
+            
+            const currentDate = new Date();
+            // eslint-disable-next-line no-unused-vars
+            const updatedStudies = [...studies];
+            
+            const endDatePromises = studies
+                .filter(study => 
+                    study.active && 
+                    !study.completed && 
+                    study.endDate && 
+                    new Date(study.endDate) < currentDate
+                )
+                .map(async (expiredStudy) => {
+                    try {
+                        await endStudy(expiredStudy, 
+                            (updatedStudy) => {
+                                setData(prevData => 
+                                    prevData.map(study => 
+                                        study._id === updatedStudy._id ? updatedStudy : study
+                                    )
+                                );
+                                console.log(`Study ${expiredStudy.title} automatically marked as completed (past end date)`);
+                            },
+                            (error) => {
+                                console.error(`Failed to auto-complete study ${expiredStudy.title}:`, error);
+                            }
+                        );
+                        
+                        return {
+                            ...expiredStudy,
+                            active: false,
+                            completed: true
+                        };
+                    } catch (err) {
+                        console.error(`Error processing study ${expiredStudy.title}:`, err);
+                        return expiredStudy;
+                    }
+                });
+                
+            if (endDatePromises.length > 0) {
+                await Promise.all(endDatePromises);
+                fetchStudies();
+            } else {
+                setData(studies);
+            }
         } catch (err) {
             console.error("Error fetching studies:", err);
             setError('Failed to load studies.');

@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import backendUrl from 'environment';
 import StudyTakeComponent from 'app/components/studyTake/StudyTakeComponent';
 
 export default function TakeStudyPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [study, setStudy] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +17,10 @@ export default function TakeStudyPage() {
   useEffect(() => {
     const fetchStudy = async () => {
       try {
+        // Check if we're in preview mode
+        const isPreview = searchParams.get('preview') === 'true';
+        
+        // Normal fetch code
         const response = await fetch(`${backendUrl}/api/studies/${params.id}`, {
           method: 'GET',
           headers: {
@@ -29,7 +34,13 @@ export default function TakeStudyPage() {
 
         const data = await response.json();
         console.log('Fetched study data:', data);
-        console.log('Study active status:', data.active);
+        
+        // If we're in preview mode, make sure the study is allowed to be taken
+        if (isPreview) {
+          // Force the study to be active in preview mode
+          data.active = true;
+        }
+        
         setStudy(data);
         setLoading(false);
       } catch (error) {
@@ -85,6 +96,30 @@ export default function TakeStudyPage() {
     );
   }
 
+  if (!study?.active && !study?.completed) {
+    return (
+      <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
+        <div className="bg-white rounded-lg shadow-md p-8 max-w-lg w-full text-center">
+          <h2 className="text-2xl font-bold text-petrol-blue mb-4">Study Has not started</h2>
+          <p className="mb-6 text-gray-600">
+            Thank you for your interest, but this study is not ready yet, chack back later.
+          </p>
+          <div className="my-8">
+            <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+              <div 
+                className="bg-petrol-blue h-2.5 rounded-full transition-all duration-300" 
+                style={{ width: `${(redirectCountdown / 30) * 100}%` }}
+              ></div>
+            </div>
+            <p className="text-gray-600">
+              Redirecting in {redirectCountdown} seconds...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (!study?.active) {
     return (
       <div className="min-h-screen bg-sky-blue p-8 flex justify-center items-center">
@@ -111,7 +146,10 @@ export default function TakeStudyPage() {
 
   return (
     <div className="min-h-screen bg-ice-blue p-8 flex justify-center">
-      <StudyTakeComponent study={study} />
+      <StudyTakeComponent 
+        study={study} 
+        previewMode={searchParams.get('preview') === 'true'} 
+      />
     </div>
   );
 }

@@ -4,17 +4,81 @@ import { useRouter } from "next/navigation";
 import backendUrl from "environment";
 import QuestionRenderer from "./QuestionRenderer";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
-export default function StudyTakeComponent({ study }) {
+// Add previewMode to props
+export default function StudyTakeComponent({ study, previewMode = false }) {
   if (!study?._id) {
     return <div className="p-8">Invalid study configuration.</div>;
   }
 
-  const [hasStarted, setHasStarted] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  // Session key for storing progress during page refreshes
+  const sessionKey = `study_progress_${study._id}`;
+  
+  // Initialize state with values from session storage
+  const [hasStarted, setHasStarted] = useState(() => {
+    if (typeof window === 'undefined' || previewMode) return false;
+    try {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        return parsedSession.hasStarted || false;
+      }
+    } catch (error) {
+      console.error("Error reading session:", error);
+    }
+    return false;
+  });
+
+  const [termsAccepted, setTermsAccepted] = useState(() => {
+    if (typeof window === 'undefined' || previewMode) return false;
+    try {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        return parsedSession.termsAccepted || false;
+      }
+    } catch (error) {
+      console.error("Error reading session:", error);
+    }
+    return false;
+  });
+
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(() => {
+    if (typeof window === 'undefined' || previewMode) return 0;
+    try {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        return parsedSession.currentQuestionIndex || 0;
+      }
+    } catch (error) {
+      console.error("Error reading session:", error);
+    }
+    return 0;
+  });
+
+  const [alreadyCompleted, setAlreadyCompleted] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [responses, setResponses] = useState(() => {
+    // First try to get saved responses from session storage
+    if (typeof window !== 'undefined' && !previewMode) {
+      try {
+        const savedSession = sessionStorage.getItem(sessionKey);
+        if (savedSession) {
+          const parsedSession = JSON.parse(savedSession);
+          if (parsedSession.responses && Object.keys(parsedSession.responses).length > 0) {
+            console.log("Restored responses from session:", parsedSession.responses);
+            return parsedSession.responses;
+          }
+        }
+      } catch (error) {
+        console.error("Error reading responses from session:", error);
+      }
+    }
+
+    // Fall back to initializing empty responses
     const initial = {};
     if (study && study.questions) {
       study.questions.forEach(q => {
@@ -50,12 +114,93 @@ export default function StudyTakeComponent({ study }) {
   const [completed, setCompleted] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState(30);
   const router = useRouter();
-  const generateParticipantId = () => {
-    return `p_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
+  
+  // Generate a device fingerprint for uniquely identifying participants
+  const [fingerprint, setFingerprint] = useState('');
+  const [participantId, setParticipantId] = useState('');
+  const startTime = new Date().toISOString();
+
+  // Initialize fingerprint on component mount
+  useEffect(() => {
+    if (previewMode) {
+      setLoading(false);
+      return;
+    }
+    
+    const initializeFingerprint = async () => {
+      try {
+        // Load FingerprintJS
+        const fpPromise = FingerprintJS.load();
+        const fp = await fpPromise;
+        const result = await fp.get();
+        
+        // Use the visitorId as the fingerprint
+        const visitorId = result.visitorId;
+        setFingerprint(visitorId);
+        
+        // Create a participantId that combines fingerprint with timestamp
+        const generatedId = `p_${visitorId.substring(0, 10)}_${Date.now()}`;
+        setParticipantId(generatedId);
+        
+        // Check if this participant has already completed this study
+        await checkParticipationStatus(study._id, visitorId);
+      } catch (error) {
+        console.error("Error generating fingerprint:", error);
+        // Fallback to a random ID if fingerprinting fails
+        const fallbackId = `p_fallback_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
+        setParticipantId(fallbackId);
+        setLoading(false);
+      }
+    };
+    
+    initializeFingerprint();
+  }, [previewMode, study._id]);
+  
+  // Simplified checkParticipationStatus function
+  const checkParticipationStatus = async (studyId, visitorId) => {
+    try {
+      // Server-side check using fingerprint and cookies
+      const response = await fetch(`${backendUrl}/api/responses/check-participation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ studyId, visitorId }),
+        credentials: 'include' // Include cookies in the request
+      });
+      
+      const data = await response.json();
+      
+      if (data.hasParticipated) {
+        setAlreadyCompleted(true);
+      }
+      
+      setLoading(false);
+    } catch (error) {
+      console.error("Error checking participation status:", error);
+      setLoading(false);
+    }
   };
 
-  const [participantId] = useState(() => generateParticipantId());
-  const [startTime] = useState(() => new Date().toISOString());
+  // Save session state when it changes
+  useEffect(() => {
+    if (typeof window === 'undefined' || previewMode || completed) {
+      return;
+    }
+    
+    try {
+      const sessionData = {
+        responses,
+        currentQuestionIndex,
+        hasStarted,
+        termsAccepted,
+      };
+      
+      sessionStorage.setItem(sessionKey, JSON.stringify(sessionData));
+    } catch (error) {
+      console.error("Error saving session:", error);
+    }
+  }, [responses, currentQuestionIndex, hasStarted, termsAccepted, completed, previewMode, sessionKey]);
 
   const questions = study?.questions || [];
   const currentQuestion = questions[currentQuestionIndex];
@@ -86,14 +231,15 @@ export default function StudyTakeComponent({ study }) {
     const question = questions.find(q => q._id === questionId);
     if (!question) return;
 
-    /* eslint-disable-next-line */
-    const questionTypeLower = question.type?.toLowerCase();
-    let validatedAndFormattedResponse = responseFromChild;
+    // For preview mode, ensure we don't have issues with null responses
+    if (previewMode && responseFromChild === null) {
+      responseFromChild = ""; // Use empty string instead of null in preview
+    }
 
-    console.log(`PARENT StudyTakeComponent: Setting response for Q_ID ${questionId}:`, JSON.stringify(validatedAndFormattedResponse));
+    console.log(`PARENT StudyTakeComponent: Setting response for Q_ID ${questionId}:`, JSON.stringify(responseFromChild));
     setResponses(prev => ({
       ...prev,
-      [questionId]: validatedAndFormattedResponse
+      [questionId]: responseFromChild
     }));
   };
 
@@ -137,7 +283,7 @@ export default function StudyTakeComponent({ study }) {
     }
   };
 
-  // Update the handleSubmit function
+  // Simplified handleSubmit function - remove redundant localStorage saving
   const handleSubmit = async () => {
     if (!study._id) return;
 
@@ -162,10 +308,21 @@ export default function StudyTakeComponent({ study }) {
     }
 
     setSubmitting(true);
+    
+    if (previewMode) {
+      // Just simulate success
+      setTimeout(() => {
+        setSubmitting(false);
+        setCompleted(true);
+      }, 1000);
+      return;
+    }
+
     try {
       const submissionData = {
         studyId: study._id,
         participantId,
+        visitorId: fingerprint,
         startTime,
         endTime: new Date().toISOString(),
         responses: Object.entries(responses).map(([questionId, response]) => ({
@@ -180,19 +337,25 @@ export default function StudyTakeComponent({ study }) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(submissionData)
+        body: JSON.stringify(submissionData),
+        credentials: 'include' // Important for cookies
       });
 
       const data = await result.json();
 
       if (!result.ok) {
-        throw new Error(data.message || 'Submission failed');
+        throw new Error(data.message || data.error || 'Submission failed');
       }
       
       setCompleted(true);
+      
+      // Clear session data since study is now complete
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem(sessionKey);
+      }
     } catch (err) {
       console.error("Error submitting responses:", err);
-      alert(err.message || "There was an error submitting your responses. Please try again.");
+      alert(`Failed to submit responses: ${err.message}`);
     } finally {
       setSubmitting(false);
     }
@@ -200,20 +363,26 @@ export default function StudyTakeComponent({ study }) {
 
   useEffect(() => {
     if (completed) {
+      // Move the state update and navigation to separate effects
       const timer = setInterval(() => {
-        setRedirectCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            router.push('/login');
-            return 0;
-          }
-          return prev - 1;
-        });
+        setRedirectCountdown(prev => prev > 0 ? prev - 1 : 0); // Just update the counter
       }, 1000);
 
       return () => clearInterval(timer);
     }
-  }, [completed, router]);
+  }, [completed]);
+
+  // Add a separate effect just for navigation
+  useEffect(() => {
+    if (completed && redirectCountdown === 0) {
+      // Delay navigation slightly to ensure state updates are complete
+      const navigationTimer = setTimeout(() => {
+        router.push('/login');
+      }, 100);
+      
+      return () => clearTimeout(navigationTimer);
+    }
+  }, [completed, redirectCountdown, router]);
 
   // Handle starting the study
   const handleStartStudy = () => {
@@ -222,6 +391,26 @@ export default function StudyTakeComponent({ study }) {
       return;
     }
     setHasStarted(true);
+  };
+
+  // Render already completed message
+  const renderAlreadyCompletedMessage = () => {
+    return (
+      <div className="bg-white rounded-lg shadow-md p-8 text-center">
+        <h2 className="text-2xl font-bold mb-4 text-petrol-blue">You've Already Completed This Study</h2>
+        <p className="mb-6 text-gray-600">
+          Our records show that you have already submitted responses for this study.
+          Each participant can only complete a study once.
+        </p>
+        <button
+          onClick={() => router.push('/login')}
+          type="button"
+          className="bg-petrol-blue text-white px-6 py-2 rounded hover:bg-oxford-blue transition-colors"
+        >
+          Return to Homepage
+        </button>
+      </div>
+    );
   };
 
   // Render the welcome screen with study information
@@ -276,6 +465,48 @@ export default function StudyTakeComponent({ study }) {
       </div>
     );
   };
+
+  // If still loading, show loading state
+  if (loading && !previewMode) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-petrol-blue"></div>
+      </div>
+    );
+  }
+
+  // If already completed, show message (unless in preview mode)
+  if (alreadyCompleted && !previewMode) {
+    return renderAlreadyCompletedMessage();
+  }
+
+  // Add a preview banner at the top when in preview mode
+  if (previewMode) {
+    return (
+      <div>
+        {/* Preview mode UI remains unchanged */}
+        <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+          <p className="font-bold">Preview Mode</p>
+          <p>This is a preview of your study. Responses will not be saved.</p>
+        </div>
+        
+        {/* Render the appropriate content based on state */}
+        {!hasStarted ? (
+          renderWelcomeScreen()
+        ) : completed ? (
+          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+            <h2 className="text-2xl font-bold mb-4">Thank You for Your Participation!</h2>
+            <p className="mb-6">This was a preview - your responses were not submitted.</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            {/* Rest of the preview mode UI */}
+            {/* ... */}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (completed) {
     return (
