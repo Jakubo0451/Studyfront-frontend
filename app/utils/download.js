@@ -176,194 +176,78 @@ export const downloadAsJSON = async (studyId, fileName = "study.json") => {
     }
 };
 
-// Utility function to recursively flatten nested objects and properly handle arrays
+// New utility function to recursively flatten nested objects and arrays
+// Array items are flattened with their index appended in the key (using "/" as separator)
 const flattenObject = (obj, prefix = '', result = {}) => {
     for (const key in obj) {
+        if (!obj.hasOwnProperty(key)) continue;
         const value = obj[key];
+        const newKey = prefix ? `${prefix}/${key}` : key;
         if (Array.isArray(value)) {
-            // If it's an array, map each item:
-            // - if item is an object, JSON.stringify it,
-            // - otherwise, use as is.
-            result[prefix + key] = value.map(item => 
-                typeof item === 'object' && item !== null ? JSON.stringify(item) : item
-            ).join(', ');
+            value.forEach((item, index) => {
+                flattenObject(item, `${newKey}/${index}`, result);
+            });
         } else if (typeof value === 'object' && value !== null) {
-            flattenObject(value, prefix + key + '.', result);
+            flattenObject(value, newKey, result);
         } else {
-            result[prefix + key] = value;
+            result[newKey] = value;
         }
     }
     return result;
 };
 
-// Convert JSON to CSV
+// Convert JSON to CSV using the new flattenObject
 export const downloadAsCSV = async (studyId, fileName = "study.csv") => {
     try {
         const jsonArray = await fetchStudyResults(studyId);
-        
+
         // Handle empty results case
         if (Array.isArray(jsonArray) && jsonArray.length === 0) {
-            const emptyContent = "No results found for this study\nStudy ID: " + studyId + "\nTimestamp: " + new Date().toISOString();
+            const emptyContent =
+                "No results found for this study\nStudy ID: " +
+                studyId +
+                "\nTimestamp: " +
+                new Date().toISOString();
             downloadFile(emptyContent, fileName, "text/csv");
             alert("No results found for this study. An empty file has been downloaded.");
             return;
         }
 
         console.log("Data structure for CSV conversion:", jsonArray);
-        
-        // Create a flattened structure that's better for CSV
+
+        // Process each entry: compute duration and then flatten the whole object.
         const flattenedData = jsonArray.map(entry => {
-            const baseData = {
-                "Study ID": studyId || entry.studyId || "",
-                "Participant ID": entry.participantId || "",
-                "Start Time": entry.startTime || "",
-                "End Time": entry.endTime || "",
-                "Completion Time (seconds)": entry.startTime && entry.endTime ? 
-                    ((new Date(entry.endTime) - new Date(entry.startTime)) / 1000).toFixed(2) : "",
-                "Submitted At": entry.createdAt || ""
-            };
-            
-            // Add demographics as separate columns if available
-            if (entry.demographics) {
-                baseData["Age"] = entry.demographics.age || "";
-                baseData["Gender"] = entry.demographics.gender || "";
-                baseData["Education"] = entry.demographics.education || "";
-                baseData["Occupation"] = entry.demographics.occupation || "";
+            const base = { ...entry };
+            // Compute duration in milliseconds if possible.
+            if (entry.startTime && entry.endTime) {
+                base.duration = (new Date(entry.endTime) - new Date(entry.startTime));
             }
-            
-            // Process responses (new structure)
-            if (entry.responses && Array.isArray(entry.responses)) {
-                entry.responses.forEach(response => {
-                    // In the new structure, question info is stored on response.response
-                    const questionText = response.response?.title || `Question_${response.questionId}`;
-                    const questionType = response.response?.type || "Unknown Type";
-                    
-                    // Flatten responses by question type
-                    if (questionType.toLowerCase().includes("rating")) {
-                        if (Array.isArray(response.response.ratingScales)) {
-                            response.response.ratingScales.forEach((scale, idx) => {
-                                baseData[`${questionText} - RatingScale ${idx+1} Name`]  = scale.name  || "";
-                                baseData[`${questionText} - RatingScale ${idx+1} Min`]   = scale.min   || "";
-                                baseData[`${questionText} - RatingScale ${idx+1} Max`]   = scale.max   || "";
-                                baseData[`${questionText} - RatingScale ${idx+1} Value`] = scale.value || "";
-                                // Optionally, you can include a timestamp column for each if needed:
-                                // baseData[`${questionText} - RatingScale ${idx+1} Timestamp`] = response.timestamp || "";
-                            });
-                        }
-                    } else if (questionType.toLowerCase() === "text") {
-                        if (Array.isArray(response.response.textAreas)) {
-                            response.response.textAreas.forEach((area, idx) => {
-                                baseData[`${questionText} - Text Area ${idx+1} Label`] = area.label || "";
-                                baseData[`${questionText} - Text Area ${idx+1} Value`] = area.value || "";
-                                baseData[`${questionText} - Text Area ${idx+1} Timestamp`] = response.timestamp || "";
-                            });
-                        }
-                    } else if (questionType.toLowerCase() === "checkbox") {
-                        if (Array.isArray(response.response.checkboxGroups)) {
-                            response.response.checkboxGroups.forEach((group) => {
-                                group.options.forEach((opt, optIdx) => {
-                                    baseData[`${questionText} - ${group.name} - Option ${optIdx+1} (${opt.label})`] = opt.selected ? "1" : "0";
-                                });
-                                baseData[`${questionText} - ${group.name} Timestamp`] = response.timestamp || "";
-                            });
-                        }
-                    } else if (questionType.toLowerCase().includes("multiplechoice")) {
-                        if (Array.isArray(response.response.multipleChoiceGroups)) {
-                            response.response.multipleChoiceGroups.forEach((group) => {
-                                baseData[`${questionText} - ${group.name} Selected Option`] = group.selectedOption?.label || "";
-                                baseData[`${questionText} - ${group.name} Timestamp`] = response.timestamp || "";
-                            });
-                        }
-                    } else if (questionType.toLowerCase() === "dropdown") {
-                        if (Array.isArray(response.response.dropdownGroups)) {
-                            response.response.dropdownGroups.forEach((group) => {
-                                baseData[`${questionText} - ${group.name} Selected Option`] = group.selectedOption?.label || "";
-                                baseData[`${questionText} - ${group.name} Timestamp`] = response.timestamp || "";
-                            });
-                        }
-                    } else if (questionType.toLowerCase() === "ranking") {
-                        if (Array.isArray(response.response.rankingGroups)) {
-                            response.response.rankingGroups.forEach((group) => {
-                                if (Array.isArray(group.items)) {
-                                    group.items.forEach((item, idx) => {
-                                        baseData[`${questionText} - ${group.name} - Item ${idx+1} Label`] = item.label || "";
-                                        baseData[`${questionText} - ${group.name} - Item ${idx+1} Rank`] = item.rank || "";
-                                    });
-                                }
-                                baseData[`${questionText} - ${group.name} Timestamp`] = response.timestamp || "";
-                            });
-                        }
-                    } else if (questionType.toLowerCase() === "matrix") {
-                        if (Array.isArray(response.response.matrixGroups)) {
-                            response.response.matrixGroups.forEach((group) => {
-                                group.selections.forEach((sel, idx) => {
-                                    baseData[`${questionText} - ${group.name} - Selection ${idx+1} Row`] = sel.row || "";
-                                    baseData[`${questionText} - ${group.name} - Selection ${idx+1} Column`] = sel.column || "";
-                                });
-                                baseData[`${questionText} - ${group.name} Timestamp`] = response.timestamp || "";
-                            });
-                        }
-                    } else {
-                        // Fallback: simply flatten the raw response using our helper
-                        baseData[`${questionText} (Raw Response)`] = JSON.stringify(flattenObject(response.response));
-                        baseData[`${questionText} Raw Timestamp`] = response.timestamp || "";
-                    }
-                });
-            }
-            
-            // Process answers if they exist (fallback for alternative API responses)
-            if (entry.answers && Array.isArray(entry.answers)) {
-                entry.answers.forEach(answer => {
-                    const questionText = answer.questionTitle || answer.questionLabel || `Question_${answer.questionId}`;
-                    const questionType = answer.questionType || "Unknown Type";
-                    const columnName = `${questionText} (${questionType})`;
-                    
-                    let answerStr = "";
-                    if (Array.isArray(answer.answer)) {
-                        answerStr = answer.answer.join("; ");
-                    } else if (typeof answer.answer === 'object' && answer.answer !== null) {
-                        // Further flatten nested answer object using flattenObject
-                        const flatAnswer = flattenObject(answer.answer);
-                        answerStr = Object.entries(flatAnswer)
-                            .map(([k, v]) => `${k}: ${v}`)
-                            .join("; ");
-                    } else {
-                        answerStr = answer.answer;
-                    }
-                    
-                    baseData[`Question Text: ${questionText}`] = questionText;
-                    baseData[`Question Type: ${questionText}`] = questionType;
-                    baseData[columnName] = answerStr;
-                    baseData[`${columnName}_timestamp`] = answer.timestamp || "";
-                });
-            }
-            
-            return baseData;
+            // Flatten the entire entry. This will produce keys such as:
+            // "answers/0/questionId", "answers/0/answer/ratingScales/0/name", etc.
+            // (If your database returns "responses" instead of "answers", adjust accordingly.)
+            return flattenObject(base);
         });
-        
-        // Get all possible headers (columns) from all entries
+
+        // Collect all headers from all flattened objects.
         const allHeaders = new Set();
         flattenedData.forEach(entry => {
             Object.keys(entry).forEach(key => allHeaders.add(key));
         });
         const headers = Array.from(allHeaders);
-        
+
         // Create CSV content
         const rows = flattenedData.map(entry => {
             return headers.map(header => {
-                const value = entry[header] || "";
-                // Properly escape CSV values
-                return typeof value === 'string' ? 
-                    `"${value.replace(/"/g, '""')}"` : 
-                    `"${value}"`;
+                const value = entry[header] !== undefined ? entry[header] : "";
+                // Escape quotes in strings
+                return typeof value === 'string'
+                    ? `"${value.replace(/"/g, '""')}"`
+                    : `"${value}"`;
             });
         });
-        
-        const csvContent = [
-            headers.join(","),
-            ...rows.map(row => row.join(","))
-        ].join("\n");
-        
+
+        const csvContent = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+
         // Trigger the file download
         downloadFile(csvContent, fileName, "text/csv");
     } catch (error) {
