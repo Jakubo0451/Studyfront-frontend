@@ -81,7 +81,8 @@ return (
       {(artifact.contentType && (artifact.contentType.startsWith('image/') || 
                                artifact.contentType.startsWith('video/') || 
                                artifact.contentType === 'application/pdf')) && (
-        <button 
+        <button
+          type="button"
           onClick={handleExpandArtifact} 
           className="text-md mt-1 flex items-center justify-center bg-petrol-blue text-white p-2 rounded hover:bg-oxford-blue transition duration-300" 
           title={`Enlarge ${
@@ -119,7 +120,7 @@ return (
             onClick={(e) => e.stopPropagation()}
           />
         ) : null}
-        <button onClick={handleCloseArtifact} className="bg-petrol-blue text-white mt-2 px-4 py-2 rounded hover:bg-oxford-blue transition duration-300">Close preview</button>
+        <button type="button" onClick={handleCloseArtifact} className="bg-petrol-blue text-white mt-2 px-4 py-2 rounded hover:bg-oxford-blue transition duration-300">Close preview</button>
       </div>
     )}
   </div>

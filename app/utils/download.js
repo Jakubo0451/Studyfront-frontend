@@ -175,136 +175,80 @@ export const downloadAsJSON = async (studyId, fileName = "study.json") => {
     }
 };
 
-// Convert JSON to CSV
+// New utility function to recursively flatten nested objects and arrays
+// Array items are flattened with their index appended in the key (using "/" as separator)
+const flattenObject = (obj, prefix = '', result = {}) => {
+    for (const key in obj) {
+      /* eslint-disable-next-line */
+        if (!obj.hasOwnProperty(key)) continue;
+        const value = obj[key];
+        const newKey = prefix ? `${prefix}/${key}` : key;
+        if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+                flattenObject(item, `${newKey}/${index}`, result);
+            });
+        } else if (typeof value === 'object' && value !== null) {
+            flattenObject(value, newKey, result);
+        } else {
+            result[newKey] = value;
+        }
+    }
+    return result;
+};
+
+// Convert JSON to CSV using the new flattenObject
 export const downloadAsCSV = async (studyId, fileName = "study.csv") => {
     try {
         const jsonArray = await fetchStudyResults(studyId);
-        
+
         // Handle empty results case
         if (Array.isArray(jsonArray) && jsonArray.length === 0) {
-            const emptyContent = "No results found for this study\nStudy ID: " + studyId + "\nTimestamp: " + new Date().toISOString();
+            const emptyContent =
+                "No results found for this study\nStudy ID: " +
+                studyId +
+                "\nTimestamp: " +
+                new Date().toISOString();
             downloadFile(emptyContent, fileName, "text/csv");
             alert("No results found for this study. An empty file has been downloaded.");
             return;
         }
 
         console.log("Data structure for CSV conversion:", jsonArray);
-        
-        // Get study title for better context
-        const studyTitle = jsonArray[0]?.studyId?.title || "Unknown Study";
-        
-        // Create a flattened structure that's better for CSV
-        const flattenedData = jsonArray.map(entry => {
-            const baseData = {
-                "Response ID": entry._id || "",
-                "Study ID": entry.studyId?._id || entry.studyId || "",
-                "Study Title": entry.studyId?.title || studyTitle,
-                "Participant ID": entry.participantId || "",
-                "Start Time": entry.startTime || "",
-                "End Time": entry.endTime || "",
-                "Completion Time (seconds)": entry.startTime && entry.endTime ? 
-                    ((new Date(entry.endTime) - new Date(entry.startTime)) / 1000).toFixed(2) : "",
-                "Submitted At": entry.createdAt || ""
-            };
-            
-            // Add demographics as separate columns
-            if (entry.demographics) {
-                baseData["Age"] = entry.demographics.age || "";
-                baseData["Gender"] = entry.demographics.gender || "";
-                baseData["Education"] = entry.demographics.education || "";
-                baseData["Occupation"] = entry.demographics.occupation || "";
-            }
-            
-            // Process responses
-            if (entry.responses && Array.isArray(entry.responses)) {
-                entry.responses.forEach(response => {
-                    // Get the question title or label
-                    const questionText = response.questionTitle || response.questionLabel || response.questionText || `Question_${response.questionId}`;
-                    const questionType = response.questionType || "Unknown Type";
-                    
-                    // Add the question type and text as separate columns for clarity
-                    baseData[`Question Text: ${questionText}`] = questionText;
-                    baseData[`Question Type: ${questionText}`] = questionType;
-                    
-                    // Add the response with both text and type information in the column name
-                    const columnName = `${questionText} (${questionType})`;
-                    
-                    // Handle different response types appropriately
-                    if (Array.isArray(response.answer)) {
-                        // Check if answer exists first (from the new format)
-                        baseData[columnName] = response.answer.join("; ");
-                    } else if (Array.isArray(response.response)) {
-                        // Fall back to response if answer doesn't exist
-                        baseData[columnName] = response.response.join("; ");
-                    } else if (typeof response.answer === 'object' && response.answer !== null) {
-                        // Check if we have answer instead of response
-                        baseData[columnName] = JSON.stringify(response.answer);
-                    } else if (typeof response.response === 'object' && response.response !== null) {
-                        baseData[columnName] = JSON.stringify(response.response);
-                    } else {
-                        // Try answer first, then fall back to response
-                        baseData[columnName] = response.answer !== undefined ? response.answer : response.response;
-                    }
-                    
-                    // Add timestamp for each response if needed
-                    baseData[`${columnName}_timestamp`] = response.timestamp || "";
-                });
-            }
 
-            // Process answers (used by some API response formats)
-            if (entry.answers && Array.isArray(entry.answers)) {
-                entry.answers.forEach(answer => {
-                    // Get the question title or label
-                    const questionText = answer.questionTitle || answer.questionLabel || `Question_${answer.questionId}`;
-                    const questionType = answer.questionType || "Unknown Type";
-                    
-                    // Add the question type and text as separate columns for clarity
-                    baseData[`Question Text: ${questionText}`] = questionText;
-                    baseData[`Question Type: ${questionText}`] = questionType;
-                    
-                    // Add the response with both text and type information
-                    const columnName = `${questionText} (${questionType})`;
-                    
-                    // Handle different answer types appropriately
-                    if (Array.isArray(answer.answer)) {
-                        baseData[columnName] = answer.answer.join("; ");
-                    } else if (typeof answer.answer === 'object' && answer.answer !== null) {
-                        baseData[columnName] = JSON.stringify(answer.answer);
-                    } else {
-                        baseData[columnName] = answer.answer;
-                    }
-                    
-                    // Add timestamp for each answer if needed
-                    baseData[`${columnName}_timestamp`] = answer.timestamp || "";
-                });
+        // Process each entry: compute duration and then flatten the whole object.
+        const flattenedData = jsonArray.map(entry => {
+            const base = { ...entry };
+            // Compute duration in milliseconds if possible.
+            if (entry.startTime && entry.endTime) {
+                const diffMs = new Date(entry.endTime) - new Date(entry.startTime);
+                const totalSeconds = Math.floor(diffMs / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                base.duration = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
-            
-            return baseData;
+            return flattenObject(base);
         });
-        
-        // Get all possible headers (columns) from all entries
+
+        // Collect all headers from all flattened objects.
         const allHeaders = new Set();
         flattenedData.forEach(entry => {
             Object.keys(entry).forEach(key => allHeaders.add(key));
         });
         const headers = Array.from(allHeaders);
-        
+
         // Create CSV content
         const rows = flattenedData.map(entry => {
             return headers.map(header => {
-                const value = entry[header] || "";
-                // Properly escape CSV values
-                return typeof value === 'string' ? 
-                    `"${value.replace(/"/g, '""')}"` : 
-                    `"${value}"`;
+                const value = entry[header] !== undefined ? entry[header] : "";
+                // Escape quotes in strings
+                return typeof value === 'string'
+                    ? `"${value.replace(/"/g, '""')}"`
+                    : `"${value}"`;
             });
         });
-        
-        const csvContent = [
-            headers.join(","),
-            ...rows.map(row => row.join(","))
-        ].join("\n");
-        
+
+        const csvContent = [headers.join(","), ...rows.map(row => row.join(","))].join("\n");
+
         // Trigger the file download
         downloadFile(csvContent, fileName, "text/csv");
     } catch (error) {
