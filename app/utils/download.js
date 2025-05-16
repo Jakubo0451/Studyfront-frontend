@@ -1,5 +1,4 @@
 import backendUrl from 'environment';
-import { fetchStudyDetails } from './studyActions';
 
 // Function to trigger a file download
 const downloadFile = (content, fileName, contentType) => {
@@ -180,6 +179,7 @@ export const downloadAsJSON = async (studyId, fileName = "study.json") => {
 // Array items are flattened with their index appended in the key (using "/" as separator)
 const flattenObject = (obj, prefix = '', result = {}) => {
     for (const key in obj) {
+      /* eslint-disable-next-line */
         if (!obj.hasOwnProperty(key)) continue;
         const value = obj[key];
         const newKey = prefix ? `${prefix}/${key}` : key;

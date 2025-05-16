@@ -36,6 +36,8 @@ export default defineConfig([
       "@eslint-react/no-missing-key": "warn",
       "@eslint-react/no-array-index-key": "off",
       "@eslint-react/hooks-extra/no-direct-set-state-in-use-effect": "off",
+      "@eslint-react/dom/no-missing-iframe-sandbox":"off",
+      "@eslint-react/dom/no-unsafe-iframe-sandbox":"off",
     },
   },
 ]);

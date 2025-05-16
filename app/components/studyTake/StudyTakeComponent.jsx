@@ -645,8 +645,6 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
                 
                 // Use empty object as fallback
                 group = group || {};
-                const rows = group.rows || [];
-                const columns = group.columns || [];
                 
                 // Use the parameter directly instead of redeclaring
                 const itemSelections = typeof groupSelections === 'object' ? 
@@ -656,8 +654,6 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
                   id: groupId,
                   name: group.label || `Matrix ${groupId}`,
                   selections: Object.entries(itemSelections).map(([rowId, colId]) => {
-                    const row = rows.find(r => r.id === rowId) || {};
-                    const col = columns.find(c => c.id === colId) || {};
                     return {
                       row: rowId,
                       column: colId,
@@ -668,15 +664,11 @@ export default function StudyTakeComponent({ study, previewMode = false }) {
             } else {
               // Single matrix group
               const group = question.data?.matrixGroups?.[0] || {};
-              const rows = group.rows || [];
-              const columns = group.columns || [];
               
               structuredResponse.matrixGroups.push({
                 id: group.id || "default",
                 name: group.label || "Matrix",
                 selections: Object.entries(responseValue).map(([rowId, colId]) => {
-                  const row = rows.find(r => r.id === rowId) || {};
-                  const col = columns.find(c => c.id === colId) || {};
                   return {
                     row: rowId,
                     column: colId,
