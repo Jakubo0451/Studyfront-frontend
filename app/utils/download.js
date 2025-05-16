@@ -220,11 +220,12 @@ export const downloadAsCSV = async (studyId, fileName = "study.csv") => {
             const base = { ...entry };
             // Compute duration in milliseconds if possible.
             if (entry.startTime && entry.endTime) {
-                base.duration = (new Date(entry.endTime) - new Date(entry.startTime));
+                const diffMs = new Date(entry.endTime) - new Date(entry.startTime);
+                const totalSeconds = Math.floor(diffMs / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                base.duration = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
-            // Flatten the entire entry. This will produce keys such as:
-            // "answers/0/questionId", "answers/0/answer/ratingScales/0/name", etc.
-            // (If your database returns "responses" instead of "answers", adjust accordingly.)
             return flattenObject(base);
         });
 
